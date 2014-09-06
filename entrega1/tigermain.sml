@@ -4,7 +4,7 @@ open tigerescap
 open tigerseman
 open BasicIO Nonstdio
 
-(* Agregado para ejerc. 2.1 de Practica0 *)
+(* Agregado para ejerc. 2.1 de Practica 0 *)
 open eje2
 
 fun lexstream(is: instream) =
@@ -30,12 +30,19 @@ fun main(args) =
 			| _ => raise Fail "opcio'n dsconocida!"
 		val lexbuf = lexstream entrada
 		val expr = prog Tok lexbuf handle _ => errParsing lexbuf
-		val _ = findEscape(expr)
-                val prints = cantprintsExp(expr) 
-		val _ = if arbol then tigerpp.exprAst expr else ()
+		(* val _ = findEscape(expr) *)
+                
+                (* Agregado para ejerc. 2.1 de Practica 0 *)
+                val printsNumber = cantprints(expr) 
+		
+                val _ = if arbol then tigerpp.exprAst expr else ()
 	in
 		transProg(expr);
-		print "yes!!\n"
+                
+                (* Agregado para ejerc. 2.1 de Practica 0 *)
+                print("Número de prints sin strings como argumento: "^Int.toString(printsNumber)^"\n");
+		
+                print ("yes!!\n")
 	end	handle Fail s => print("Fail: "^s^"\n")
 
 val _ = main(CommandLine.arguments())

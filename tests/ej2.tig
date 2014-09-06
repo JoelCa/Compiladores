@@ -1,0 +1,5 @@
+let
+  var t :string:= "HOLA!"
+in
+    print(t);23
+end
