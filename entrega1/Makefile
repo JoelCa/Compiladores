@@ -11,6 +11,19 @@ CFLAGS= -g
 MOSMLC=${MOSMLHOME}/mosmlc -c -liberal
 MOSMLL=${MOSMLHOME}/mosmlc
 
+
+# HOME=/home/alumno
+# MOSMLHOME=${HOME}/mosml
+# MOSMLTOOLS=${MOSMLHOME}/bin/camlrunm ${MOSMLHOME}/bin/tools
+# MOSMLLEX=${MOSMLHOME}/bin/mosmllex
+# MOSMLYACC=${MOSMLHOME}/bin/mosmlyac -v
+
+# GCC=gcc
+# CFLAGS= -g
+# MOSMLC=${MOSMLHOME}/bin/mosmlc -c -liberal
+# MOSMLL=${MOSMLHOME}/bin/mosmlc
+
+
 # Unix
 REMOVE=rm -f
 MOVE=mv

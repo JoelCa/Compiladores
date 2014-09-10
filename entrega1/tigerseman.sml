@@ -1,6 +1,8 @@
 structure tigerseman :> tigerseman =
 struct
 
+(* Ignoramos los breaks mal puestos*)
+
 open tigerabs
 open tigersres
 
@@ -157,18 +159,29 @@ fun transExp(venv, tenv) =
 		val exprs = map (fn{exp, ty} => exp) lexti
 		val {exp, ty=tipo} = hd(rev lexti)
 	    in	{ exp=(), ty=tipo } end
-	  (* | trexp(AssignExp({var = SimpleVar s, exp = e}, nl)) = *)
-          (* Este caso es al cuete, lo contempla el caso general *)
+	  | trexp(AssignExp({var = SimpleVar s, exp = e}, nl)) =
+            let
+                val {ty = expType, ...} = trexp e
+                val {ty = varType, ...} = trvar ((SimpleVar s),nl)
+            in
+                if (tabEsta(s, venv))
+                then error("Intentando asignar variable Read Only",nl)
+                else
+                    if tiposIguales expType varType then
+                        {exp=(), ty = TUnit }
+                    else
+                        error("Error de tipos en asignación", nl)
+            end
 	  | trexp(AssignExp ({var, exp}, nl)) =
 	    (*NOSOTROS*)
             let
                 val {ty = expType, ...} = trexp exp
-		val {ty = varType, ...} = trvar (var,nl)
+                val {ty = varType, ...} = trvar (var,nl)
             in
-		if tiposIguales expType varType then
+                if tiposIguales expType varType then
                     {exp=(), ty = TUnit }
-		else
-		    error("Error de tipos en asignación", nl)
+                else
+                    error("Error de tipos en asignación", nl)
             end
 	  | trexp(IfExp({test, then', else'=SOME else'}, nl)) =
 	    let val {exp=testexp, ty=tytest} = trexp test
@@ -194,8 +207,22 @@ fun transExp(venv, tenv) =
 		else if tipoReal (#ty ttest) <> TInt then error("Error de tipo en la condición", nl)
 		else error("El cuerpo de un while no puede devolver un valor", nl)
 	    end
-	  | trexp(ForExp({var, escape, lo, hi, body}, nl)) =
-	    {exp=(), ty=TUnit} (*COMPLETAR*)
+	  | trexp(ForExp({var, lo = e1, hi = e2, body = e3, ...}, nl)) =
+	    (* NOSOTROS *)
+            let
+                val {ty = typeLo, ...} = trexp e1
+                val {ty = typeHi, ...} = trexp e2
+                val venv' = tabInserta (var,IntReadOnly,venv)
+                val {ty = typeBody, ...} = transExp (venv', tenv) e3
+            in
+                if(not((tiposIguales typeLo typeHi) andalso (tiposIguales TInt typeLo)))
+                then error("Expresiones en for, NO enteras",nl)
+                else
+                    if(not(tiposIguales typeBody TUnit))
+                    then error("Cuerpo del for no es de tipo Unit",nl)
+                    else
+                        {exp = (), ty = TUnit}
+            end
 	  | trexp(LetExp({decs, body}, _)) =
 	    let
 		val (venv', tenv', _) = List.foldl (fn (d, (v, t, _)) => trdec(v, t) d) (venv, tenv, []) decs
@@ -204,16 +231,26 @@ fun transExp(venv, tenv) =
 		{exp=(), ty=tybody}
 	    end
 	  | trexp(BreakExp nl) =
-	    {exp=(), ty=TUnit} (*COMPLETAR*)
-	  | trexp(ArrayExp({typ, size, init}, nl)) =
-	    {exp=(), ty=TUnit} (*COMPLETAR*)
+            (*NOSOTROS*)
+	    {exp=(), ty=TUnit}
+	  | trexp(ArrayExp({typ, size = e1, init = e2}, nl)) =
+            (*NOSOTROS*)
+            let
+                val {ty = typeSize, ...} = trexp e1
+                val {ty = typeInit, ...} = trexp e2
+            in
+                if(not(tiposIguales typeSize TInt)) then
+                      error("Tipo NO entero en arreglo",nl)
+                else
+                    {exp = (), ty = TArray(typeInit,ref ())}
+            end
 	and trvar(SimpleVar s, nl) =
             (* NOSOTROS *)
             let
 		val varType =
 		    case tabBusca (s, venv) of
 			SOME (Var {ty = t}) => t
-                      | SOME (VIntro) => TInt (*esta bien?*)
+                      | SOME (IntReadOnly) => TInt
                       | SOME _ => error ("Variable inválida", nl)
 		      | NONE => error("Variable inexistente", nl)
             in
