@@ -30,23 +30,17 @@ fun main(args) =
 			| _ => raise Fail "opcio'n dsconocida!"
 		val lexbuf = lexstream entrada
 		val expr = prog Tok lexbuf handle _ => errParsing lexbuf
-<<<<<<< HEAD
 		(* val _ = findEscape(expr) *)
                 
                 (* Agregado para ejerc. 2.1 de Practica 0 *)
                 val printsNumber = cantprints(expr) 
 		
                 val _ = if arbol then tigerpp.exprAst expr else ()
-=======
-		val _ = findEscape(expr)
-    val prints = cantprints(expr) 
-		val _ = if arbol then tigerpp.exprAst expr else ()
->>>>>>> ca1d4dcb3d8b3214e0cb13907323d9860002f12b
 	in
 		transProg(expr);
                 
                 (* Agregado para ejerc. 2.1 de Practica 0 *)
-                print("Número de prints sin strings como argumento: "^Int.toString(printsNumber)^"\n");
+                (* print("Número de prints sin strings como argumento: "^Int.toString(printsNumber)^"\n"); *)
 		
                 print ("yes!!\n")
 	end	handle Fail s => print("Fail: "^s^"\n")
