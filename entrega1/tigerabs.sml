@@ -1,6 +1,6 @@
 structure tigerabs = 
 struct
-
+(* comentario *)
 type symbol = string
 type pos = int
 
