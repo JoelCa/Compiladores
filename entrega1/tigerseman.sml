@@ -310,23 +310,72 @@ fun transExp(venv, tenv) =
             end
 	  | trdec (venv,tenv) (FunctionDec fs) =
             (*NOSOTROS*)
-            let
-                fun checkNames []  = true
-                    | checkNames (( {name=n,...} , _ )::xs) =
+            let (* checkNames devuelve el numero de linea en que se dio el error *)
+                fun checkNames [] = ~1
+                    | checkNames (( {name=n,...} , nl)::xs) =
                       let 
-                          val res = List.all (fn ({name=m,...},_) => m = n) xs
+                          val res = List.all (fn ({name=m,...},_) => m <> n) xs
                       in
                       if res then
                           checkNames xs
                       else
-                          false
+                          nl
                       end
-                val _ = checkNames fs
+                val nl = checkNames fs
+                val _ = if (nl <> ~1) then error("mas de una funcion con el mismo nombre",nl) else ()
+                
+                (* esta funcion toma un record de la forma {name: symbol, escape: bool ref, typ: ty} y devuelve una tupla de la forma (string, Tipo, int) *)
+                (* fun genRecordTuple (r as {name = s, typ = t, ...}) = let val t1 = genTipo r *)
+                (*                                                      in (s, t1, 0) end *)
+ 
+                (* esta funcion toma un record de la forma {name: symbol, escape: bool ref, typ: ty} y devuelve un elemento de tipo Tipo*)
+                fun genTipo {name = s, typ = t, ...} =
+                    let val tTipo = (case t of
+                                         NameTy n => (case tabBusca (n,tenv) of
+                                                          NONE => raise Fail ("Argumento de tipo no declarado en la funcion: "^s)
+                                                        | SOME ttipo => ttipo)
+                                       | _ => raise Fail ("Tipo del argumento inválido"))
+                    in (s,tTipo) end
+                fun putVars ([], env) = env  
+                  | putVars (((s,vtype)::xs), env) = tabRInserta(s, Var {ty = vtype}, putVars (xs,env))
+                fun putFuncs ([], env) = env  
+                  | putFuncs (((s,ftype)::xs), env) = tabRInserta(s, ftype, putFuncs (xs,env))
+                (* esta funcion la utilizaremos para agregar cada una de las funciones de fs a venv *)
+                fun genEnvEntry  ({name = s, params = ps, result = NONE, body = exp}, pos) =
+                    let val fmlPairs = map genTipo ps
+                        val venv' = putVars (fmlPairs,venv)
+                        val {ty = tBody, ...} = transExp (venv',tenv) exp
+                        val fmls = map (#2) fmlPairs
+                    in 
+                        if not(tiposIguales TUnit tBody) then
+                            error("Error de tipo en el retorno", pos)
+                        else
+                            (s,Func {level = (), label = tigertemp.newlabel()^s, formals = fmls, result = TUnit, extern = false})
+                    end
+                  | genEnvEntry ({name = s, params = ps, result = (SOME n), body = exp}, pos) =
+                    let
+                        val ttipo = (case tabBusca (n,tenv) of
+                                        NONE => error("Tipo de funcion no declarado", pos)
+                                      | SOME t => t)
+                        val fmlPairs = map genTipo ps
+                        val venv' = putVars (fmlPairs,venv)
+                        val {ty = tBody, ...} = transExp (venv',tenv) exp
+                        val fmls = map (#2) fmlPairs
+                    in
+                        if not(tiposIguales ttipo tBody) then
+                            error("Error de tipo en el retorno", pos)
+                        else
+                            (s,Func {level = (), label = tigertemp.newlabel()^s, formals = fmls, result = TUnit, extern = false})
+                    end
+                val envEntryList = map genEnvEntry fs
+                val venv' = putFuncs (envEntryList,venv)
             in
-                (venv, tenv, [])
+                (venv', tenv, [])
             end
 	  | trdec (venv,tenv) (TypeDec ts) =
-	    (venv, tenv, []) (*COMPLETAR*)
+            (*NOSOTROS*)
+            
+	    (venv, tenv, [])
     in trexp end
 fun transProg ex =
     let	val main =

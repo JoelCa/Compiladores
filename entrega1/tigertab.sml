@@ -18,7 +18,7 @@ fun tabEsta(s, t) =
 	SOME _ => true
 	| NONE => false
 fun tabInserta(s, e, t) = let val t' = copy t in (peekInsert t' (s, e); t') end
-fun tabRInserta(s, e, t) = let val t' = copy t in (insert t' (s, e); t') end
+fun tabRInserta(s, e, t) = let val t' = copy t in (insert t' (s, e); t') end (* Sobrescribe la entrada en la tabla *)
 fun tabBusca(s, t) = peek t s
 fun tabSaca(s, t) =
 	case tabBusca(s, t) of
