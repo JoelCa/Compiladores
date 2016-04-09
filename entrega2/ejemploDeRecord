@@ -1,0 +1,8 @@
+let
+	type R = {a:int, b:int}
+	var a:= R{a=0, b=0}
+in
+	(a.a = 10;
+	 a := R{a=10, b=a.b};
+	0)
+end

@@ -1,0 +1,34 @@
+En el diagrama:
+		|    argn    |	fp+4*(n+1)
+		|    ...     |
+		|    arg2    |	fp+16
+		|    arg1    |	fp+12
+		|	fp level |  fp+8
+		|  retorno   |	fp+4
+		|   fp ant   |	fp
+		--------------	fp
+		|   local1   |	fp-4
+		|   local2   |	fp-8
+		|    ...     |
+		|   localn   |	fp-4*n
+
+1) el "fp level", es el SL? Si, El SL es el frame de la función que le corresponde a la llamada (la que
+la anida). El fp ant. es el fp de la función que hace el call.
+
+Definición de SL:
+El SL de la función g es el FP de la función f, siendo f la que define a g, es decir
+   let f() =
+       let g()= ...
+Notar que la función anidante (función donde se define la función llamada) no necesariamente es igual que la función llamante (función donde se llama a la función llamada)
+
+2) el fp se refiere al frame actual? Sí.
+3) que es local? las var. locales.
+
+4) Cuando se crea un nuevo nivel?
+5) El código intermedio de una declaración de variable, equivale a la asignación de la var. recien creada, con su valor inicial? Si.
+
+6) El label de una función que se encuentra en venv, debe ser el mismo al que está en la pila
+de levels?
+
+7) En la declaración de una función, tengo que usar el código intermedio del body
+de cada función?
