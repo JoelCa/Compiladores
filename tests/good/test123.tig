@@ -1,0 +1,8 @@
+let
+  type a = array of int
+  var x := 0
+  type a = {i:int,prox:a}
+  var y:a := a{i=1,prox = a{i=2,prox=nil}}
+in
+  0
+end

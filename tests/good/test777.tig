@@ -1,0 +1,9 @@
+let
+  type i = int
+  var x := 0
+  type a = i
+  type i = {n:int}
+  var y:a := a{n=100}
+in
+  0
+end

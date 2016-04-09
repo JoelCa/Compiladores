@@ -1,0 +1,10 @@
+let
+  type a = array of int
+  var x := 0
+  type b = {i:int,prox:a} /*¿ a quien debería hacer referencia este "a" ?*/
+  type a = array of b
+  var y:a := a [2] of nil
+in
+  y[1] := b{i=1,prox=y};
+  0
+end

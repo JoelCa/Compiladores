@@ -1,0 +1,8 @@
+let
+  type intlist = {hd : int, tl : intlist}
+  type a = intlist
+  type b = array of a
+  type talist = {ta1 : b}
+in
+  0
+end
