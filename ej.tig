@@ -1,0 +1,9 @@
+/* este es un ejemplo en el que los desempaquetadores (unEx, unNx, unCx) sirven de mucho
+   la expresion a[2]<15 se traduce como Cx ... y el desempaquetador unEx debe devolver una
+   expresión */
+let
+	type T = array of int
+	var a:= T[10] of 15
+in
+	a[a[2]<15]
+end

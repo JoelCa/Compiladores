@@ -1,0 +1,64 @@
+push $2
+push $3
+call f
+
+
+
+f:
+push %efp
+movl %efp, %esp
+push $555
+
+
+function f(a:int) :int =
+    let
+        function g(b:int) :int = a+b
+        function h(c:int) :int = 2+g(c)
+
+fp -> ...
+      ...
+      ...
+sp ->
+
+fp -> ...
+      ...
+      ...
+      2
+      3
+sp ->
+
+fp -> ...
+      ...
+      ...
+      2
+      3
+      return address
+sp ->
+
+fp -> ...
+      ...
+      ...
+      2
+      3
+      return address
+      fp (anterior)
+sp ->
+
+      ...
+      ...
+      ...
+      2
+      3
+      return address
+      fp (anterior)
+fp sp ->
+
+      ...
+      ...
+      ...
+      2
+      3
+      return address
+      fp (anterior)
+fp -> 555
+sp -> ...
