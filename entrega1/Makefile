@@ -3,9 +3,10 @@
 # Para nuestras casas
 HOME=/usr/bin
 MOSMLHOME=${HOME}
-MOSMLTOOLS=$(MOSMLHOME)/camlrunm $(MOSMLHOME)/tools
+MOSMLTOOLS=$(MOSMLHOME)/camlrunm /usr/local/share/mosml/tools
 MOSMLLEX=$(MOSMLHOME)/mosmllex
 MOSMLYACC=$(MOSMLHOME)/mosmlyac -v
+
 
 # Para el DCC
 # HOME=/usr/local/bin
@@ -23,7 +24,7 @@ MOSMLL=${MOSMLHOME}/mosmlc
 # Para el laboratorio
 # HOME=/home/alumno
 # MOSMLHOME=${HOME}/mosml
-# MOSMLTOOLS=${MOSMLHOME}/bin/camlrunm ${MOSMLHOME}/bin/tools
+# MOSMLTOOLS=${MOSMLHOME}/bin/camlrunm ${MOSMLHOME}/tools
 # MOSMLLEX=${MOSMLHOME}/bin/mosmllex
 # MOSMLYACC=${MOSMLHOME}/bin/mosmlyac -v
 
@@ -47,7 +48,9 @@ EXEFILE=
 .SUFFIXES : .sig .sml .ui .uo
 
 GRALOBJS= tigerabs.uo tigergrm.uo tigerlex.uo tigermain.uo \
-	tigernlin.uo tigerpp.uo tigerescap.uo tigertab.uo tigerseman.uo tigertemp.uo topsort.uo eje2.uo
+	tigernlin.uo tigerpp.uo tigerescap.uo tigertab.uo \
+	tigerseman.uo tigertemp.uo topsort.uo  \
+	tigertips.uo
 
 all: tiger
 
@@ -79,26 +82,28 @@ clean:
 	$(MOSMLC) $<
 
 depend: tigerabs.sml tigergrm.sml tigerlex.sml tigermain.sml \
-	tigernlin.sml tigerpp.sml eje2-1.sml #Agregado para Practica0
+	tigernlin.sml tigerpp.sml \
+	topsort.sml
 	$(REMOVE) Makefile.bak
 	$(MOVE) Makefile Makefile.bak
 	$(MOSMLTOOLS)/cutdeps < Makefile.bak > Makefile
 	$(MOSMLTOOLS)/mosmldep >> Makefile
 
 ### DO NOT DELETE THIS LINE
-tigerpp.uo: tigerabs.uo 
-tigerescap.ui: tigerabs.uo 
-tigergrm.ui: tigerabs.uo 
-tigerseman.ui: tigerabs.uo 
-tigerescap.uo: tigerescap.ui tigertab.ui tigerabs.uo 
-tigerseman.uo: tigerseman.ui tigersres.uo tigertab.ui tigerabs.uo 
-tigergrm.uo: tigergrm.ui tigernlin.uo tigerabs.uo 
-tigersres.uo: tigertab.ui tigertips.uo tigertemp.ui tigerabs.uo 
-tigertab.uo: tigertab.ui 
-tigermain.uo: tigerseman.ui tigerescap.ui tigergrm.ui tigerlex.uo \
-    tigerpp.uo eje2.uo
+tigerseman.uo: tigerseman.ui tigersres.uo tigertab.ui topsort.ui \
+    tigertemp.ui tigerabs.uo tigerpp.uo 
 tigertemp.uo: tigertemp.ui 
+tigergrm.uo: tigergrm.ui tigernlin.uo tigerabs.uo 
+tigerpp.uo: tigertab.ui tigertips.uo tigerabs.uo 
+tigerseman.ui: tigerabs.uo 
+eje2.uo: eje2.ui tigerabs.uo 
+tigertab.uo: tigertab.ui 
+tigersres.uo: tigertab.ui tigertips.uo tigertemp.ui tigerabs.uo 
+tigerescap.uo: tigerescap.ui tigertab.ui tigerabs.uo 
 tigerlex.uo: tigergrm.ui tigernlin.uo 
-
-#Agregado para ela practica 0
-eje2.uo : eje2.ui  
+tigerescap.ui: tigerabs.uo 
+eje2.ui: tigerabs.uo 
+tigergrm.ui: tigerabs.uo 
+topsort.uo: topsort.ui tigerabs.uo 
+tigermain.uo: tigerseman.ui tigerescap.ui tigergrm.ui tigerlex.uo \
+    tigerpp.uo 

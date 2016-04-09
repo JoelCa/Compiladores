@@ -1,0 +1,25 @@
+Test:
+
+- En el test17, obtengo "tipo inexistente", el error deberia ser más explicito indicando que hay un ciclo? No. Arreglado.
+- En el test18: se puede hacer llamadas a funciones declaradas en el bach?. Si. Como detecto un ciclo? NO se detecta. Para que sirve "extern" de Func en tigersres.sml?
+- No importa que me dé el error con una línea posterior?
+- En test39: puede haber más de una función con el mismo nombre? No.
+- En test45:  por que deberia dar un error? Por que no puede inferir el tipo, "nil" solo corresponde a los records?
+- En test51: deberia estar bien?
+
+-El test555.tig en type, esta bien que dé ok? sí, es analogo al test37.tig.
+ La variable "a" se instar con tabInserta o tabRInserta?
+-El test666.tig en type, esta bien que dé ok?
+
+
+En general:
+- Donde pongo las funciones "básicas"?, podes dejarlas en tigerseman.
+- Que hace el "local" del topsort?
+- En un ArrayExp, la expresion init siempre existe?
+
+Dudas 2016:
+- En clases, cuando guido hacia el código del scanner creaba el token: ABSMININT, pero NO está en el código que descargamos,
+podemos ignorarlo?
+- Por qué no puedo comparar dos Unit? (línea 115 de tigerseman). Posible respuesta: el tipo unit representa computaciones,
+entonces NO se pueden comparar dos computaciones.
+- Como se anidan los lets?

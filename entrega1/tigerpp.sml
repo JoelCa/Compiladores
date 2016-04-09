@@ -4,7 +4,29 @@ struct
 *)
 
 open tigerabs
+open tigertips
 open PP
+
+(*Agregado de Martin*)
+fun showT TUnit = "Unit"
+	| showT TNil = "Nil"
+	(* | showT (TInt RW) = "Int RW" *)
+	(* | showT (TInt RO) = "Int RO" *)
+        | showT TInt = "Int"
+	| showT TString = "String"
+	| showT (TArray(t,u)) = "Array of "^(showT t)
+	| showT (TRecord(lr,u)) = "Record["^(showr lr)^"]"
+	| showT (TFunc(tl, t)) = "("^(showf tl)^" -> "^showT t^")"
+	| showT (TTipo (t, ref NONE)) = "'"^t^"'"
+	| showT (TTipo (t, ref (SOME _))) = "*"^t
+
+and showr [] = ""
+	| showr ((n,t,i)::ls) = n^":"^(showT t)^":"^(Int.toString i)^";"^(showr ls)
+and showf [] = ""
+	| showf (t::ts) = (showT t)^"->"^(showf ts)
+
+fun prTenv tenv = List.app(fn(c, v) => print(c^":"^showT v^"\n")) (tigertab.tabAList tenv)
+
 
 fun ppexpr pps e0 = 
 	let

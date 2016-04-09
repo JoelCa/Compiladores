@@ -4,8 +4,6 @@ open tigerescap
 open tigerseman
 open BasicIO Nonstdio
 
-(* Agregado para ejerc. 2.1 de Practica 0 *)
-open eje2
 
 fun lexstream(is: instream) =
 	Lexing.createLexer(fn b => fn n => buff_input is b 0 n);
@@ -33,7 +31,7 @@ fun main(args) =
 		(* val _ = findEscape(expr) *)
                 
                 (* Agregado para ejerc. 2.1 de Practica 0 *)
-                val printsNumber = cantprints(expr) 
+                (* val printsNumber = cantprints(expr)  *)
 		
                 val _ = if arbol then tigerpp.exprAst expr else ()
 	in
