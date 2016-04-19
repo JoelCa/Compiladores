@@ -13,13 +13,26 @@ Test:
 
 
 En general:
+
 - Donde pongo las funciones "básicas"?, podes dejarlas en tigerseman.
 - Que hace el "local" del topsort?
 - En un ArrayExp, la expresion init siempre existe?
 
+-----------------------------------------------------------------------------
+
 Dudas 2016:
+
 - En clases, cuando guido hacia el código del scanner creaba el token: ABSMININT, pero NO está en el código que descargamos,
 podemos ignorarlo?
 - Por qué no puedo comparar dos Unit? (línea 115 de tigerseman). Posible respuesta: el tipo unit representa computaciones,
 entonces NO se pueden comparar dos computaciones.
 - Como se anidan los lets?
+- Tenemos que darle al while el tipo TUnit, por que representa una "computación" NO comparable (un combinador)?
+- Una declaración de funcion, puede tener argumentos con el mismo nombre?
+
+
+Observaciones:
+
+- Modificamos genEnvEntry y checkBodies, para que sea más eficiente. Antes genEnvEntry devolvía una tupla de la forma ((s,f)fmls) donde s es el nombre de la función,
+f es de la forma Func {....} y fmls es una lista de los elementos que devuelve la función genTipo. Ahora, devuelve una tupla de la forma ((s,f),(fmls,SOME ttipo))
+para guardar el tipo del resultado, que se buscó en el entorno, y que se utilizará en el chequeo de los bodies de cada función.
