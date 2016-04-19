@@ -233,7 +233,7 @@ fun transExp(venv, tenv) =
             end
 	  | trexp(LetExp({decs, body}, _)) =
 	    let
-		val (venv', tenv', _) = List.foldl (fn (d, (v, t, _)) => trdec(v, t) d) (venv, tenv, []) decs
+		val (venv', tenv', _) = List.foldl (fn (d, (v, t, _)) => trdec (v, t) d) (venv, tenv, []) decs
 		val {exp=expbody,ty=tybody}=transExp (venv', tenv') body
 	    in 
 		{exp=(), ty=tybody}
@@ -362,7 +362,7 @@ fun transExp(venv, tenv) =
                         val fmls = map (#2) fmlPairs
                         val f = Func {level = (), label = tigertemp.newlabel()^s, formals = fmls, result = TUnit, extern = false}
                     in
-                        ((s,f),fmlPairs)
+                        ((s,f),(fmlPairs,NONE))
                     end
                   | genEnvEntry ({name = s, params = ps, result = (SOME n), body = exp}, pos) =
                     let
@@ -373,12 +373,12 @@ fun transExp(venv, tenv) =
                         val fmls = map (#2) fmlPairs
                         val f = Func {level = (), label = tigertemp.newlabel()^s, formals = fmls, result = ttipo, extern = false}
                     in
-                        ((s,f),fmlPairs)
+                        ((s,f),(fmlPairs,SOME ttipo))
                     end
 
 
                 fun checkBodies _ [] [] = ()
-                  | checkBodies venv (x::xs) (({name = s, params = ps, result = NONE, body = exp}, pos)::fs) =
+                  | checkBodies venv ((x,NONE)::xs) (({name = s, params = ps, result = NONE, body = exp}, pos)::fs) =
                     let val venv' = putVars (x,venv)
                         val {ty = tBody, ...} = transExp (venv',tenv) exp
                     in
@@ -387,12 +387,11 @@ fun transExp(venv, tenv) =
                         else
                             checkBodies venv xs fs
                     end
-                  | checkBodies venv (x::xs) (({name = s, params = ps, result = (SOME n), body = exp}, pos)::fs) =
+                  | checkBodies venv ((x,SOME ttipo)::xs) (({name = s, params = ps, result = (SOME _x), body = exp}, pos)::fs) =
                     let
-                        val ttipo = (case tabBusca (n,tenv) of
-                                         NONE => error(printRef n ^ " tiene un tipo de retorno inexistente", pos)
-                                       | SOME t => t)
-                                        
+                        (* val ttipo = (case tabBusca (n,tenv) of *)
+                        (*                  NONE => error(printRef n ^ " tiene un tipo de retorno inexistente", pos) *)
+                        (*                | SOME t => t) *)                
                         val venv' = putVars (x,venv)
                         val {ty = tBody, ...} = transExp (venv',tenv) exp
                     in
