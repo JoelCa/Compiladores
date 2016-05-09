@@ -29,6 +29,12 @@ entonces NO se pueden comparar dos computaciones.
 - Como se anidan los lets?
 - Tenemos que darle al while el tipo TUnit, por que representa una "computación" NO comparable (un combinador)?
 - Una declaración de funcion, puede tener argumentos con el mismo nombre?
+- La línea 524 de tigerseman está bien? (fijar el NONE de un record  que se define a si mismo)
+
+- En la función segundaPasada (línea 482), se pisan tipos NameTy con tipos TTipo con referencia a NONE. Estaría bien modificar para que no los sobreescriba? Tener en
+cuenta que si se hace la modificación, también se debe modificar la función precs en el caso para los NameTy ya que los tipos que existen en el entorno no se deben pisar.
+- Por qué es necesario tener 2 entornos de tipos (env y env') para la función segundaPasada? No basta con env? Creemos que env' no es necesario. ARREGLADO
+- Por qué es necesario "TTipo (t, ref (SOME x))" (línea 488)? Nosotros pensamos que dejando la línea de abajo es suficiente. ARREGLADO 
 
 
 Observaciones:

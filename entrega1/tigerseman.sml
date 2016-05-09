@@ -387,7 +387,7 @@ fun transExp(venv, tenv) =
                         else
                             checkBodies venv xs fs
                     end
-                  | checkBodies venv ((x,SOME ttipo)::xs) (({name = s, params = ps, result = (SOME _x), body = exp}, pos)::fs) =
+                  | checkBodies venv ((x,SOME ttipo)::xs) (({name = s, params = ps, result = (SOME _), body = exp}, pos)::fs) =
                     let
                         (* val ttipo = (case tabBusca (n,tenv) of *)
                         (*                  NONE => error(printRef n ^ " tiene un tipo de retorno inexistente", pos) *)
@@ -481,33 +481,29 @@ fun transExp(venv, tenv) =
                 NameTy que están definidos en base a records o arrays *)
                 fun segundaPasada batch recs env =
                     let
-                        fun buscaEnv env' t =
+                        fun buscaEnv t =
                             case List.find (fn {name, ...} => name = t) batch of
                                 SOME {name, ...} => TTipo(name, ref NONE)
                               | _ => case tabBusca(t, env) of
-                                         SOME (x as (TRecord _)) => TTipo (t, ref (SOME x))
-                                       | SOME tt => tt
-                                       | _ => (case tabBusca(t, env') of
-                                                   SOME (x as (TRecord _)) => TTipo (t, ref (SOME x))
-                                                 | SOME tt => tt
-                                                 | _ => error (printRef t^" es un tipo inexistente", firstNL))
+                                         SOME tt => tt
+                                       | _ => error (printRef t^" es un tipo inexistente", firstNL)
 
                         fun precs [] env' = env'
                           | precs ({name, ty=RecordTy lf} :: t) env' =
                             let
-                                val lf' = List.foldl (fn ({name, typ=NameTy t, ...}, l) => (name, buscaEnv env' t) :: l
+                                val lf' = List.foldl (fn ({name, typ=NameTy t, ...}, l) => (name, buscaEnv t) :: l
                                                      | (_, l) => l) [] lf
                                 val (_, lf'')= List.foldl (fn ((x,y),(n,l)) => (n+1, (x,y,n)::l)) (0,[]) lf'
                                 val env'' = tabRInserta (name, TRecord (lf'', ref ()), env')
                             in precs t env'' end
 
                           | precs ({name, ty=ArrayTy ty} :: t) env' =
-                            precs t (tabRInserta (name, TArray (buscaEnv env' ty, ref ()), env'))
+                            precs t (tabRInserta (name, TArray (buscaEnv ty, ref ()), env'))
                           
                           | precs ({name, ty = NameTy ty} :: t) env' = 
-                            precs t (tabRInserta (name, buscaEnv env' ty, env'))
+                            precs t (tabRInserta (name, buscaEnv ty, env'))
 
-                    in precs batch (fromTab env) end
+                    in precs batch env end
                         
                 (* reemplaza los tipos "punteros" a NONE, por punteros al record del cual
                 son miembros y pone los tipos definitivos en los NameTy *)
@@ -556,6 +552,10 @@ fun transExp(venv, tenv) =
                         val env'' = segundaPasada batch recs env'
 
                         val _ = (print("Tabla en el 2º procesa: ") ; printTab (env''); print("\n"))
+
+                        val _ = map (fn (s,t) => print(s^" "^(showT t)^" - ")) (tabAList env'')
+
+                        val _ = print("\n")
 
                         val env''' =  fijaNONE (tabAList env'') env''
 
