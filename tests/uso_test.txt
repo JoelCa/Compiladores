@@ -1,0 +1,10 @@
+Uso de test_entrega1
+./test_entrega1 ARG1 ARG2
+
+ARG1 es el directorio donde están los test
+ARG2 es el tipo de chequeo que se quiere hacer, hay dos tipos
+good: se quiere chequear que el test sea correcto.
+error: se quiere chequear que el test sea incorrecto.
+
+Ejemplo:
+./test_entrega1.sh type/error/ error
