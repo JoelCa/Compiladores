@@ -458,7 +458,8 @@ fun transExp(venv, tenv) =
                         genP lt []
                     end
 
-                (* procesa la lista ordenada dada por el topsort, no procesa Arrays ni Records *)
+                (* Procesa la lista ordenada dada por el topsort, no procesa Arrays ni Records. Cree que NO es necesario
+                usar "primeraPasada". *)
                 fun primeraPasada [] decs recs env = env
                   | primeraPasada (sorted as (h::t)) decs recs env =
                     let
@@ -477,9 +478,9 @@ fun transExp(venv, tenv) =
                                      | _ => env
                     in primeraPasada t ps' recs env' end
                         
-                (* procesa records y arrays, además, posiblemente, le da tipo a los
-                NameTy que están definidos en base a records o arrays *)
-                fun segundaPasada batch recs env =
+                (* Procesa records y arrays. Posiblemente, le da tipo a los
+                NameTy que están definidos en base a records o arrays. *)
+                fun segundaPasada batch env =
                     let
                         fun buscaEnv t =
                             case List.find (fn {name, ...} => name = t) batch of
@@ -505,8 +506,8 @@ fun transExp(venv, tenv) =
 
                     in precs batch env end
                         
-                (* reemplaza los tipos "punteros" a NONE, por punteros al record del cual
-                son miembros y pone los tipos definitivos en los NameTy *)
+                (* Reemplaza los tipos "punteros" a NONE, por punteros al record del cual
+                son miembros y pone los tipos definitivos en los NameTy. *)
                 fun fijaNONE [] env =
                     env
                   | fijaNONE ((name, TArray (TTipo (s, ref NONE), u)) :: t) env =
@@ -549,7 +550,7 @@ fun transExp(venv, tenv) =
 
                         val _ = (print("Tabla en el 1º procesa: ") ; printTab (env'); print("\n"))
 
-                        val env'' = segundaPasada batch recs env'
+                        val env'' = segundaPasada batch env'
 
                         val _ = (print("Tabla en el 2º procesa: ") ; printTab (env''); print("\n"))
 

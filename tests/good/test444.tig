@@ -1,0 +1,6 @@
+let
+  type A = string
+  type B = A
+in
+  0
+end

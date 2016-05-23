@@ -1,0 +1,8 @@
+let
+  type A = {q:int, a:A}
+in 
+  let /*type B = {k:A}*/
+    type B=A
+  in ()
+  end; 0
+end

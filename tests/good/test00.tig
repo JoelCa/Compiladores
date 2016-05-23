@@ -1,0 +1,9 @@
+let
+  type b = array of a
+  type a = c
+  type c = {name : b}
+  var x:b := b [2] of nil
+  var y:c := c {name = x}
+in
+  0
+end
