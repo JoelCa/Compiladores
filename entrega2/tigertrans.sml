@@ -247,15 +247,14 @@ fun arrayExp{size, init} =
 (* external : indica si es una func. de libreria o no (booleano). *)
 (*            Las funciónes de librerias no tienen static link *)
 (* isproc : indica si devuelve algo (bool) *)
-(* level : el nivel, un record *)
+(* level : el nivel de la función llamada, un record *)
 (* ls : la lista de argumentos  *)
 fun callExp (name,external,isproc,lev:level,ls) = 
     let fun menAMay 0 = TEMP fp
           | menAMay n = MEM (BINOP (PLUS, menAMay(n-1), CONST fpPrevLev))
-        val fplev = if (#level lev) = getActualLev() (* getActualLev, nos da el nivel de la función actual,
-                                                        es decir el nivel de la llamante, en un callExp*)
+        val fplev = if (#level lev) = getActualLev()                     (* getActualLev, nos da el nivel de la función actual, es decir el nivel de la llamante, en un callExp*)
                     then MEM (BINOP (PLUS, TEMP fp, CONST fpPrevLev))
-                    else if (#level lev) > getActualLev()
+                    else if (#level lev) < getActualLev()
                     then menAMay (getActualLev() - (#level lev) + 1)
                     else TEMP fp
         fun preparaArgs [] (rt,re) = (rt, re)
