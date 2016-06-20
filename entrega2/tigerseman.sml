@@ -241,9 +241,10 @@ fun transExp(venv, tenv) =
 		val ttest = trexp test
                 val _ = preWhileForExp()
 		val tbody = trexp body
+                val expWhile = whileExp {test=(#exp ttest), body=(#exp tbody), lev=topLevel()}
                 val _ = postWhileForExp()
 	    in
-		if tipoReal (#ty ttest) = TInt andalso #ty tbody = TUnit then {exp=whileExp {test=(#exp ttest), body=(#exp tbody), lev=topLevel()}, ty=TUnit}
+		if tipoReal (#ty ttest) = TInt andalso #ty tbody = TUnit then {exp=expWhile, ty=TUnit}
 		else if tipoReal (#ty ttest) <> TInt then error("Error de tipo en la condición", nl)
 		else error("El cuerpo de un while no puede devolver un valor", nl)
 	    end

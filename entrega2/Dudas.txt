@@ -36,5 +36,10 @@ de cada función?
 --------------------------------------
 Dudas 2016
 
-En la entrega1 _tigermain tiene el resultado de tipo TInt, mientras que la entrega2 _tigermain tiene el de resultado de tipo TUnit, así esta bien?
+- En la entrega1 _tigermain tiene el resultado de tipo TInt, mientras que la entrega2 _tigermain tiene el de resultado de tipo TUnit, así esta bien?
 Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests están como para que funcionen con TInt?
+
+- Como deberían pasarse los argumentos de la instrucción CALL(..)?
+  . Mediante registros
+  . Por stack
+  . Lo define la arquitectura
