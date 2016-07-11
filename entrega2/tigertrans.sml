@@ -293,7 +293,7 @@ fun seqExp ([]:exp list) = Nx (EXP(CONST 0))
     let
 	fun unx [e] = []
 	  | unx (s::ss) = (unNx s)::(unx ss)
-	  | unx[] = []
+	  | unx [] = []
     in
 	case List.last exps of
 	    Nx s =>
@@ -320,14 +320,13 @@ fun forExp {lo, hi, var, body} =
                     Ex(CONST n) =>
                     if valOf Int.maxInt = n then
                         [ MOVE (evar, elo),
-                          LABEL l2,
                           CJUMP(LE, evar, CONST n, l1, l3),
                           LABEL l1,
                           ebody,
-                          CJUMP(EQ, evar,CONST n, l3, l1), (*sin este jump, se quedaria bucleando infinitamente*)
-                          LABEL l1,
+                          CJUMP(EQ, evar,CONST n, l3, l2),
+                          LABEL l2,
                           MOVE(evar,BINOP(PLUS,evar,CONST 1)),
-                          JUMP(NAME l2,[l2]),
+                          JUMP(NAME l1,[l1]),
                           LABEL l3
                         ]
                     else
@@ -336,7 +335,6 @@ fun forExp {lo, hi, var, body} =
                           CJUMP(LE, evar, CONST n, l1, l3),
                           LABEL l1,
                           ebody,
-                          LABEL l1,
                           MOVE(evar,BINOP(PLUS,evar,CONST 1)),
                           JUMP(NAME l2,[l2]),
                           LABEL l3
@@ -347,13 +345,13 @@ fun forExp {lo, hi, var, body} =
                     in
                         [ MOVE (evar, elo),
                           MOVE(TEMP t, ehi),
-                          CJUMP(LE, evar, TEMP t, l2, l3),
-                          LABEL l2,
-                          ebody,
-                          CJUMP(EQ,evar,TEMP t, l3, l1),
+                          CJUMP(LE, evar, TEMP t, l1, l3),
                           LABEL l1,
+                          ebody,
+                          CJUMP(EQ,evar,TEMP t, l3, l2),
+                          LABEL l2,
                           MOVE(evar, BINOP(PLUS,evar,CONST 1)),
-                          JUMP(NAME l2, [l2]),
+                          JUMP(NAME l1, [l1]),
                           LABEL l3
                         ]
                     end     
