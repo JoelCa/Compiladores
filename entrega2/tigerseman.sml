@@ -17,6 +17,7 @@ fun printRef v = "\"" ^ v ^ "\""
 open tigerabs
 open tigersres
 open tigertrans
+open tigerpp
 
 type expty = {exp: unit, ty: Tipo}
 
@@ -209,11 +210,11 @@ fun transExp(venv, tenv) =
 	  | trexp(AssignExp ({var, exp}, nl)) =
 	    (*NOSOTROS*)
             let
-                val {ty = expType, ...} = trexp exp
-                val {ty = varType, ...} = trvar (var,nl)
+                val {ty = expType, exp = expCode} = trexp exp
+                val {ty = varType, exp = varCode} = trvar (var,nl)
             in
                 if tiposIguales expType varType then
-                    {exp=nilExp(), ty = TUnit }
+                    {exp=assignExp{var=varCode,exp=expCode}, ty = TUnit }
                 else
                     error("tipos incompatibles en asignación", nl)
             end
@@ -320,7 +321,7 @@ fun transExp(venv, tenv) =
             let
                 val {ty = typeVar, exp = varCode} = trvar (v,nl)
             in
-                (case typeVar of
+                (case tipoReal typeVar of
                      TRecord (xs,_) =>
                      (case List.find(fn (nameMember,_,_) => nameMember = s) xs of
                           SOME (_,t,i) => {exp = fieldVar(varCode, i), ty = t}
@@ -336,7 +337,7 @@ fun transExp(venv, tenv) =
                 if (not(tiposIguales typeExp TInt)) then
                     error("La expresion no es de tip" ^ printRef "int",nl)
                 else
-                    case typeVar of
+                    case tipoReal typeVar of
                         TArray (t,_) => {exp = subscriptVar(varCode,expCode), ty = t}
                       | _ => error("se intenta acceder a algo que no es un arreglo",nl)
                 
@@ -385,7 +386,7 @@ fun transExp(venv, tenv) =
 
                 val (nl,name) = checkNames fs
                 val _ = if (nl <> ~1) then error("declaración múltiple de la función " ^ printRef name,nl) else ()
-                                                                                                                    
+                 
                 (* esta funcion toma un record de la forma {name: symbol, escape: bool ref, typ: ty} y devuelve un elemento de tipo Tipo*)
                 fun genTipo {name = s, typ = t, escape = esc} =
                     let val tTipo = (case t of
@@ -412,7 +413,7 @@ fun transExp(venv, tenv) =
                         val level = newLevel{parent=topLevel(), name = tigertemp.newlabel()^s, formals = map (#3) fmlPairs}
                         val f = Func {level = level, label = tigertemp.newlabel()^s, formals = fmls, result = TUnit, extern = false}
                     in
-                        ((s,f),fmlPairs)
+                        ((s,f),(fmlPairs,NONE))
                     end
                   | genEnvEntry ({name = s, params = ps, result = (SOME n), body = exp}, pos) =
                     let
@@ -424,11 +425,11 @@ fun transExp(venv, tenv) =
                         val level = newLevel{parent=topLevel(), name = tigertemp.newlabel()^s, formals = map (#3) fmlPairs}
                         val f = Func {level = level, label = tigertemp.newlabel()^s, formals = fmls, result = ttipo, extern = false}
                     in
-                        ((s,f),fmlPairs)
+                        ((s,f),(fmlPairs,SOME ttipo))
                     end
 
                 fun checkBodies _ [] [] = ()
-                  | checkBodies venv (((_,fEntry:EnvEntry),x)::xs) (({name = s, result = NONE, body = exp, ...}, pos)::fs) =
+                  | checkBodies venv (((_,fEntry:EnvEntry),(x,NONE))::xs) (({name = s, result = NONE, body = exp, ...}, pos)::fs) =
                     let val level = case fEntry of
                                         Func {level = level, ...} => level
                                       | _ => raise Fail "error interno: declaración de función"
@@ -443,11 +444,11 @@ fun transExp(venv, tenv) =
                         else
                             checkBodies venv xs fs
                     end
-                  | checkBodies venv (((_,fEntry),x)::xs) (({name = s, result = (SOME n), body = exp, ...}, pos)::fs) =
+                  | checkBodies venv (((_,fEntry),(x, SOME ttipo))::xs) (({name = s, result = (SOME n), body = exp, ...}, pos)::fs) =
                     let
-                        val ttipo = (case tabBusca (n,tenv) of
-                                         NONE => error(printRef n ^ " tiene un tipo de retorno inexistente", pos)
-                                       | SOME t => t)
+                        (* val ttipo = (case tabBusca (n,tenv) of *)
+                        (*                 NONE => error(printRef n ^ " tiene un tipo de retorno inexistente", pos) *)
+                        (*               | SOME t => t) *)
                         val level = case fEntry of
                                         Func {level = level, ...} => level
                                       | _ => raise Fail "error interno: declaración de función"
@@ -471,7 +472,166 @@ fun transExp(venv, tenv) =
                 (venv', tenv, [])
             end
 	  | trdec (venv,tenv) (TypeDec ts) =
-	    (venv, tenv, []) (*NOSOTROS*)
+            (*NOSOTROS*)
+            let
+                val firstNL = (#2(hd ts))
+
+                fun checkNames [] = (~1, "")
+                  | checkNames (( {name=n,...} , nl)::xs) =
+                    let 
+                        val res = List.all (fn ({name=m,...},_) => m <> n) xs
+                    in
+                        if res then
+                            checkNames xs
+                        else
+                            (nl, n)
+                    end
+
+                val (nl,name) = checkNames ts
+                val _ = if (nl <> ~1) then error("declaraciones múltiples del tipo " ^ printRef name,nl) else ()
+
+                fun buscaArrRecords lt =
+                    let fun buscaRecs [] recs = recs
+                          | buscaRecs ((r as {name, ty = RecordTy _}) :: t) recs = buscaRecs t (r :: recs)
+                          | buscaRecs ((r as {name, ty = ArrayTy _}) :: t) recs = buscaRecs t (r ::recs)
+                          | buscaRecs (_ :: t) recs = buscaRecs t recs
+                    in buscaRecs lt [] end
+
+                fun genPares lt =
+                    let
+                        (* val lrecs = buscaArrRecords lt *)
+                        fun genP [] res = res
+                           |genP ({name, ty = NameTy s} :: t) res =
+                            genP t ((s,name)::res)
+                           |genP ({name, ty = ArrayTy s} :: t) res =
+                            genP t ((s,name) :: res)
+                           |genP ({name,ty = RecordTy lf} :: t) res =
+                            let fun recorre ({typ = NameTy x, ...} :: t) =
+                                    (case List.find ((op = rs x) o #name) lt  of (* cambié "lrecs" con "lt" *)
+                                         SOME _ => recorre t
+                                        |_ => x :: recorre t)
+                                  | recorre (_ :: l) = recorre l
+                                  | recorre [] = []
+                                val res' = recorre lf
+                                val res'' = List.map (fn x => (x,name)) res'
+                            in genP t (res'' @ res) end
+                    in
+                        genP lt []
+                    end
+
+                (* Procesa la lista ordenada dada por el topsort, no procesa Arrays ni Records. Cree que NO es necesario
+                usar "primeraPasada". *)
+                fun primeraPasada [] decs recs env = env
+                  | primeraPasada (sorted as (h::t)) decs recs env =
+                    let
+                        fun filt h {name, ty=NameTy t} = h = t
+                          | filt h {name, ty=ArrayTy t} = h = t
+                          | filt h {name, ty=RecordTy lt} = List.exists (fn {name, ...} => h = name) lt
+                        val (ps,ps') = List.partition (filt h) decs
+                        val ttopt = case List.find (fn {name,ty} => name = h) recs of
+                                        SOME _ => NONE
+                                      | NONE => (case tabBusca(h, env) of
+                                                     SOME t => SOME t
+                                                   | _ => NONE)
+                        val env' = case ttopt of
+                                       SOME tt => List.foldr (fn ({name, ty=NameTy _}, env) => tabRInserta(name, tt, env)
+                                                             | (_, env) => env) env ps
+                                     | _ => env
+                    in primeraPasada t ps' recs env' end
+                        
+                (* Procesa records y arrays. Posiblemente, le da tipo a los
+                NameTy que están definidos en base a records o arrays. *)
+                fun segundaPasada batch env =
+                    let
+                        fun buscaEnv t =
+                            case List.find (fn {name, ...} => name = t) batch of
+                                SOME {name, ...} => TTipo(name, ref NONE)
+                              | _ => case tabBusca(t, env) of
+                                         SOME tt => tt
+                                       | _ => error (printRef t^" es un tipo inexistente", firstNL)
+
+                        fun precs [] env' = env'
+                          | precs ({name, ty=RecordTy lf} :: t) env' =
+                            let
+                                val lf' = List.foldl (fn ({name, typ=NameTy t, ...}, l) => (name, buscaEnv t) :: l
+                                                     | (_, l) => l) [] lf
+                                val (_, lf'')= List.foldl (fn ((x,y),(n,l)) => (n+1, (x,y,n)::l)) (0,[]) lf'
+                                val env'' = tabRInserta (name, TRecord (lf'', ref ()), env')
+                            in precs t env'' end
+
+                          | precs ({name, ty=ArrayTy ty} :: t) env' =
+                            precs t (tabRInserta (name, TArray (buscaEnv ty, ref ()), env'))
+                          
+                          | precs ({name, ty = NameTy ty} :: t) env' = 
+                            precs t (tabRInserta (name, buscaEnv ty, env'))
+
+                    in precs batch env end
+                        
+                (* Reemplaza los tipos "punteros" a NONE, por punteros al record del cual
+                son miembros y pone los tipos definitivos en los NameTy. *)
+                fun fijaNONE [] env =
+                    env
+                  | fijaNONE ((name, TArray (TTipo (s, ref NONE), u)) :: t) env =
+                    (case tabBusca(s, env) of
+                         SOME r => fijaNONE t (tabRInserta (name, TArray (TTipo (s, ref (SOME r)), u) , env)) (* Antes estaba "SOME (r as (TRecord _)" *)
+                       | _ => error (printRef s^" tipo inexistente", firstNL))
+                  | fijaNONE ((name, TRecord (lf, u)) :: t) env =
+                    let
+                        fun busNONE ((s, TTipo (t, r), u), l) = 
+                            (case !r of
+                                 NONE => let val _ = r := SOME (tabSaca (t, env))
+                                         in (s, TTipo (t,r), u) :: l end
+                               | SOME e => (s, TTipo (t, r), u) :: l)
+                          | busNONE (d, l) = d :: l
+                        val lf' = List.foldl busNONE [] lf
+                    in fijaNONE t (tabRInserta(name, TRecord (lf', u), env)) end
+                  | fijaNONE ((name, TTipo (ty, _)) :: t) env =
+                    let 
+                        val (ta,env') = case tabBusca (ty,env) of
+                                       SOME t => (t,tabRInserta (name, t, env))
+                                     | NONE => raise Fail (printRef ty ^ " es un tipo no declarado")
+                    in
+                        fijaNONE t env'
+                    end
+                  | fijaNONE (_ :: t) env = fijaNONE t env
+                                                   
+                (* Fija tipos en un batch *)
+                fun fijatipos batch env =
+                    let
+                        val pares = genPares batch
+
+                        val _ = (print("Pares: "); map (fn (s, s') => print ("("^s^","^s'^")" ^ " - ")) pares ; print("\n"))
+
+                        val ordered = topsort.topsort pares
+
+                        val _ = (print("Tipos ordenados por el topsort: "); map (fn s => print (s ^ " - ")) ordered ; print("\n"))
+
+                        val recs = buscaArrRecords batch
+                        val env' = primeraPasada ordered batch recs env
+
+                        val _ = (print("Tabla en el 1º procesa: ") ; printTab (env'); print("\n"))
+
+                        val env'' = segundaPasada batch env'
+
+                        val _ = (print("Tabla en el 2º procesa: ") ; printTab (env''); print("\n"))
+
+                        val _ = map (fn (s,t) => print(s^" "^(showT t)^" - ")) (tabAList env'')
+
+                        val _ = print("\n")
+
+                        val env''' =  fijaNONE (tabAList env'') env''
+
+                        val _ = map (fn (s,t) => print(s^" "^(showT t)^" - ")) (tabAList env''')
+
+                        val _ = print("\n")
+                    in env''' end
+            in
+                let
+                    val tenv' = fijatipos (map (#1) ts) tenv
+                in
+                    (venv, tenv', [])
+                end
+            end
     in trexp end
 fun transProg ex =
     let	val main =
