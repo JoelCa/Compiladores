@@ -124,6 +124,8 @@ fun transExp(venv, tenv) =
 	    let
 		val {exp=explCode, ty=tyl} = trexp left
 		val {exp=exprCode, ty=tyr} = trexp right
+                val _ = (printTab (venv); print("\n"))
+                val _ = print("izquierda "^(showT tyl)^" - derecha "^(showT tyr)^"\n")
 	    in
 		if tiposIguales tyl tyr andalso not (tyl=TNil andalso tyr=TNil) andalso tyl<>TUnit then 
 		    {exp=if tiposIguales tyl TString then binOpStrExp {left=explCode,oper=EqOp,right=exprCode} else binOpIntRelExp {left=explCode,oper=EqOp,right=exprCode}, ty=TInt}
@@ -313,6 +315,7 @@ fun transExp(venv, tenv) =
                       | SOME (IntReadOnly {access=access, level=level}) => (TInt,access,level)
                       | SOME _ => error (printRef s ^ " es de tipo inválido", nl)
 		      | NONE => error(printRef s ^ " no fue declarada", nl)
+                val _ = print("tipo :"^(showT varType)^"\n")
             in
 		{exp=simpleVar(access, level), ty=varType}
             end
@@ -365,7 +368,7 @@ fun transExp(venv, tenv) =
                     error(printRef name ^ " con tipo incompatible",pos)
                 else
                     let
-                        val venv' = tabRInserta(name,Var {ty=typeExp,access=acc,level=level},venv)
+                        val venv' = tabRInserta(name,Var {ty=typeVar,access=acc,level=level},venv)
                     in
                         (venv',tenv,[assignExp{var = simpleVar(acc,level), exp = initCode}])
                     end
@@ -636,7 +639,7 @@ fun transExp(venv, tenv) =
 fun transProg ex =
     let	val main =
 	    LetExp({decs=[FunctionDec[({name="_tigermain", params=[],
-					result=NONE, body=ex}, 0)]],
+					result=SOME "int", body=ex}, 0)]],
 		    body=UnitExp 0}, 0)
 	val _ = transExp(tab_vars, tab_tipos) main
     in	print "bien!\n" end

@@ -43,3 +43,5 @@ Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests
   . Mediante registros
   . Por stack
   . Lo define la arquitectura
+
+- ¿De qué tipo debe ser el retorno del main de tiger: TInt, o TUnit? (Si es TUnit, tendriamos que modificar todos los test dados.).

@@ -1,0 +1,14 @@
+/* variables escapadas */
+let
+  var i := 0
+  function f(a:int):int =
+  let
+    var j := i
+    function g(b:int):int =
+      j
+  in
+    g(i)
+  end
+in
+  0
+end
