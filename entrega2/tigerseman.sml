@@ -354,7 +354,7 @@ fun transExp(venv, tenv) =
                                 TNil => error (printRef name ^ " no es posible inferir su tipo", pos)
                               | _ => tabRInserta(name,Var {ty=typeExp,access=acc,level=level},venv)
             in
-                (venv',tenv,[assignExp{var = simpleVar(acc,level), exp = initCode}])
+                (venv',tenv,[assignExp{var = simpleVar(acc,level), exp = initCode}]) (* Utiliza una lista por comodidad, es util por la lista vacia [], en FunctionDec, y TypeDec *)
             end
 	  | trdec (venv,tenv) (VarDec ({name,escape = esc,typ=SOME s,init},pos)) =
             let
