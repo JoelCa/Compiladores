@@ -457,8 +457,9 @@ fun transExp(venv, tenv) =
                                       | _ => raise Fail "error interno: declaración de función"
                         val venv' = putVars (x, level, venv)
                         val _ = pushLevel level
-                        val {ty = tBody, ...} = transExp (venv',tenv) exp
+                        val {ty = tBody, exp = bodyCode} = transExp (venv',tenv) exp
                         val _ = popLevel()
+                        val _ = procEntryExit{level = level, body = bodyCode}
                     in
                         if not(tiposIguales ttipo tBody) then
                             error(printRef s ^ " tiene un tipo de retorno inválido", pos)

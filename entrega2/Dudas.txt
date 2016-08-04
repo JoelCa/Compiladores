@@ -45,3 +45,5 @@ Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests
   . Lo define la arquitectura
 
 - ¿De qué tipo debe ser el retorno del main de tiger: TInt, o TUnit? (Si es TUnit, tendriamos que modificar todos los test dados.).
+
+- ¿Cual es la sugerencia de Guillermo para modificar el tigerframe?

@@ -22,6 +22,7 @@ open tigertree
 
 type level = int
 
+(* val argregs = ["A","B"]*)                 (* Sugerencia de Guillermo *)
 val fp = "FP"				(* frame pointer *)
 val sp = "SP"				(* stack pointer *)
 val rv = "RV"				(* return value  *)
@@ -60,7 +61,7 @@ fun newFrame{name, formals} = {
     locals=[],
     actualArg=ref argsInicial,
     actualLocal=ref localsInicial,
-    actualReg=ref regInicial
+    actualReg=ref regInicial                  (* actualReg = ref (length argregs), con la sugerencia de Guillermo *)
 }
 fun name(f: frame) = #name f
 fun string(l, s) = l^tigertemp.makeString(s)^"\n"
@@ -69,23 +70,49 @@ fun formals({formals=f, ...}: frame) =
 	  | aux(n, h::t) = InFrame(n)::aux(n+argsGap, t)
     in aux(argsInicial, f) end
 fun maxRegFrame(f: frame) = !(#actualReg f)
-fun allocArg (f: frame) b = 
+
+
+fun allocArg (f: frame) b =
     case b of
 	true =>
 	let	val ret = (!(#actualArg f)+argsOffInicial)*wSz
 		val _ = #actualArg f := !(#actualArg f)+1
 	in	InFrame ret end
       | false => InReg(tigertemp.newtemp())
-fun allocLocal (f: frame) b = 
+fun allocLocal (f: frame) b =
     case b of
 	true =>
 	let	val ret = InFrame(localsGap + (!(#actualLocal f)*wSz))
 	in	#actualLocal f:=(!(#actualLocal f)-1); ret end
       | false => InReg(tigertemp.newtemp())
+
+
+(* Modificación, sugerencia Guillermo *)
+(* fun allocArg (f: frame) b =  *)
+(*     if b then *)
+(*         InFrame(!(#actualArg(f))*wSz+argsOffInicial) *)
+(*         before #actualArg(f) := !(#actualArg(f))+1 *)
+(*     else (* registro o stack *) *)
+(*         if !(#actualArg(f)) > 0 then *)
+(*             InReg(newtemp()) *)
+(*             before #actualArgRegs(f) := !(#actualArgRegs(f))-1 *)
+(*         else (* vamos al stack *) *)
+(*             InFrame(!(#actualArg(f))*wSz+argsOffInicial) *)
+(*             before #actualArg(f) := !(#actualArg(f))+argsOffInicial (*esta linea la complete yo*) *)
+
+(* fun allocLocal (f:frame) b = *)
+(*     if b then (* memoria *) *)
+(*         InFrame (!(#actualLocal(f))*wSz) *)
+(*         before #actualLocal(f) := !(#actualLocal(f))+localsDelta *)
+(*     else InReg (newtemp()) *)
+
+
 fun exp(InFrame k) e = MEM(BINOP(PLUS, TEMP(fp), CONST k))
   | exp(InReg l) e = TEMP l
 fun externalCall(s, l) = CALL(NAME s, l)
-
 fun procEntryExit1 (frame,body) = body
+
+(* fun procEntryExit2(frame,body) = *)
+(*     body@(tigerassem.Oper{assem="",src[rv,rf,ff]@callee_saves,drt=[],jump=NONE}) *)
 
 end
