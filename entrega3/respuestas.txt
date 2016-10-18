@@ -1,0 +1,14 @@
+Respuestas Plancha 4 de Arquitectura
+
+Ejercicio 1:
+
+LDR Rd,=const es una pseudo-instrucción que genera la instrucción más eficiente para cargar cualquier constante de 32 bits.
+Si el valor inmediato puede ser construido que una instrucción MOV o MVN, el assembler genera la instrucción apropiada.
+Si no, se guarda el valor en un "literal pool" (una región de memoria), y se genera la instrucción de LDR con el PC
+que permite leer la constante del literal pool. O sea,
+ LDR rn, [pc, #offset to literal pool]
+     ; load register n with one word
+     ; from the address [pc + offset]
+
+LDR Rd,=label es una pseudo-intrucción que guarda una dirección de 32 bits en un literal pool, y la carga en el registro.
+
