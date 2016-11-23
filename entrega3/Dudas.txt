@@ -1,0 +1,61 @@
+Preguntas Resueltas del 2014.
+
+En el diagrama:
+		|    argn    |	fp+4*(n+1)
+		|    ...     |
+		|    arg2    |	fp+16
+		|    arg1    |	fp+12
+		|	fp level |  fp+8
+		|  retorno   |	fp+4
+		|   fp ant   |	fp
+		--------------	fp
+		|   local1   |	fp-4
+		|   local2   |	fp-8
+		|    ...     |
+		|   localn   |	fp-4*n
+
+1) el "fp level", es el SL? Si, El SL es el frame de la función que le corresponde a la llamada (la que
+la anida). El fp ant. es el fp de la función que hace el call.
+
+Definición de SL:
+El SL de la función g es el FP de la función f, siendo f la que define a g, es decir
+   let f() =
+       let g()= ...
+Notar que la función anidante (función donde se define la función llamada) no necesariamente es igual que la función llamante (función donde se llama a la función llamada)
+
+2) el fp se refiere al frame actual? Sí.
+3) que es local? las var. locales.
+
+4) Cuando se crea un nuevo nivel? Cuando se declara una funcion.
+5) El código intermedio de una declaración de variable, equivale a la asignación de la var. recien creada, con su valor inicial? Si.
+
+7) En la declaración de una función, tengo que usar el código intermedio del body
+de cada función? Si.
+
+
+--------------------------------------------------------------------------------
+
+
+Dudas 2016
+
+- En la entrega1 _tigermain tiene el resultado de tipo TInt, mientras que la entrega2 _tigermain tiene el de resultado de tipo TUnit, así esta bien?
+Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests están como para que funcionen con TInt?
+
+- ¿Cual es la sugerencia de Guillermo para modificar el tigerframe?
+
+- ¿Para qué la canonización elimina los ESEQ?
+
+
+----- Para preguntar en clase ------
+
+- ¿Cómo se usa el intérprete que está en tigerinterp.sml?. Preguntado.
+
+- Una vez terminado el maximal munch ¿Cuáles son los pasos a seguir?. Preguntado.
+
+- Te escribo por estoy avanzando con el compilador junto con Joel Catacora y nos surgió una duda respecto a la arquitectura destino. Estamos entre 2 opciones:
+  - ARM
+  - i386
+  Queremos saber qué "problemas" puede presentarnos ARM, que no están, o son más simples, en i386? Preguntado.
+
+- En el maximal munch de un jump "simple", ¿siempre tenemos un label como expresión?.
+
