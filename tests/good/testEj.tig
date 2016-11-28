@@ -1,0 +1,6 @@
+let
+  function f (n : int) =
+    (1 > 0; ())
+in
+  0
+end
