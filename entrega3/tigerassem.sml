@@ -14,6 +14,8 @@ struct
                                dst : temp list,
                                src : temp list }
 
-    (* val format : (temp -> string) -> instr -> string *)
+    fun format (_ : temp -> string) (OPER {assem = s, ...}) = s
+      | format _ (LABEL {assem = s, ...}) = s
+      | format _ _ = raise Fail "tigerassem: no debería pasar.\n"
 
 end

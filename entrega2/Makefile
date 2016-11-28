@@ -8,7 +8,7 @@
 #MOSMLYACC=$(MOSMLHOME)/mosmlyac -v
 
 # Para el DCC y lab. de 2º piso
-HOME=/usr/local/bin
+HOME=/usr/bin
 MOSMLHOME=${HOME}
 MOSMLTOOLS=$(MOSMLHOME)/camlrunm $(MOSMLHOME)/tools
 MOSMLLEX=$(MOSMLHOME)/mosmllex
@@ -94,7 +94,7 @@ depend: tigerabs.sml tigergrm.sml tigerlex.sml tigermain.sml \
 
 ### DO NOT DELETE THIS LINE
 tigerseman.uo: tigerseman.ui tigersres.uo tigertab.ui tigerpila.ui \
-    topsort.ui tigerabs.uo tigertrans.ui 
+    topsort.ui tigerabs.uo tigertrans.ui tigerit.uo
 tigercanon.uo: tigercanon.ui tigertree.uo tigertab.ui tigertemp.ui 
 tigerinterp.uo: tigertree.uo tigertab.ui tigerframe.ui tigerit.uo \
     tigertemp.ui 
@@ -119,5 +119,5 @@ tigergrm.ui: tigerabs.uo
 topsort.uo: topsort.ui tigerabs.uo 
 tigercanon.ui: tigertree.uo 
 tigermain.uo: tigerseman.ui tigerescap.ui tigergrm.ui tigerlex.uo \
-    tigerpp.uo 
+    tigerpp.uo tigertrans.uo 
 tigerframe.uo: tigerframe.ui tigertree.uo tigertemp.ui 

@@ -72,7 +72,7 @@ fun linearize(stm0: stm) : stm list =
 			reorder_exp([a,b], fn l=>BINOP(p,hd l,hd(tl l)))
 		| do_exp(MEM(a)) = reorder_exp([a], fn l=>MEM(hd l))
 		| do_exp(ESEQ(s,e)) = 
-			let	vals tms = do_stm s
+			let	val stms = do_stm s
 				val (stms',e) = do_exp e
 			in	(stms%stms',e) end
 		| do_exp(CALL(e,el)) = 

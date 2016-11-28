@@ -13,7 +13,7 @@ fun tree s0 =
 			indent(d)^sayln("SEQ(")^stm(a,d+1)^
 			sayln(",")^stm(b,d+1)^say(")")
 		| stm(LABEL lab, d) = indent(d)^say("LABEL ")^say(lab)
-		| stm(JUMP (e,_), d) =  indent(d)^say("JUMP(")^exp(e,d+1)^say(")")
+		| stm(JUMP (e,_), d) =  indent(d)^sayln("JUMP(")^exp(e,d+1)^say(")")
 		| stm(CJUMP(r,a,b,t,f),d) = indent(d)^say("CJUMP(")^
 			relop(r)^sayln(",")^
 			exp(a,d+1)^sayln(",")^exp(b,d+1)^sayln(",")^

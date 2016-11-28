@@ -93,6 +93,10 @@ fun Ir(e) =
 
 fun nombreFrame frame = print(".globl " ^ tigerframe.name frame ^ "\n")
 
+fun procBody (PROC {body = b, frame = f}) = SOME (b,f)
+  | procBody _  = NONE
+                             
+
 (* While y for necesitan la última etiqueta para un break *)
 (* Es distinto de lo que está en la carpeta*)
 local

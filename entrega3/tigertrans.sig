@@ -50,5 +50,7 @@ val arrayExp : {size: exp, init: exp} -> exp
 val Ir : frag list -> string
 
 val unNx : exp -> tigertree.stm
-                          
+
+val procBody : tigerframe.frag -> (tigertree.stm * tigerframe.frame) option
+                      
 end

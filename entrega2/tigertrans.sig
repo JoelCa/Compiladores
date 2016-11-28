@@ -49,4 +49,6 @@ val arrayExp : {size: exp, init: exp} -> exp
 
 val Ir : frag list -> string
 
+val unNx : exp -> tigertree.stm
+                          
 end

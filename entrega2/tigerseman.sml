@@ -18,7 +18,8 @@ open tigerabs
 open tigersres
 open tigertrans
 open tigerpp
-
+open tigerit
+         
 type expty = {exp: unit, ty: Tipo}
 
 type venv = (string, EnvEntry) tigertab.Tabla
@@ -437,10 +438,12 @@ fun transExp(venv, tenv) =
                                         Func {level = level, ...} => level
                                       | _ => raise Fail "error interno: declaración de función"
                         val venv' = putVars (x, level, venv)
+                        val _ = preFunctionDec()
                         val _ = pushLevel level
                         val {ty = tBody, exp = bodyCode} = transExp (venv',tenv) exp
+                        val _ = functionDec (bodyCode, level, true)
                         val _ = popLevel()
-                        val _ = procEntryExit{level = level, body = bodyCode}
+                        val _ = postFunctionDec()
                     in
                         if not(tiposIguales TUnit tBody) then
                             error(printRef s ^ " tiene un tipo de retorno inválido", pos)
@@ -456,10 +459,12 @@ fun transExp(venv, tenv) =
                                         Func {level = level, ...} => level
                                       | _ => raise Fail "error interno: declaración de función"
                         val venv' = putVars (x, level, venv)
+                        val _ = preFunctionDec()
                         val _ = pushLevel level
                         val {ty = tBody, exp = bodyCode} = transExp (venv',tenv) exp
+                        val _ = functionDec (bodyCode, level, false)
                         val _ = popLevel()
-                        val _ = procEntryExit{level = level, body = bodyCode}
+                        val _ = postFunctionDec()
                     in
                         if not(tiposIguales ttipo tBody) then
                             error(printRef s ^ " tiene un tipo de retorno inválido", pos)
@@ -643,5 +648,6 @@ fun transProg ex =
 					result=SOME "int", body=ex}, 0)]],
 		    body=UnitExp 0}, 0)
 	val _ = transExp(tab_vars, tab_tipos) main
+        (*val _ = print (tigerit.tree (unNx exp))*)
     in	print "bien!\n" end
 end

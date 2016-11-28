@@ -1,3 +1,5 @@
+Preguntas Resueltas del 2014.
+
 En el diagrama:
 		|    argn    |	fp+4*(n+1)
 		|    ...     |
@@ -24,26 +26,34 @@ Notar que la función anidante (función donde se define la función llamada) no
 2) el fp se refiere al frame actual? Sí.
 3) que es local? las var. locales.
 
-4) Cuando se crea un nuevo nivel?
+4) Cuando se crea un nuevo nivel? Cuando se declara una funcion.
 5) El código intermedio de una declaración de variable, equivale a la asignación de la var. recien creada, con su valor inicial? Si.
 
-6) El label de una función que se encuentra en venv, debe ser el mismo al que está en la pila
-de levels?
-
 7) En la declaración de una función, tengo que usar el código intermedio del body
-de cada función?
+de cada función? Si.
 
---------------------------------------
+
+--------------------------------------------------------------------------------
+
+
 Dudas 2016
 
 - En la entrega1 _tigermain tiene el resultado de tipo TInt, mientras que la entrega2 _tigermain tiene el de resultado de tipo TUnit, así esta bien?
 Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests están como para que funcionen con TInt?
 
-- Como deberían pasarse los argumentos de la instrucción CALL(..)?
-  . Mediante registros
-  . Por stack
-  . Lo define la arquitectura
-
-- ¿De qué tipo debe ser el retorno del main de tiger: TInt, o TUnit? (Si es TUnit, tendriamos que modificar todos los test dados.).
-
 - ¿Cual es la sugerencia de Guillermo para modificar el tigerframe?
+
+- ¿Para qué la canonización elimina los ESEQ?
+
+
+----- Para preguntar en clase ------
+
+- ¿Cómo se usa el intérprete que está en tigerinterp.sml?
+
+- Una vez terminado el maximal munch ¿Cuáles son los pasos a seguir?
+
+- Te escribo por estoy avanzando con el compilador junto con Joel Catacora y nos surgió una duda respecto a la arquitectura destino. Estamos entre 2 opciones:
+  - ARM
+  - i386
+  Queremos saber qué "problemas" puede presentarnos ARM, que no están, o son más simples, en i386?
+

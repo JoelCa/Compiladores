@@ -2,6 +2,7 @@ open tigerlex
 open tigergrm
 open tigerescap
 open tigerseman
+open tigercanon
 open BasicIO Nonstdio
 
 fun lexstream(is: instream) =
@@ -31,9 +32,17 @@ fun main(args) =
 		val _ = if arbol then tigerpp.exprAst expr else ()
                 val _ = transProg(expr);
                 val fragmentos = tigertrans.getResult()
+                fun optionFilter [] = []
+                  | optionFilter ((SOME s) :: xs) = s :: optionFilter xs 
+                  | optionFilter (NONE :: xs) = optionFilter xs
+                val stmList = optionFilter (map (tigertrans.procBody) fragmentos)
+                val functionInstrCode = map (fn (s,f) => tigercodegen.maximalMunch f (traceSchedule (basicBlocks (linearize s)))) stmList 
 		val _ = if ir then print(tigertrans.Ir(fragmentos)) else ()
+                val _ = if code then map (map (print o (tigerassem.format (fn a => "")))) functionInstrCode else [[()]]
 	in
 		print "yes!!\n"
 	end	handle Fail s => print("Fail: "^s^"\n")
 
-val _ = main(CommandLine.arguments())
+val _ = main(CommandLine.arguments())                          
+
+            (* maximalMunch f (traceSchedule (basicBlocks (linearize b)))*)

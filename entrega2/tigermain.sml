@@ -29,8 +29,10 @@ fun main(args) =
 		val expr = prog Tok lexbuf handle _ => errParsing lexbuf
 		val _ = findEscape(expr)
 		val _ = if arbol then tigerpp.exprAst expr else ()
+                val _ = transProg(expr);
+                val fragmentos = tigertrans.getResult()
+		val _ = if ir then print(tigertrans.Ir(fragmentos)) else ()
 	in
-		transProg(expr);
 		print "yes!!\n"
 	end	handle Fail s => print("Fail: "^s^"\n")
 
