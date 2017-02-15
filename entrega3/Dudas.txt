@@ -34,8 +34,6 @@ de cada función? Si.
 
 
 --------------------------------------------------------------------------------
-
-
 Dudas 2016
 
 - En la entrega1 _tigermain tiene el resultado de tipo TInt, mientras que la entrega2 _tigermain tiene el de resultado de tipo TUnit, así esta bien?

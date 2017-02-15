@@ -35,16 +35,16 @@ fun codegen (frame) (stm) =
                                                             jump = NONE })
         | munchStm (T.CJUMP (oper, e1, e2, t, _)) = let fun toAssemOper operacion = 
                                                           case operacion of
-                                                              EQ => "eq"
-                                                            | NE => "ne"
-                                                            | LT => "lt"
-                                                            | GT => "gt"
-                                                            | LE => "le"
-                                                            | GE => "ge"
-                                                            | ULT => "lo"
-                                                            | ULE => "ls"
-                                                            | UGT => "hi"
-                                                            | UGE => "hs"
+                                                              T.EQ => "eq"
+                                                            | T.NE => "ne"
+                                                            | T.LT => "lt"
+                                                            | T.GT => "gt"
+                                                            | T.LE => "le"
+                                                            | T.GE => "ge"
+                                                            | T.ULT => "lo"
+                                                            | T.ULE => "ls"
+                                                            | T.UGT => "hi"
+                                                            | T.UGE => "hs"
                                                     in emit (A.OPER { assem = "cmp s0 s1\n" ^ "b" ^ toAssemOper(oper) ^ " " ^ t ^"\n",
                                                                       src = [munchExp e1, munchExp e2],
                                                                       dst = [],

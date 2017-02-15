@@ -140,7 +140,7 @@ fun stringExp(s: string) =
 
 fun preFunctionDec() =
     (pushSalida(NONE);
-     actualLevel := !actualLevel+1)
+     actualLevel := getActualLev()+1)
 
 fun functionDec(e, l, proc) =
     let	val body =
@@ -151,7 +151,7 @@ fun functionDec(e, l, proc) =
     in	Ex(CONST 0) end
 
 fun postFunctionDec() =
-    (popSalida(); actualLevel := !actualLevel-1)
+    (popSalida(); actualLevel := getActualLev()-1)
 
 fun unitExp() = Ex (CONST 0)
 
@@ -166,11 +166,21 @@ fun simpleVar(acc, nivel) =
         let fun aux 0 = TEMP fp
               | aux n = MEM (BINOP (PLUS, CONST fpPrevLev, aux(n-1)))
         in
-            Ex (MEM(BINOP(PLUS,aux (!actualLevel - nivel), CONST offset)))
+            Ex (MEM(BINOP(PLUS,aux (getActualLev() - nivel), CONST offset)))
         end
       | InReg r => Ex (TEMP r)
-                   
-fun varDec(acc) = simpleVar(acc, getActualLev())
+
+
+fun assignExp{var, exp} =
+    let
+	val v = unEx var
+	val vl = unEx exp
+    in
+	Nx (MOVE(v,vl))
+    end
+                      
+(* Antes estaba así: simpleVar(acc, getActualLev()) *)
+fun varDec(acc,initCode) = assignExp{var = simpleVar(acc,getActualLev()), exp = initCode}
 
 (* var es el código que "apunta" al inicio del arreglo, y field es un entero que indica
 la posición del miembro, dado por el TRecord correspondiente *)
@@ -422,14 +432,6 @@ fun ifThenElseExpUnit {test,then',else'} =
                  LABEL f,
                  e3,
                  LABEL e])
-    end
-
-fun assignExp{var, exp} =
-    let
-	val v = unEx var
-	val vl = unEx exp
-    in
-	Nx (MOVE(v,vl))
     end
 
 fun binOpIntExp {left, oper, right} = 

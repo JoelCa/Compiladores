@@ -350,17 +350,17 @@ fun transExp(venv, tenv) =
 	    (*NOSOTROS*)
             let
                 val {ty = typeExp, exp = initCode} = transExp (venv, tenv) init
-                val (acc,level) = (allocLocal (topLevel()) (!esc), getActualLev())
+                val acc = allocLocal (topLevel()) (!esc)
                 val venv' = case typeExp of
                                 TNil => error (printRef name ^ " no es posible inferir su tipo", pos)
-                              | _ => tabRInserta(name,Var {ty=typeExp,access=acc,level=level},venv)
+                              | _ => tabRInserta(name,Var {ty=typeExp,access=acc,level=getActualLev()},venv)
             in
-                (venv',tenv,[assignExp{var = simpleVar(acc,level), exp = initCode}]) (* Utiliza una lista por comodidad, es util por la lista vacia [], en FunctionDec, y TypeDec *)
+                (venv',tenv,[varDec(acc,initCode)]) (* Utiliza una lista por comodidad, es util por la lista vacia [], en FunctionDec, y TypeDec *)
             end
 	  | trdec (venv,tenv) (VarDec ({name,escape = esc,typ=SOME s,init},pos)) =
             let
                 val {ty = typeExp, exp = initCode} = transExp (venv, tenv) init
-                val (acc,level) = (allocLocal (topLevel()) (!esc), getActualLev())
+                val acc = allocLocal (topLevel()) (!esc)
                 val typeVar = (case tabBusca (s,tenv) of
                                    SOME t => t
                                  | NONE => error ("el tipo "^printRef s^" no está definido", pos))
@@ -369,9 +369,9 @@ fun transExp(venv, tenv) =
                     error(printRef name ^ " con tipo incompatible",pos)
                 else
                     let
-                        val venv' = tabRInserta(name,Var {ty=typeVar,access=acc,level=level},venv)
+                        val venv' = tabRInserta(name,Var {ty=typeVar,access=acc,level=getActualLev()},venv)
                     in
-                        (venv',tenv,[assignExp{var = simpleVar(acc,level), exp = initCode}])
+                        (venv',tenv,[varDec(acc,initCode)])
                     end
             end
 	  | trdec (venv,tenv) (FunctionDec fs) =
