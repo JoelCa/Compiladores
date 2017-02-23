@@ -13,7 +13,6 @@ fun lp --- e = List.filter ((op <> rs e) o fst) lp
 
 fun printRef v = "\"" ^ v ^ "\""
 
-
 open tigerabs
 open tigersres
 open tigertrans
@@ -34,6 +33,13 @@ fun pushLevel l = tigerpila.pushPila levelPila l
 fun popLevel() = tigerpila.popPila levelPila 
 fun topLevel() = tigerpila.topPila levelPila
 
+(* TERMINAR *)
+fun printPila l =
+  let val l' = tigerpila.nuevaPila1 l
+  in
+      nombreFrame (tigerpila.topPila l')
+  end
+                                   
 val tab_vars : (string, EnvEntry) Tabla = tabInserList(
 tabNueva(),
 [("print", Func{level=topLevel(), label="print",
@@ -414,8 +420,9 @@ fun transExp(venv, tenv) =
                 fun genEnvEntry ({name = s, params = ps, result = NONE, body = exp}, pos) =
                     let val fmlPairs = map genTipo ps   
                         val fmls = map (#2) fmlPairs
-                        val level = newLevel{parent=topLevel(), name = tigertemp.newlabel()^s, formals = map (#3) fmlPairs}
-                        val f = Func {level = level, label = tigertemp.newlabel()^s, formals = fmls, result = TUnit, extern = false}
+                        (* IMPORTANTE!. El campo name de level antes estaba: "name = tigertemp.newlabel()^s" *)
+                        val level = newLevel{parent=topLevel(), name = s, formals = map (#3) fmlPairs}
+                        val f = Func {level = level, label = s, formals = fmls, result = TUnit, extern = false}
                     in
                         ((s,f),(fmlPairs,NONE))
                     end
@@ -426,8 +433,9 @@ fun transExp(venv, tenv) =
                                        | SOME t => t)
                         val fmlPairs = map genTipo ps
                         val fmls = map (#2) fmlPairs
-                        val level = newLevel{parent=topLevel(), name = tigertemp.newlabel()^s, formals = map (#3) fmlPairs}
-                        val f = Func {level = level, label = tigertemp.newlabel()^s, formals = fmls, result = ttipo, extern = false}
+                        (* IMPORTANTE!. El campo name de level antes estaba: "name = tigertemp.newlabel()^s" *)
+                        val level = newLevel{parent=topLevel(), name = s, formals = map (#3) fmlPairs}
+                        val f = Func {level = level, label = s, formals = fmls, result = ttipo, extern = false}
                     in
                         ((s,f),(fmlPairs,SOME ttipo))
                     end

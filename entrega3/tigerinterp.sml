@@ -211,9 +211,12 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 
 	fun getstrFun(args) = 
 	    let
-		val str = TextIO.inputLine TextIO.stdIn
-	    in
-		storeString str
+		val str = TextIO.inputLine TextIO.stdIn (* Tiene tipo "string option". NO debería tenerlo. *)
+                val strP = case str of
+		               SOME t => t
+		             | NONE => ""
+            in
+		storeString strP
 	    end
 
 	val tabLib: (tigertemp.label, int list -> int) Tabla =
@@ -312,8 +315,12 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 	    let
 		(* Encontrar la función*)
 		val ffrac = List.filter (fn (body, frame) => tigerframe.name(frame)=f) funfracs
-		val _ = if (List.length(ffrac)<>1) then raise Fail ("No se encuentra la función, o repetida: "^f^"\n") else ()
-		val [(body, frame)] = ffrac
+                fun imprimeDG [] = ""
+                  | imprimeDG ((b,frame)::xs) =
+                    (imprimeDG xs) ^ "\n" ^ tigerframe.name(frame)
+                (* val _ = print(imprimeDG funfracs) *)
+		val _ = if (List.length(ffrac)<>1) then raise Fail ("No se encuentra la función, o repetida: "^f^"\n"^Int.toString(List.length(ffrac))^"") else ()
+                val [(body, frame)] = ffrac
 		(* Mostrar qué se está haciendo, si showdebug *)
 		val _ = if showdebug then (print((tigerframe.name frame)^":\n");List.app (print o tigerit.tree) body; print("Argumentos: "); List.app (fn n => (print(Int.toString(n)); print("  "))) args; print("\n")) else ()
 
@@ -362,5 +369,5 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 	    in
 		rv
 	    end
-    in (print("Comienzo de ejecución...\n"); evalFun("_tigermain", []); print("Fin de ejecución.\n")) end
+    in (print("--------------> Comienzo de ejecución...\n"); evalFun("_tigermain", []); print("--------------> Fin de ejecución.\n")) end
 end

@@ -23,25 +23,25 @@ open tigertree
 type level = int
 
 (* val argregs = ["A","B"]*)                 (* Sugerencia de Guillermo *)
-val fp = "FP"				(* frame pointer *)
-val sp = "SP"				(* stack pointer *)
-val rv = "RV"				(* return value  *)
-val ov = "OV"				(* overflow value (edx en el 386) *)
-val wSz = 4				(* word size in bytes *)
-val log2WSz = 2				(* base two logarithm of word size in bytes *)
-val fpPrev = 0				(* offset (bytes) *)
-val fpPrevLev = 8			(* offset (bytes) *)
-val argsInicial = 0			(* words *)
+val fp             = "FP"		(* frame pointer *)
+val sp             = "SP"		(* stack pointer *)
+val rv             = "RV"		(* return value  *)
+val ov             = "OV"		(* overflow value (edx en el 386) *)
+val wSz            = 4			(* word size in bytes *)
+val log2WSz        = 2			(* base two logarithm of word size in bytes *)
+val fpPrev         = 0			(* offset (bytes) *)
+val fpPrevLev      = 8			(* offset (bytes) *)
+val argsInicial    = 0			(* words *)
 val argsOffInicial = 0		        (* words *)
-val argsGap = wSz			(* bytes *)
-val regInicial = 1			(* reg *)
-val localsInicial = 0		        (* words *)
-val localsGap = ~4 			(* bytes que indican el espacio entre el fp y el 1º local *)
-val calldefs = [rv]
-val specialregs = [rv, fp, sp]
-val argregs = []
-val callersaves = []
-val calleesaves = []
+val argsGap        = wSz		(* bytes *)
+val regInicial     = 1			(* reg *)
+val localsInicial  = 0		        (* words *)
+val localsGap      = ~4 		(* bytes que indican el espacio entre el fp y el 1º local *)
+val calldefs       = [rv]
+val specialregs    = [rv, fp, sp]
+val argregs        = []
+val callersaves    = []
+val calleesaves    = []
 
 type frame = {
     name: string,
@@ -55,20 +55,25 @@ type register = string
 datatype access = InFrame of int | InReg of tigertemp.label
 datatype frag = PROC of {body: tigertree.stm, frame: frame}
 	      | STRING of tigertemp.label * string
+
 fun newFrame{name, formals} = {
-    name=name,
-    formals=formals,
-    locals=[],
-    actualArg=ref argsInicial,
-    actualLocal=ref localsInicial,
-    actualReg=ref regInicial                  (* actualReg = ref (length argregs), con la sugerencia de Guillermo *)
+    name        = name,
+    formals     = formals,
+    locals      = [],
+    actualArg   = ref argsInicial,
+    actualLocal = ref localsInicial,
+    actualReg   = ref regInicial        (* actualReg = ref (length argregs), con la sugerencia de Guillermo *)
 }
+
 fun name(f: frame) = #name f
+
 fun string(l, s) = l^tigertemp.makeString(s)^"\n"
+
 fun formals({formals=f, ...}: frame) = 
     let	fun aux(n, []) = []
 	  | aux(n, h::t) = InFrame(n)::aux(n+argsGap, t)
     in aux(argsInicial, f) end
+
 fun maxRegFrame(f: frame) = !(#actualReg f)
 
 

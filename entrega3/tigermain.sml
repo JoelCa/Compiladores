@@ -4,6 +4,7 @@ open tigerescap
 open tigerseman
 open tigercanon
 open BasicIO Nonstdio
+open tigerinterp
 
 fun lexstream(is: instream) =
 	Lexing.createLexer(fn b => fn n => buff_input is b 0 n);
@@ -32,13 +33,27 @@ fun main(args) =
 		val _ = if arbol then tigerpp.exprAst expr else ()
                 val _ = transProg(expr);
                 val fragmentos = tigertrans.getResult()
-                fun optionFilter [] = []
-                  | optionFilter ((SOME s) :: xs) = s :: optionFilter xs 
-                  | optionFilter (NONE :: xs) = optionFilter xs
-                val stmList = optionFilter (map (tigertrans.procBody) fragmentos)
-                val functionInstrCode = map (fn (s,f) => tigercodegen.maximalMunch f (traceSchedule (basicBlocks (linearize s)))) stmList 
+                (* fun optionFilter [] = [] *)
+                (*   | optionFilter ((SOME s) :: xs) = s :: optionFilter xs  *)
+                (*   | optionFilter (NONE :: xs) = optionFilter xs *)
+                val fcCanon = (tigercanon.traceSchedule o tigercanon.basicBlocks o tigercanon.linearize)
+
+		(* Divide los fragmentos y canoniza los que son PROC *)
+		fun divideFrags [] = ([],[])
+		  | divideFrags (tigerframe.PROC {body,frame} :: t) = let val (stm,str) = divideFrags t in ((frame,fcCanon body)::stm,str) end
+		  | divideFrags (tigerframe.STRING s :: t) = let val (stm,str) = divideFrags t in (stm,s::str) end
+
+		val (canonizado, roData) = divideFrags fragmentos
+
+		val _ = if canon then List.app (fn (f,b) => (print((tigerframe.name f)^":\n");List.app (print o tigerit.tree) b)) canonizado else ()
+                                                                                                                                                      
+                val (procs,strings) = tigertrans.procStringList(fragmentos)
+                (* val stmList = optionFilter (map (tigertrans.procBody) fragmentos) *)
+                val stmCanonList = map (fn (s,f) => (traceSchedule (basicBlocks (linearize s)), f)) procs
+                (* val functionInstrCode = map (fn (s,f) => tigercodegen.maximalMunch f s) stmCanonList *)
 		val _ = if ir then print(tigertrans.Ir(fragmentos)) else ()
-                val _ = if code then map (map (print o (tigerassem.format (fn a => "")))) functionInstrCode else [[()]]
+                (* val _ = if code then map (map (print o (tigerassem.format (fn a => "")))) functionInstrCode else [[()]] *)
+                val _ = if inter then tigerinterp.inter true stmCanonList strings else ()
 	in
 		print "yes!!\n"
 	end	handle Fail s => print("Fail: "^s^"\n")

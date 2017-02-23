@@ -119,7 +119,7 @@ tigergrm.ui: tigerabs.uo
 topsort.uo: topsort.ui tigerabs.uo 
 tigercanon.ui: tigertree.uo 
 tigermain.uo: tigerseman.ui tigerescap.ui tigergrm.ui tigerlex.uo \
-    tigerpp.uo tigertrans.uo tigercodegen.ui tigercanon.ui 
+    tigerpp.uo tigertrans.uo tigercodegen.ui tigercanon.ui tigerinterp.uo
 tigerframe.uo: tigerframe.ui tigertree.uo tigertemp.ui
 tigercodegen.uo: tigercodegen.ui tigertemp.ui
 tigercodegen.ui: tigerframe.ui tigerassem.uo tigertree.uo

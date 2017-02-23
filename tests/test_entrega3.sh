@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PATH_TIGER="$DIR/../entrega2/tiger"
+PATH_TIGER="$DIR/../entrega3/tiger"
 PATH_TEST="$DIR/$1"
 
 cd "$DIR/$1"

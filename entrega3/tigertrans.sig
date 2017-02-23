@@ -46,11 +46,14 @@ val binOpIntExp : {left:exp, oper:tigerabs.oper, right:exp} -> exp
 val binOpIntRelExp: {left:exp, oper:tigerabs.oper, right:exp} -> exp
 val binOpStrExp : {left:exp, oper:tigerabs.oper, right:exp} -> exp
 val arrayExp : {size: exp, init: exp} -> exp
+val nombreFrame : tigerframe.frame -> unit
 
 val Ir : frag list -> string
 
 val unNx : exp -> tigertree.stm
 
 val procBody : tigerframe.frag -> (tigertree.stm * tigerframe.frame) option
-                      
+
+val procStringList : tigerframe.frag list -> (tigertree.stm*tigerframe.frame) list * (tigertemp.label*string) list
+                                                                     
 end

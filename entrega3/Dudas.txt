@@ -57,3 +57,32 @@ Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests
 
 - En el maximal munch de un jump "simple", ¿siempre tenemos un label como expresión?.
 
+--------------------------------------------------------------------------------
+Dudas 2017
+
+- En la variable "datosGlobs", cuando se agrega el PROC de una función f, asociamos como frame de f, 
+el frame que viene del level, el cual se crea con el nombre de f más un prefijo formado por una string obtenida de tigertemp.newLabel(). ¿Está bien?.
+El prefijo nos estorba para usar el intérprete, debido a que busca el frame por el nombre de las funciones sin tener en cuenta el prefijo ¿como lo solucionamos, si mantenemos este prefijo?.
+
+- En el chequeo de tipos, ¿deberiamos capturar la excepción Ciclo, y mostrar un error más detallado?.
+
+- En el código intermedio del CALL f, ¿deberíamos incluir MOVEs de los valores con los que se llama f, a los registros o
+direcciones de memoria, que genera allocArg(), en la declaración de f?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

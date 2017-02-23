@@ -8,7 +8,7 @@ open tigerabs
 exception breakexc
 exception divCero
 	  
-type level = {parent:frame option , frame: frame, level: int} (*parent, es el frame de la función que la anida*)
+type level = {parent: frame option , frame: frame, level: int} (*parent, es el frame de la función que la anida*)
 type access = tigerframe.access
 
 type frag = tigerframe.frag
@@ -18,14 +18,15 @@ val actualLevel = ref ~1 (* _tigermain debe tener level = 0. *)
 fun getActualLev() = !actualLevel
 
 val outermost: level = {
-    parent=NONE,
-    frame=newFrame{name="_tigermain", formals=[]}, level=getActualLev()
+    parent = NONE,
+    frame  = newFrame{name = "_tigermain", formals = []},
+    level  = getActualLev()
 }
 
-fun newLevel{parent={parent, frame, level}, name, formals} = {
-    parent=SOME frame,
-    frame=newFrame{name=name, formals=formals},
-    level=level+1}
+fun newLevel{parent = {parent, frame, level}, name, formals} = {
+    parent = SOME frame,
+    frame  = newFrame{name = name, formals = formals},
+    level  = level+1}
 
 fun getLevel{parent, frame, level} = level
 
@@ -93,10 +94,19 @@ fun Ir(e) =
 
 fun nombreFrame frame = print(".globl " ^ tigerframe.name frame ^ "\n")
 
+fun procStringList ((PROC {body = b, frame = f})::zs) =
+  let val (xs,ys) = procStringList zs
+  in ((b,f)::xs,ys)
+  end
+  | procStringList ((STRING (l,s))::zs) =
+    let val (xs,ys) = procStringList zs
+    in (xs,(l,s)::ys)
+    end
+  | procStringList [] = ([],[]) 
+
 fun procBody (PROC {body = b, frame = f}) = SOME (b,f)
   | procBody _  = NONE
-                             
-
+                      
 (* While y for necesitan la última etiqueta para un break *)
 (* Es distinto de lo que está en la carpeta*)
 local
@@ -275,8 +285,8 @@ fun callExp (name,external,isproc,lev:level,ls) =
           | preparaArgs (h::t) (rt,re) =  (* rt son constantes,etc; re son expresiones a evaluar *)
             case h of
                 Ex(CONST s) => preparaArgs t ((CONST s)::rt, re)
-              | Ex(NAME s) => preparaArgs t ((NAME s)::rt, re)
-              | Ex(TEMP s) => preparaArgs t ((TEMP s)::rt, re)
+              | Ex(NAME s)  => preparaArgs t ((NAME s)::rt, re)
+              | Ex(TEMP s)  => preparaArgs t ((TEMP s)::rt, re)
               |_ =>
                let
                    val t' = newtemp()
@@ -478,4 +488,4 @@ fun binOpStrExp {left,oper,right} =
           | GeOp => Cx (subst GE)
           | _ => raise Fail ("Error: se esperaba operador de comparación de strings") 
     end
-end
+end                                      
