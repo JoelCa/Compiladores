@@ -69,21 +69,21 @@ fun name(f: frame) = #name f
 
 fun string(l, s) = l^tigertemp.makeString(s)^"\n"
 
-fun formals({formals=f, ...}: frame) = 
-    let	fun aux(n, []) = []
-	  | aux(n, h::t) = InFrame(n)::aux(n+argsGap, t)
-    in aux(argsInicial, f) end
+fun formals({formals=f,...}:frame) = let fun armaAccesos [] _ n = []
+                                       		 | armaAccesos (_::xs) [] n = (InFrame (n*wSz))::armaAccesos xs [] (n+1)
+                                           | armaAccesos (_::xs) (r::rs) n = (InReg r)::armaAccesos xs rs n
+                                     in armaAccesos f argregs argsOffInicial end
 
 fun maxRegFrame(f: frame) = !(#actualReg f)
 
 
 fun allocArg (f: frame) b =
-    case b of
-	true =>
-	let	val ret = (!(#actualArg f)+argsOffInicial)*wSz
-		val _ = #actualArg f := !(#actualArg f)+1
-	in	InFrame ret end
-      | false => InReg(tigertemp.newtemp())
+	case b of
+		true =>
+			let	val ret = (!(#actualArg f)+argsOffInicial)*wSz
+					val _ = #actualArg f := !(#actualArg f)+1
+			in	InFrame ret end
+  	| false => InReg(tigertemp.newtemp())
 fun allocLocal (f: frame) b =
     case b of
 	true =>

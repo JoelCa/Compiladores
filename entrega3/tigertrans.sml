@@ -123,6 +123,7 @@ fun topSalida() =
 end
 
 val datosGlobs = ref ([]: frag list)
+
 fun procEntryExit{level: level, body} =
     let	val label = STRING(name(#frame level), "")
 	val body' = PROC{frame= #frame level, body=unNx body}
@@ -287,7 +288,7 @@ fun callExp (name,external,isproc,lev:level,ls) =
                 Ex(CONST s) => preparaArgs t ((CONST s)::rt, re)
               | Ex(NAME s)  => preparaArgs t ((NAME s)::rt, re)
               | Ex(TEMP s)  => preparaArgs t ((TEMP s)::rt, re)
-              |_ =>
+              | _ =>
                let
                    val t' = newtemp()
                in preparaArgs t ((TEMP t')::rt, (MOVE(TEMP t', unEx h))::re)
@@ -299,8 +300,9 @@ fun callExp (name,external,isproc,lev:level,ls) =
         if isproc
         then Nx (seq (ls'@[EXP(CALL(NAME name, ta'))]))
         else
-            Ex (ESEQ (seq ls',
-                      CALL(NAME name, ta')))
+          let val tmp = newtemp()
+          in Ex (ESEQ (seq(ls'@[EXP(CALL (NAME name, ta')), MOVE (TEMP tmp, TEMP rv)]), TEMP tmp))
+          end
     end
 
 fun letExp ([], body) = Ex (unEx body)

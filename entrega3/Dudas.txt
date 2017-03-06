@@ -69,6 +69,11 @@ El prefijo nos estorba para usar el intérprete, debido a que busca el frame por
 - En el código intermedio del CALL f, ¿deberíamos incluir MOVEs de los valores con los que se llama f, a los registros o
 direcciones de memoria, que genera allocArg(), en la declaración de f?
 
+---------------------------------------------------------------------------------
+
+LO ULTIMO:
+Copiamos la función formals de felipe en tigerframe.sml. Esta función la usa tigerinterp.sml, para el mapeo entre los argumentos
+declarados en f y los argumentos del call de f.
 
 
 

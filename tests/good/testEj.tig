@@ -1,6 +1,6 @@
 let
   function f (n : int) : int =
-    (1 > 0; if n > 11 then n+78 else n-78)
+    (if n > 11 then n+78 else n-78)
 in
   f(10+500)
 end

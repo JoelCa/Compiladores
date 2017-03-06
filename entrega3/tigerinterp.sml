@@ -315,10 +315,10 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 	    let
 		(* Encontrar la función*)
 		val ffrac = List.filter (fn (body, frame) => tigerframe.name(frame)=f) funfracs
-                fun imprimeDG [] = ""
+                (*fun imprimeDG [] = ""
                   | imprimeDG ((b,frame)::xs) =
                     (imprimeDG xs) ^ "\n" ^ tigerframe.name(frame)
-                (* val _ = print(imprimeDG funfracs) *)
+                 val _ = print(imprimeDG funfracs)*) 
 		val _ = if (List.length(ffrac)<>1) then raise Fail ("No se encuentra la función, o repetida: "^f^"\n"^Int.toString(List.length(ffrac))^"") else ()
                 val [(body, frame)] = ffrac
 		(* Mostrar qué se está haciendo, si showdebug *)
