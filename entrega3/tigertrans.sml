@@ -7,7 +7,7 @@ open tigerabs
 
 exception breakexc
 exception divCero
-	  
+    
 type level = {parent: frame option , frame: frame, level: int} (*parent, es el frame de la función que la anida*)
 type access = tigerframe.access
 
@@ -35,7 +35,7 @@ fun allocLocal{parent, frame, level} b = tigerframe.allocLocal frame b
 fun formals{parent, frame, level} = tigerframe.formals frame
 
 datatype exp =
-	 Ex of tigertree.exp
+   Ex of tigertree.exp
        | Nx of tigertree.stm
        | Cx of label * label -> tigertree.stm
 
@@ -47,50 +47,47 @@ fun unEx (Ex e) = e
   | unEx (Nx s) = ESEQ(s, CONST 0)
   | unEx (Cx cf) =
     let
-	val r = newtemp()
-	val t = newlabel()
-	val f = newlabel()
+      val r = newtemp()
+      val t = newlabel()
+      val f = newlabel()
     in
-	ESEQ(seq [MOVE(TEMP r, CONST 1),
-		  cf (t, f),
-		  LABEL f,
-		  MOVE(TEMP r, CONST 0),
-		  LABEL t],       
-	     TEMP r)
+      ESEQ(seq [MOVE(TEMP r, CONST 1),
+               cf (t, f),
+               LABEL f,
+               MOVE(TEMP r, CONST 0),
+               LABEL t],       
+           TEMP r)
     end
 
 fun unNx (Ex e) = EXP e
   | unNx (Nx s) = s
   | unNx (Cx cf) =
     let
-	val t = newlabel()
-	val f = newlabel()
+      val t = newlabel()
+      val f = newlabel()
     in
-	seq [cf(t,f),
-	     LABEL t,
-	     LABEL f]
+      seq [cf(t,f),
+      LABEL t,
+      LABEL f]
     end
 
 fun unCx (Nx s) = raise Fail ("Error (UnCx(Nx..))")
   | unCx (Cx cf) = cf
-  | unCx (Ex (CONST 0)) =
-    (fn (t,f) => JUMP(NAME f, [f]))
-  | unCx (Ex (CONST _)) =
-    (fn (t,f) => JUMP(NAME t, [t]))
-  | unCx (Ex e) =
-    (fn (t,f) => CJUMP(NE, e, CONST 0, t, f))
+  | unCx (Ex (CONST 0)) = (fn (t,f) => JUMP(NAME f, [f]))
+  | unCx (Ex (CONST _)) = (fn (t,f) => JUMP(NAME t, [t]))
+  | unCx (Ex e) = (fn (t,f) => CJUMP(NE, e, CONST 0, t, f))
 
 fun Ir(e) =
-    let	fun aux(Ex e) = tigerit.tree(EXP e)
-	  | aux(Nx s) = tigerit.tree(s)
-	  | aux _ = raise Fail "bueno, a completar!"
-	fun aux2(PROC{body, frame}) = aux(Nx body)
-	  | aux2(STRING(l, "")) = l^":\n"
-	  | aux2(STRING("", s)) = "\t"^s^"\n"
-	  | aux2(STRING(l, s)) = l^":\t"^s^"\n"
-	fun aux3 [] = ""
-	  | aux3(h::t) = (aux2 h)^(aux3 t)
-    in	aux3 e end
+    let fun aux(Ex e) = tigerit.tree(EXP e)
+    | aux(Nx s) = tigerit.tree(s)
+    | aux _ = raise Fail "bueno, a completar!"
+  fun aux2(PROC{body, frame}) = aux(Nx body)
+    | aux2(STRING(l, "")) = l^":\n"
+    | aux2(STRING("", s)) = "\t"^s^"\n"
+    | aux2(STRING(l, s)) = l^":\t"^s^"\n"
+  fun aux3 [] = ""
+    | aux3(h::t) = (aux2 h)^(aux3 t)
+    in  aux3 e end
 
 fun nombreFrame frame = print(".globl " ^ tigerframe.name frame ^ "\n")
 
@@ -117,49 +114,50 @@ val pushSalida = tigerpila.pushPila salidas
 fun popSalida() = tigerpila.popPila salidas
 
 fun topSalida() =
-    case tigerpila.topPila salidas of
-	SOME l => l
-      | NONE => raise Fail "break incorrecto!"			
+  case tigerpila.topPila salidas of
+    SOME l => l
+  | NONE => raise Fail "break incorrecto!"      
 end
 
 val datosGlobs = ref ([]: frag list)
 
 fun procEntryExit{level: level, body} =
-    let	val label = STRING(name(#frame level), "")
-	val body' = PROC{frame= #frame level, body=unNx body}
-	val final = STRING(";;-------", "")
-    in	datosGlobs:=(!datosGlobs@[label, body', final]) end
+    let val label = STRING(name(#frame level), "")
+        val body' = PROC{frame= #frame level, body=unNx body}
+        val final = STRING(";;-------", "")
+    in  datosGlobs:=(!datosGlobs@[label, body', final])
+    end
 
 fun getResult() = !datosGlobs
 
 fun stringLen s =
-    let	fun aux [] = 0
-	  | aux (#"\\":: #"x"::_::_::t) = 1+aux(t)
-	  | aux (_::t) = 1+aux(t)
-    in	aux(explode s) end
+    let fun aux [] = 0
+    | aux (#"\\":: #"x"::_::_::t) = 1+aux(t)
+    | aux (_::t) = 1+aux(t)
+    in  aux(explode s) end
 
 (* Equivale a  *)
 (* STRINGlabel: *)
 (*     .long 4 *)
 (*     .string "hola" *)
 fun stringExp(s: string) =
-    let	val l = newlabel()
-	val len = ".long "^makestring(stringLen s)
-	val str = ".string \""^s^"\""
-	val _ = datosGlobs:=(!datosGlobs @ [STRING(l, len), STRING("", str)])
-    in	Ex(NAME l) end
+    let val l = newlabel()
+  val len = ".long "^makestring(stringLen s)
+  val str = ".string \""^s^"\""
+  val _ = datosGlobs:=(!datosGlobs @ [STRING(l, len), STRING("", str)])
+    in  Ex(NAME l) end
 
 fun preFunctionDec() =
     (pushSalida(NONE);
      actualLevel := getActualLev()+1)
 
 fun functionDec(e, l, proc) =
-    let	val body =
-	    if proc then unNx e
-	    else MOVE(TEMP rv, unEx e)
-	val body' = procEntryExit1(#frame l, body)
-	val () = procEntryExit{body=Nx body', level=l}
-    in	Ex(CONST 0) end
+    let val body =
+      if proc then unNx e
+      else MOVE(TEMP rv, unEx e)
+  val body' = procEntryExit1(#frame l, body)
+  val () = procEntryExit{body=Nx body', level=l}
+    in  Ex(CONST 0) end
 
 fun postFunctionDec() =
     (popSalida(); actualLevel := getActualLev()-1)
@@ -184,10 +182,10 @@ fun simpleVar(acc, nivel) =
 
 fun assignExp{var, exp} =
     let
-	val v = unEx var
-	val vl = unEx exp
+  val v = unEx var
+  val vl = unEx exp
     in
-	Nx (MOVE(v,vl))
+  Nx (MOVE(v,vl))
     end
                       
 (* Antes estaba así: simpleVar(acc, getActualLev()) *)
@@ -198,13 +196,13 @@ la posición del miembro, dado por el TRecord correspondiente *)
 fun fieldVar(var, field) =
     (* NOSOTROS *) 
     let
-	val a = unEx var
-	val ra = newtemp()
+  val a = unEx var
+  val ra = newtemp()
     in
-	Ex( ESEQ(seq[MOVE(TEMP ra, a),
+  Ex( ESEQ(seq[MOVE(TEMP ra, a),
                      EXP(externalCall("_checkNil", [TEMP ra]))  (*no retorna nada *)
                     ],
-		 MEM(BINOP(PLUS, TEMP ra, BINOP(LSHIFT, CONST field, CONST tigerframe.log2WSz)))
+     MEM(BINOP(PLUS, TEMP ra, BINOP(LSHIFT, CONST field, CONST tigerframe.log2WSz)))
                 )
           )
     end
@@ -215,14 +213,14 @@ fun subscriptVar(arr, ind) =
 (*NOSOTROS*)
 (*Originalmente usaba: "_checkindex"*)
     let
-	val a = unEx arr
-	val i = unEx ind
-	val ra = newtemp()
-	val ri = newtemp()
+  val a = unEx arr
+  val i = unEx ind
+  val ra = newtemp()
+  val ri = newtemp()
     in
-	Ex( ESEQ(seq[MOVE(TEMP ra, a),
-		     MOVE(TEMP ri, i),
-		     EXP(externalCall("_checkIndexArray", [TEMP ra, TEMP ri])) (* no retorna nada *)
+  Ex( ESEQ(seq[MOVE(TEMP ra, a),
+         MOVE(TEMP ri, i),
+         EXP(externalCall("_checkIndexArray", [TEMP ra, TEMP ri])) (* no retorna nada *)
                     ],
                  MEM( BINOP(PLUS, TEMP ra,
                             case i of
@@ -262,10 +260,10 @@ fun arrayExp{size, init} =
 (* NOSOTROS *)
 (*Originalmente usaba: "allocArray"*)
     let
-	val s = unEx size
-	val i = unEx init
+  val s = unEx size
+  val i = unEx init
     in
-	Ex (externalCall("_initArray", [s, i])) (*retornaría el inicio del arreglo: i. En la posición i-1
+  Ex (externalCall("_initArray", [s, i])) (*retornaría el inicio del arreglo: i. En la posición i-1
                                                  se encuentra el tamaño que fue reservado*)
     end
 
@@ -317,16 +315,16 @@ fun breakExp() =
 fun seqExp ([]:exp list) = Nx (EXP(CONST 0))
   | seqExp (exps:exp list) =
     let
-	fun unx [e] = []
-	  | unx (s::ss) = (unNx s)::(unx ss)
-	  | unx [] = []
+  fun unx [e] = []
+    | unx (s::ss) = (unNx s)::(unx ss)
+    | unx [] = []
     in
-	case List.last exps of
-	    Nx s =>
-	    let val unexps = map unNx exps
-	    in Nx (seq unexps) end
-	  | Ex e => Ex (ESEQ(seq(unx exps), e))
-	  | cond => Ex (ESEQ(seq(unx exps), unEx cond))
+  case List.last exps of
+      Nx s =>
+      let val unexps = map unNx exps
+      in Nx (seq unexps) end
+    | Ex e => Ex (ESEQ(seq(unx exps), e))
+    | cond => Ex (ESEQ(seq(unx exps), unEx cond))
     end
 
 fun preWhileForExp() = pushSalida(SOME(newlabel()))
@@ -388,16 +386,16 @@ fun forExp {lo, hi, var, body} =
 fun whileExp {test: exp, body: exp, lev:level} =
     (* NOSOTROS *)
     let
-	val cf = unCx test
-	val expb = unNx body
-	val (l1, l2, l3) = (newlabel(), newlabel(), topSalida())
+  val cf = unCx test
+  val expb = unNx body
+  val (l1, l2, l3) = (newlabel(), newlabel(), topSalida())
     in
-	Nx (seq[LABEL l1,
-		cf(l2,l3),
-		LABEL l2,
-		expb,
-		JUMP(NAME l1, [l1]),
-		LABEL l3])
+  Nx (seq[LABEL l1,
+    cf(l2,l3),
+    LABEL l2,
+    expb,
+    JUMP(NAME l1, [l1]),
+    LABEL l3])
     end
 
 fun ifThenExp{test, then'} =
@@ -421,7 +419,7 @@ fun ifThenElseExp {test,then',else'} =
     in
         Ex (ESEQ (seq [e1 (t, f),
                        LABEL t,
-	               MOVE(TEMP r, e2),
+                 MOVE(TEMP r, e2),
                        JUMP (NAME e,[e]),
                        LABEL f,
                        MOVE(TEMP r, e3),
