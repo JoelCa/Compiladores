@@ -27,9 +27,9 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 		    SOME v => !v
 		  | NONE => (tab := tabInserta(a, ref 0, !tab); 0)
 	    fun store tab a x =
-		case tabBusca(a, !tab) of
-		    SOME v => v := x
-		  | NONE => tab := tabInserta(a, ref x, !tab)
+				case tabBusca(a, !tab) of
+		    	SOME v => v := x
+		  	| NONE => tab := tabInserta(a, ref x, !tab)
 	in
 	val loadMem = load tabMem
 	val storeMem = store tabMem
@@ -315,10 +315,10 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 	    let
 		(* Encontrar la función*)
 		val ffrac = List.filter (fn (body, frame) => tigerframe.name(frame)=f) funfracs
-                (*fun imprimeDG [] = ""
+                fun imprimeDG [] = ""
                   | imprimeDG ((b,frame)::xs) =
                     (imprimeDG xs) ^ "\n" ^ tigerframe.name(frame)
-                 val _ = print(imprimeDG funfracs)*) 
+                 val _ = print(imprimeDG funfracs)
 		val _ = if (List.length(ffrac)<>1) then raise Fail ("No se encuentra la función, o repetida: "^f^"\n"^Int.toString(List.length(ffrac))^"") else ()
                 val [(body, frame)] = ffrac
 		(* Mostrar qué se está haciendo, si showdebug *)
@@ -353,13 +353,12 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 		(* Mover fp lo suficiente *)
 		val fpPrev = loadTemp tigerframe.fp
 		val _ = storeTemp tigerframe.fp (fpPrev-1024*1024)
-		(* Poner argumentos donde la función los espera *)
-		val formals = map (fn x => tigerframe.exp x (TEMP tigerframe.fp)) (tigerframe.formals frame)
+		(* Poner argumentos donde la función los espera *)		val formals = map (fn x => tigerframe.exp x (TEMP tigerframe.fp)) (tigerframe.formals frame)
 		val formalsValues = ListPair.zip(formals, args)
 		val _ = map (fn (x,y) => 
 				case x of
 				    TEMP t => storeTemp t y
-				  | MEM m => storeMem (evalExp m) y) formalsValues
+				  | MEM m  => storeMem (evalExp m) y) formalsValues
 		(* Ejecutar la lista de instrucciones *)
 		val _ = execute body
 		val rv = loadTemp tigerframe.rv

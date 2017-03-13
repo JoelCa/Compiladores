@@ -67,17 +67,20 @@ El prefijo nos estorba para usar el intérprete, debido a que busca el frame por
 - En el chequeo de tipos, ¿deberiamos capturar la excepción Ciclo, y mostrar un error más detallado?.
 
 - En el código intermedio del CALL f, ¿deberíamos incluir MOVEs de los valores con los que se llama f, a los registros o
-direcciones de memoria, que genera allocArg(), en la declaración de f?
+direcciones de memoria, que genera allocArg(), en la declaración de f?. El interpete lo hace solo, si incluimos la función "formals" y hacemos MOVEs en el preambulo de la función, en procEntryExit1.
+¿Qué pasa cuando no esté el intérprete?. ¿El trabajo lo hace la instrucción CALL de ARM?.
 
+- ¿Como es la estructura del frame de ARM Cortex-A8?. ¿Utilizamos un registro especial para el static link, o lo mantenemos en memoria?.
+
+- En ARM, ¿La dirección de retorno se guarda en el registro lr?.
+
+- ¿Esta bien mantener dos levels donde el nombre del frame sea "_tigermain", en la pila de levels (uno viene por defecto, al crear la pila)?.
+
+- ¿Podemos definir en tiger una función de nombre "_tigermain"?.
 ---------------------------------------------------------------------------------
 
 LO ULTIMO:
-Copiamos la función formals de felipe en tigerframe.sml. Esta función la usa tigerinterp.sml, para el mapeo entre los argumentos
-declarados en f y los argumentos del call de f.
-
-LO ULTIMO:
-Vimos que sigue sin funcionar el intérprete. A pesar de los cambios en tigerframe.sml.
-
+No funciona el interprete si agregamos prefijos a los nombres de los frames. Analizar el caso de trdec con FunctionDec. Ver por qué aparece NAME "f", y NO "L0_f".
 
 
 

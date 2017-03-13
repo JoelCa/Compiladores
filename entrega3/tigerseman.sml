@@ -420,8 +420,8 @@ fun transExp(venv, tenv) =
                 fun genEnvEntry ({name = s, params = ps, result = NONE, body = exp}, pos) =
                     let val fmlPairs = map genTipo ps   
                         val fmls = map (#2) fmlPairs
-                        (* IMPORTANTE!. El campo name de level antes estaba: "name = tigertemp.newlabel()^s" *)
-                        val level = newLevel{parent=topLevel(), name = s, formals = map (#3) fmlPairs}
+                        val newName = if s = "_tigermain" then s else tigertemp.newlabel()^"_"^s
+                        val level = newLevel{parent=topLevel(), name = newName, formals = map (#3) fmlPairs}
                         val f = Func {level = level, label = s, formals = fmls, result = TUnit, extern = false}
                     in
                         ((s,f),(fmlPairs,NONE))
@@ -433,8 +433,8 @@ fun transExp(venv, tenv) =
                                        | SOME t => t)
                         val fmlPairs = map genTipo ps
                         val fmls = map (#2) fmlPairs
-                        (* IMPORTANTE!. El campo name de level antes estaba: "name = tigertemp.newlabel()^s" *)
-                        val level = newLevel{parent=topLevel(), name = s, formals = map (#3) fmlPairs}
+                        val newName = if s = "_tigermain" then s else tigertemp.newlabel()^"_"^s
+                        val level = newLevel{parent=topLevel(), name = newName, formals = map (#3) fmlPairs}
                         val f = Func {level = level, label = s, formals = fmls, result = ttipo, extern = false}
                     in
                         ((s,f),(fmlPairs,SOME ttipo))
