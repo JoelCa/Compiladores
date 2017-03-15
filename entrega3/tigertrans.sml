@@ -233,11 +233,11 @@ fun subscriptVar(arr, ind) =
     end
 
 (* l: es una lista de tuplas (code, i), donde "code" es el cod. intermedio del
-miembro en la posición i, del record*)
+miembro en la posición i, del record *)
 (* Obs: Se guarda en memória el resultado que se le quiere asignar a cada miembro, con el
 orden dado por los indices del TRecord correspondiente *)
 (* Duda: se estaría reservando espacio de mem., cada vez que se le asigna un nuevo valor
-a un miembro del record? No. Cuando se tiene un recordExp, se define un nuevo record.*)
+a un miembro del record? No. Cuando se tiene un recordExp, se define un nuevo record. *)
 fun recordExp l =
     (* NOSOTROS *)
     let val ret = newtemp()

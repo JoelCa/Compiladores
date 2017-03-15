@@ -8,8 +8,8 @@ let
   type tree ={key : int, children : treelist}
   type treelist = {hd : tree, tl : treelist}
 
-  var lis : intlist := intlist { hd = 45698, tl = nil }
+  var lis : intlist := intlist { tl = intlist { hd = 888, tl = nil}, hd = 4568766 }
 
 in
-  lis; 0
+  lis.tl.hd
 end
