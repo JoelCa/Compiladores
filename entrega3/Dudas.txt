@@ -79,6 +79,8 @@ direcciones de memoria, que genera allocArg(), en la declaración de f?. El inte
 - ¿Podemos definir en tiger una función de nombre "_tigermain"?.
 
 - A nosotros no nos importa el orden con el cual se declaran los miembros de un record, está bien?. Según la pág. 518 del libro, SI importa.
+
+- ¿Por qué es necesario guardar en un registro el valor de retorno (RV) luego del CALL? Ésto lo vimos del código de Felipe.
 ---------------------------------------------------------------------------------
 
 LO ULTIMO:

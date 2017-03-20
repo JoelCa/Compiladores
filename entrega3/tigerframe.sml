@@ -117,11 +117,11 @@ fun allocArg (f: frame) b =
 
 
 fun allocLocal (f: frame) b =
-    case b of
-  true =>
-  let val ret = InFrame(localsGap + (!(#actualLocal f)*wSz))
-  in  #actualLocal f:=(!(#actualLocal f)-1); ret end
-      | false => InReg(tigertemp.newtemp())
+  case b of
+    true =>
+      let val ret = InFrame(localsGap + (!(#actualLocal f)*wSz))
+      in  #actualLocal f:=(!(#actualLocal f)-1); ret end
+  | false => InReg(tigertemp.newtemp())
 
 
 (* fun allocLocal (f:frame) b = *)

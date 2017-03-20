@@ -16,46 +16,46 @@ open Dynarray
 open tigertree
 
 fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (tigertemp.label*string) list) =
-    let
+  let
 	(* Memoria y registros *)
 	local
-	    val tabTemps: (tigertemp.temp, int ref) Tabla ref = ref (tabNueva())
-	    val tabMem: (int, int ref) Tabla ref = ref (tabNueva())
+    val tabTemps: (tigertemp.temp, int ref) Tabla ref = ref (tabNueva())
+    val tabMem: (int, int ref) Tabla ref = ref (tabNueva())
 
-	    fun load tab a =
-		case tabBusca(a, !tab) of
+    fun load tab a =
+			case tabBusca(a, !tab) of
 		    SOME v => !v
 		  | NONE => (tab := tabInserta(a, ref 0, !tab); 0)
-	    fun store tab a x =
-				case tabBusca(a, !tab) of
-		    	SOME v => v := x
-		  	| NONE => tab := tabInserta(a, ref x, !tab)
+    fun store tab a x =
+			case tabBusca(a, !tab) of
+	    	SOME v => v := x
+	  	| NONE => tab := tabInserta(a, ref x, !tab)
 	in
-	val loadMem = load tabMem
-	val storeMem = store tabMem
-	fun printMem () =
-	    let
-		val ls = tabAList(!tabMem)
-		fun p (a,b) = (print(Int.toString(a)); print(" -> "); print(Int.toString(!b)); print("\n"))
-	    in
-		(print("MEM:\n"); List.app p ls)
-	    end
-	val loadTemp = load tabTemps
-	val storeTemp = store tabTemps
-	fun getTemps () = 
-	    let
-		val tabL = tabAList(!tabTemps)
-	    in
-		map (fn (x,y) => (x, !y)) tabL
-	    end
-	fun restoreTemps temps = map (fn (x,y) => storeTemp x y) temps
-	fun printTemps () =
-	    let
-		val ls = tabAList(!tabTemps)
-		fun p (a,b) = (print(a); print(" -> "); print(Int.toString(!b)); print("\n"))
-	    in
-		(print("TEMPS:\n"); List.app p ls)
-	    end
+		val loadMem = load tabMem
+		val storeMem = store tabMem
+		fun printMem () =
+		  let
+				val ls = tabAList(!tabMem)
+				fun p (a,b) = (print(Int.toString(a)); print(" -> "); print(Int.toString(!b)); print("\n"))
+		  in
+				(print("MEM:\n"); List.app p ls)
+		  end
+		val loadTemp = load tabTemps
+		val storeTemp = store tabTemps
+		fun getTemps () = 
+		  let
+				val tabL = tabAList(!tabTemps)
+		  in
+				map (fn (x,y) => (x, !y)) tabL
+		  end
+		fun restoreTemps temps = map (fn (x,y) => storeTemp x y) temps
+		fun printTemps () =
+		  let
+				val ls = tabAList(!tabTemps)
+				fun p (a,b) = (print(a); print(" -> "); print(Int.toString(!b)); print("\n"))
+		  in
+				(print("TEMPS:\n"); List.app p ls)
+  		end
 	end
 
 	(* alocación de memoria *)
@@ -72,60 +72,69 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 
 	(* tabla de labels -> direcciones *)
 	local
-	    val tabLabels: (tigertemp.label, int) Tabla ref = ref (tabNueva())
+    val tabLabels: (tigertemp.label, int) Tabla ref = ref (tabNueva())
 	in
-	fun loadLabel lab = case tabBusca(lab, !tabLabels) of
-				SOME a => a
-			      | NONE => raise Fail("Label no encontrado: "^lab^"\n")
-	fun storeLabel lab addr = tabLabels := tabInserta(lab, addr, !tabLabels)
+		fun loadLabel lab = case tabBusca(lab, !tabLabels) of
+					SOME a => a
+				      | NONE => raise Fail("Label no encontrado: "^lab^"\n")
+		fun storeLabel lab addr = tabLabels := tabInserta(lab, addr, !tabLabels)
 	end
 
 	(* Guardado de strings *)
 	local
-	    val stringArray = array(10, "")
-	    val next = ref 0;
+    val stringArray = array(10, "")
+    val next = ref 0;
 	in
-	fun loadString addr = sub(stringArray, loadMem addr)
-	fun storeString str =
+		fun loadString addr = sub(stringArray, loadMem addr)
+		fun storeString str =
 	    let
-		val addr = getNewMem(1)
-		val idx = !next;
-		val _ = next := !next + 1;
+				val addr = getNewMem(1)
+				val idx = !next;
+				val _ = next := !next + 1;
 	    in
-		(update(stringArray, idx, str); storeMem addr idx; addr)
+				(update(stringArray, idx, str); storeMem addr idx; addr)
 	    end
+	  fun printStringN 10 = print ("\n")
+	  	| printStringN i  =
+	  		let 
+	  			val x = sub(stringArray, i)
+	  		in if x = ""
+  				 then ()
+  				 else (print x; print ("\n"); printStringN (i+1))
+	  		end
+	  fun printStrings () = (print("STRINGS:\n"); printStringN 0)
 	end
 	val _ = List.map (fn (lab, str) => storeLabel lab (storeString str)) stringfracs
 
 	(* Funciones de biblioteca *)
 	fun initArray(siz::init::rest) =
-	    let
-		val mem = getNewMem(siz)
-		val l = (mem+1, siz)::(List.tabulate(siz, (fn x => (mem+tigerframe.wSz*x, init))))
-		val _ = List.map (fn (a,v) => storeMem a v) l
-	    in
-		mem
-	    end
-	  | initArray _ = raise Fail("No debería pasar (initArray)")
+    let
+			val mem = getNewMem(siz+1)
+			val l = (mem, siz)::(List.tabulate(siz, (fn x => (mem+tigerframe.wSz*(x+1), init))))
+			val _ = List.map (fn (a,v) => storeMem a v) l
+    in
+			mem+tigerframe.wSz
+    end
+  	| initArray _ = raise Fail("No debería pasar (initArray)")
 
 	fun checkIndexArray(arr::idx::rest) =
-	    let
-		val siz = loadMem (arr+1)
-		val _ = if (idx>=siz orelse idx<0) then raise Fail("Índice fuara de rango\n") else ()
-	    in
-		0
-	    end
+    let
+			val siz = loadMem (arr - tigerframe.wSz)
+			val _ = if (idx>=siz orelse idx<0) then raise Fail("Índice fuara de rango\n") else ()
+    in
+			0
+    end
 	  | checkIndexArray _ = raise Fail("No debería pasar (checkIndexArray)")
 		                      
 	fun allocRecord(ctos::vals) =
-	    let
-		val mem = getNewMem(ctos)
-		val addrs = List.tabulate(ctos, (fn x => mem + x*tigerframe.wSz))
-		val l = ListPair.zip(addrs, vals)
-		val _ = List.map (fn (a,v) => storeMem a v) l
-	    in
-		mem
-	    end
+    let
+			val mem = getNewMem(ctos)
+			val addrs = List.tabulate(ctos, (fn x => mem + x*tigerframe.wSz))
+			val l = ListPair.zip(addrs, vals)
+			val _ = List.map (fn (a,v) => storeMem a v) l
+    in
+			mem
+    end
 	  | allocRecord _ = raise Fail("No debería pasar (allocRecord)")
 		                  
 	fun checkNil(r::rest) =
@@ -225,7 +234,7 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 			  ("_checkIndexArray", checkIndexArray),
 			  ("_allocRecord", allocRecord),
 			  ("_checkNil", checkNil),
-			  ("_stringcmp", stringCompare),
+			  ("_stringCompare", stringCompare),
 			  ("print", printFun),
 			  ("flush", flushFun),
 			  ("ord", ordFun),
@@ -330,7 +339,7 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 			fun exe [] = ()
 			  | exe (x::xs) =
 			    let
-				val _ = if showdebug then (printTemps(); printMem(); print("****************\n"); print(tigerit.tree(x)); print("****************\n")) else ()
+				val _ = if showdebug then (printStrings(); printTemps(); printMem(); print("****************\n"); print(tigerit.tree(x)); print("****************\n")) else ()
 			    in
 				case evalStm x of
 				    SOME lab =>
