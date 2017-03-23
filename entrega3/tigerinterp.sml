@@ -106,6 +106,36 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 	end
 	val _ = List.map (fn (lab, str) => storeLabel lab (storeString str)) stringfracs
 
+	(* Extrae la string entre comillas apuntado por el label *)
+	(* Tomado de compilador de Postan, Giustozzi, Del Piano *)
+  fun getRealString(strPtr:int):string =
+    let
+      val str = explode (loadString strPtr)
+      val (str2,delFuente) = case str of
+                               #"."::( #"l"::( #"o"::( #"n"::( #"g"::_)))) => (explode (loadString (strPtr + tigerframe.wSz)),true)
+                             | _ => (str,false)
+      (* format1 lleva los \x0a y \x09 a \n y \t respectivamente*)
+      fun format1 [] = []
+      | format1 (#"\\"::(#"x"::(#"0"::(#"a"::xs)))) = #"\n"::format1 xs
+      | format1 (#"\\"::(#"x"::(#"0"::(#"9"::xs)))) = #"\t"::format1 xs
+      | format1 (x::xs) = x::format1 xs
+      
+      (*front quita la comilla al final de un string del fuente*)
+      fun front [] = raise Fail "front en []"
+      | front [x] = []
+      | front (x::xs) = x :: front xs
+
+      (*ripFront quita el .string '' del inicio de un string del fuente*)
+      fun ripFront xs = List.drop(xs, 9)
+
+      val finalStr = if delFuente 
+                     then (front o ripFront o format1) str2
+                     else str2
+    in
+		  implode finalStr
+    end
+
+
 	(* Funciones de biblioteca *)
 	fun initArray(siz::init::rest) =
     let
@@ -138,112 +168,112 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 	  | allocRecord _ = raise Fail("No debería pasar (allocRecord)")
 		                  
 	fun checkNil(r::rest) =
-	    let
-		val _ = if (r=0) then raise Fail("Nil\n") else ()
-	    in
-		0
-	    end
+	  let
+			val _ = if (r=0) then raise Fail("Nil\n") else ()
+	  in
+			0
+	  end
 	  | checkNil _ = raise Fail("No debería pasar (checkNil)")
 
 	fun stringCompare(strPtr1::strPtr2::rest) =
-	    let
-		val str1 = loadString strPtr1
-		val str2 = loadString strPtr2
-		val res = String.compare(str1, str2)
-	    in
-		case res of
+	  let
+			val str1 = getRealString strPtr1
+			val str2 = getRealString strPtr2
+			val res = String.compare(str1, str2)
+	  in
+			case res of
 		    LESS => ~1
 		  | EQUAL => 0
 		  | GREATER => 1
-	    end
+	  end
 	  | stringCompare _ = raise Fail("No debería pasar (stringCompare)")
 
 	fun printFun(strPtr::rest) =
-	    let
-		val str = loadString strPtr
-		val _ = print(str)
-	    in
-		0
-	    end
+	  let
+			val str = getRealString strPtr
+			val _ = print(str)
+	  in
+			0
+	  end
 	  | printFun _ = raise Fail("No debería pasar (printFun)")
 
 	fun flushFun(args) = 0
 
 	fun ordFun(strPtr::rest) =
-	    let
-		val str = loadString strPtr
-		val ch = hd(explode(str))
-	    in
-		ord(ch)
-	    end
+    let
+		  val str = getRealString strPtr
+		  val ch = hd(explode(str))
+    in
+		  ord(ch)
+    end
 	  | ordFun _ = raise Fail("No debería pasar (ordFun)")
 
 	fun chrFun(i::rest) =
-	    let
-		val ch = chr(i)
-		val str = implode([ch])
-	    in
-		storeString str
-	    end
+    let
+		  val ch = chr(i)
+		  val str = implode([ch])
+    in
+		  storeString str
+    end
 	  | chrFun _ = raise Fail("No debería pasar (chrFun)")
 
 	fun sizeFun(strPtr::rest) =
-	    let
-		val str = loadString strPtr
-	    in
-		String.size(str)
-	    end
+	 	let
+			val str = getRealString strPtr
+	  in
+			String.size(str)
+	  end
 	  | sizeFun _ = raise Fail("No debería pasar (sizeFun)")
 
 	fun substringFun(strPtr::first::n::rest) =
-	    let
-		val str = loadString strPtr
-		val substr = String.substring(str, first, n)
-	    in
-		storeString substr
-	    end
+	  let
+			val str = getRealString strPtr
+			val substr = String.substring(str, first, n)
+	  in
+			storeString substr
+	  end
 	  | substringFun _ = raise Fail("No debería pasar (substringFun)")
 
 	fun concatFun(strPtr1::strPtr2::rest) =
-	    let
-		val str1 = loadString strPtr1
-		val str2 = loadString strPtr2
-		val res = str1^str2
-	    in
-		storeString res
-	    end
+	  let
+			val str1 = getRealString strPtr1
+			val str2 = getRealString strPtr2
+			val res = str1^str2
+	  in
+			storeString res
+	  end
 	  | concatFun _ = raise Fail("No debería pasar (concatFun)")
 
 	fun notFun(v::rest) =
-	    if (v=0) then 1 else 0
-	  | notFun _ = raise Fail("No debería pasar (notFun)")
+	  if (v=0) then 1 else 0
+	 	| notFun _ = raise Fail("No debería pasar (notFun)")
 
 	fun getstrFun(args) = 
-	    let
-		val str = TextIO.inputLine TextIO.stdIn (* Tiene tipo "string option". NO debería tenerlo. *)
-                val strP = case str of
+	 	let
+			val str = TextIO.inputLine TextIO.stdIn (* Tiene tipo "string option". NO debería tenerlo. *)
+      val strP = case str of
 		               SOME t => t
 		             | NONE => ""
-            in
-		storeString strP
-	    end
+    in
+		  storeString strP
+	  end
 
 	val tabLib: (tigertemp.label, int list -> int) Tabla =
-	    tabInserList(tabNueva(),
-			 [("_initArray", initArray),
-			  ("_checkIndexArray", checkIndexArray),
-			  ("_allocRecord", allocRecord),
-			  ("_checkNil", checkNil),
-			  ("_stringCompare", stringCompare),
-			  ("print", printFun),
-			  ("flush", flushFun),
-			  ("ord", ordFun),
-			  ("chr", chrFun),
-			  ("size", sizeFun),
-			  ("substring", substringFun),
-			  ("concat", concatFun),
-			  ("not", notFun),
-			  ("getstr", getstrFun)])
+      tabInserList(tabNueva(),
+      [("_initArray", initArray),
+       ("_checkIndexArray", checkIndexArray),
+       ("_allocRecord", allocRecord),
+       ("_checkNil", checkNil),
+       ("_stringCompare", stringCompare),
+       ("print", printFun),
+       ("flush", flushFun),
+       ("ord", ordFun),
+       ("chr", chrFun),
+       ("size", sizeFun),
+       ("substring", substringFun),
+       ("concat", concatFun),
+       ("not", notFun),
+       ("getstr", getstrFun)])
 
 	(* Evalúa una expresión, devuelve el valor (entero) *)
 	fun evalExp(CONST t) = t

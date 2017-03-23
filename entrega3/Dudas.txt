@@ -46,7 +46,7 @@ Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests
 
 ----- Para preguntar en clase ------
 
-- ¿Cómo se usa el intérprete que está en tigerinterp.sml?. Preguntado.
+- ¿Cómo se usa el intérprete que está en tigerinterp.sml?. Resuelto.
 
 - Una vez terminado el maximal munch ¿Cuáles son los pasos a seguir?. Preguntado.
 
@@ -62,13 +62,14 @@ Dudas 2017
 
 - En la variable "datosGlobs", cuando se agrega el PROC de una función f, asociamos como frame de f, 
 el frame que viene del level, el cual se crea con el nombre de f más un prefijo formado por una string obtenida de tigertemp.newLabel(). ¿Está bien?.
-El prefijo nos estorba para usar el intérprete, debido a que busca el frame por el nombre de las funciones sin tener en cuenta el prefijo ¿como lo solucionamos, si mantenemos este prefijo?.
+El prefijo nos estorba para usar el intérprete, debido a que busca el frame por el nombre de las funciones sin tener en cuenta el prefijo ¿como lo solucionamos, si mantenemos este prefijo?. Resuelto.
 
 - En el chequeo de tipos, ¿deberiamos capturar la excepción Ciclo, y mostrar un error más detallado?.
 
 - En el código intermedio del CALL f, ¿deberíamos incluir MOVEs de los valores con los que se llama f, a los registros o
 direcciones de memoria, que genera allocArg(), en la declaración de f?. El interpete lo hace solo, si incluimos la función "formals" y hacemos MOVEs en el preambulo de la función, en procEntryExit1.
-¿Qué pasa cuando no esté el intérprete?. ¿El trabajo lo hace la instrucción CALL de ARM?.
+
+- ¿Qué pasa cuando no esté el intérprete?. ¿El trabajo lo hace la instrucción CALL de ARM?.
 
 - ¿Como es la estructura del frame de ARM Cortex-A8?. ¿Utilizamos un registro especial para el static link, o lo mantenemos en memoria?.
 
@@ -84,8 +85,11 @@ direcciones de memoria, que genera allocArg(), en la declaración de f?. El inte
 ---------------------------------------------------------------------------------
 
 LO ULTIMO:
-Funciona el intérprete agregandole el prefijo a los labels de funciones. Seguir probando ejemplos.
-Chequear que el código intermedio generado por las instrucciones respeta el frame de ARM.
+Funciona el intérprete agregandole el prefijo a los labels de funciones.
+Modificamos el interprete para que respete el allocArray de C.
+Arreglado el almacenamiento de strings en el interprete.
+Probar el ejemplo "merge.tig".
+Testear el array.
 Setear correctamente los registros fv, sp, etc.
 
 

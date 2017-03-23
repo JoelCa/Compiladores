@@ -53,7 +53,7 @@ fun main(args) =
                 (* val functionInstrCode = map (fn (s,f) => tigercodegen.maximalMunch f s) stmCanonList *)
 		val _ = if ir then print(tigertrans.Ir(fragmentos)) else ()
                 (* val _ = if code then map (map (print o (tigerassem.format (fn a => "")))) functionInstrCode else [[()]] *)
-    val _ = if inter then tigerinterp.inter true stmCanonList strings else ()
+    val _ = if inter then tigerinterp.inter false stmCanonList strings else ()
 	in
 		print "yes!!\n"
 	end	handle Fail s => print("Fail: "^s^"\n")

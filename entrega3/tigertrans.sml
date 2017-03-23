@@ -141,11 +141,11 @@ fun stringLen s =
 (*     .long 4 *)
 (*     .string "hola" *)
 fun stringExp(s: string) =
-    let val l = newlabel()
-  val len = ".long "^makestring(stringLen s)
-  val str = ".string \""^s^"\""
-  val _ = datosGlobs:=(!datosGlobs @ [STRING(l, len), STRING("", str)])
-    in  Ex(NAME l) end
+  let val l = newlabel()
+    val len = ".long "^makestring(stringLen s)
+    val str = ".string \""^s^"\""
+    val _ = datosGlobs:=(!datosGlobs @ [STRING(l, len), STRING("", str)])
+  in  Ex(NAME l) end
 
 fun preFunctionDec() =
     (pushSalida(NONE);
@@ -212,25 +212,25 @@ de una expresión entera, que indica la posición que se quiere indexar*)
 fun subscriptVar(arr, ind) =
 (*NOSOTROS*)
 (*Originalmente usaba: "_checkindex"*)
-    let
-  val a = unEx arr
-  val i = unEx ind
-  val ra = newtemp()
-  val ri = newtemp()
-    in
-  Ex( ESEQ(seq[MOVE(TEMP ra, a),
-         MOVE(TEMP ri, i),
-         EXP(externalCall("_checkIndexArray", [TEMP ra, TEMP ri])) (* no retorna nada *)
-                    ],
-                 MEM( BINOP(PLUS, TEMP ra,
-                            case i of
-                                CONST k => CONST (k*tigerframe.wSz)
-                              | _ => BINOP(LSHIFT, i, CONST tigerframe.log2WSz)
-                           )
-                    )
+  let
+    val a = unEx arr
+    val i = unEx ind
+    val ra = newtemp()
+    val ri = newtemp()
+  in
+    Ex( ESEQ(seq[ MOVE(TEMP ra, a),
+                  MOVE(TEMP ri, i),
+                  EXP(externalCall("_checkIndexArray", [TEMP ra, TEMP ri])) (* no retorna nada *)
+             ],
+             MEM( BINOP(PLUS, TEMP ra,
+                        case i of
+                          CONST k => CONST (k*tigerframe.wSz)
+                        | _ => BINOP(LSHIFT, i, CONST tigerframe.log2WSz)
+                       )
                 )
-          )
-    end
+            )
+      )
+  end
 
 (* l: es una lista de tuplas (code, i), donde "code" es el cod. intermedio del
 miembro en la posición i, del record *)
@@ -259,13 +259,13 @@ fun recordExp l =
 fun arrayExp{size, init} =
 (* NOSOTROS *)
 (*Originalmente usaba: "allocArray"*)
-    let
-  val s = unEx size
-  val i = unEx init
-    in
-  Ex (externalCall("_initArray", [s, i])) (*retornaría el inicio del arreglo: i. En la posición i-1
-                                                 se encuentra el tamaño que fue reservado*)
-    end
+  let
+    val s = unEx size
+    val i = unEx init
+  in
+    Ex (externalCall("_initArray", [s, i])) (*retornaría el inicio del arreglo: i. En la posición i-1
+                                              se encuentra el tamaño que fue reservado*)
+  end
 
 (* external : indica si es una func. de libreria o no (booleano). *)
 (*            Las funciónes de librerias no tienen static link *)
@@ -308,23 +308,23 @@ fun letExp ([], body) = Ex (unEx body)
 
 (*NOSOTROS*)
 fun breakExp() = 
-    let val ts = topSalida()
-    in Nx (JUMP (NAME ts, [ts]))
-    end
+  let val ts = topSalida()
+  in Nx (JUMP (NAME ts, [ts]))
+  end
 
 fun seqExp ([]:exp list) = Nx (EXP(CONST 0))
   | seqExp (exps:exp list) =
     let
-  fun unx [e] = []
-    | unx (s::ss) = (unNx s)::(unx ss)
-    | unx [] = []
+      fun unx [e] = []
+        | unx (s::ss) = (unNx s)::(unx ss)
+        | unx [] = []
     in
-  case List.last exps of
-      Nx s =>
-      let val unexps = map unNx exps
-      in Nx (seq unexps) end
-    | Ex e => Ex (ESEQ(seq(unx exps), e))
-    | cond => Ex (ESEQ(seq(unx exps), unEx cond))
+      case List.last exps of
+        Nx s =>
+          let val unexps = map unNx exps
+          in Nx (seq unexps) end
+      | Ex e => Ex (ESEQ(seq(unx exps), e))
+      | cond => Ex (ESEQ(seq(unx exps), unEx cond))
     end
 
 fun preWhileForExp() = pushSalida(SOME(newlabel()))
@@ -385,18 +385,20 @@ fun forExp {lo, hi, var, body} =
 
 fun whileExp {test: exp, body: exp, lev:level} =
     (* NOSOTROS *)
-    let
-  val cf = unCx test
-  val expb = unNx body
-  val (l1, l2, l3) = (newlabel(), newlabel(), topSalida())
-    in
-  Nx (seq[LABEL l1,
-    cf(l2,l3),
-    LABEL l2,
-    expb,
-    JUMP(NAME l1, [l1]),
-    LABEL l3])
-    end
+  let
+    val cf = unCx test
+    val expb = unNx body
+    val (l1, l2, l3) = (newlabel(), newlabel(), topSalida())
+  in
+    Nx (seq[ LABEL l1,
+             cf(l2,l3),
+             LABEL l2,
+             expb,
+             JUMP(NAME l1, [l1]),
+             LABEL l3
+            ]
+       )
+  end
 
 fun ifThenExp{test, then'} =
     (* NOSOTROS *)
@@ -404,10 +406,12 @@ fun ifThenExp{test, then'} =
         val e2 = unNx then'
         val (t,f) = (newlabel(), newlabel())
     in
-        Nx (seq [e1 (t,f),
-                 LABEL t,
-                 e2,
-                 LABEL f])
+        Nx (seq [ e1 (t,f),
+                  LABEL t,
+                  e2,
+                  LABEL f
+                ]
+           )
     end
 
 fun ifThenElseExp {test,then',else'} =
@@ -450,11 +454,11 @@ fun binOpIntExp {left, oper, right} =
         val r = unEx right
     in
         case oper of
-            PlusOp => Ex (BINOP (PLUS,l,r))
-          | MinusOp => Ex (BINOP (MINUS,l,r))
-          | TimesOp => Ex (BINOP (MUL,l,r))
+            PlusOp   => Ex (BINOP (PLUS,l,r))
+          | MinusOp  => Ex (BINOP (MINUS,l,r))
+          | TimesOp  => Ex (BINOP (MUL,l,r))
           | DivideOp => Ex (BINOP (DIV,l,r))
-          | _ => raise Fail ("Error: se esperaba operador algebraico")
+          | _        => raise Fail ("Error: se esperaba operador algebraico")
     end
 
 fun binOpIntRelExp {left,oper,right} =
@@ -463,14 +467,14 @@ fun binOpIntRelExp {left,oper,right} =
         val r = unEx right
         fun opint oper = fn (t,f) => CJUMP(oper, l, r, t, f)
     in
-        case oper of
-            EqOp => Cx (opint EQ)
-          | NeqOp => Cx (opint NE)
-          | LtOp => Cx (opint LT)
-          | LeOp => Cx (opint LE)
-          | GtOp => Cx (opint GT)
-          | GeOp => Cx (opint GE)
-          | _ => raise Fail ("Error: se esperaba operador de comparacion") 
+      case oper of
+          EqOp  => Cx (opint EQ)
+        | NeqOp => Cx (opint NE)
+        | LtOp  => Cx (opint LT)
+        | LeOp  => Cx (opint LE)
+        | GtOp  => Cx (opint GT)
+        | GeOp  => Cx (opint GE)
+        | _     => raise Fail ("Error: se esperaba operador de comparacion") 
     end
 
 fun binOpStrExp {left,oper,right} =
@@ -479,13 +483,13 @@ fun binOpStrExp {left,oper,right} =
         val r = unEx right
         fun subst oper = fn (t,f) => CJUMP(oper, ESEQ(EXP(externalCall ("_stringCompare",[l,r])), TEMP rv), CONST 0, t, f)
     in
-        case oper of
-            EqOp => Cx (subst EQ)
-          | NeqOp => Cx (subst NE)
-          | LtOp => Cx (subst LT)
-          | LeOp => Cx (subst LE)
-          | GtOp => Cx (subst GT)
-          | GeOp => Cx (subst GE)
-          | _ => raise Fail ("Error: se esperaba operador de comparación de strings") 
+      case oper of
+          EqOp  => Cx (subst EQ)
+        | NeqOp => Cx (subst NE)
+        | LtOp  => Cx (subst LT)
+        | LeOp  => Cx (subst LE)
+        | GtOp  => Cx (subst GT)
+        | GeOp  => Cx (subst GE)
+        | _     => raise Fail ("Error: se esperaba operador de comparación de strings") 
     end
 end                                      
