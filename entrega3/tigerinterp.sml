@@ -249,14 +249,14 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 	 	| notFun _ = raise Fail("No debería pasar (notFun)")
 
 	fun getstrFun(args) = 
-	 	let
-			val str = TextIO.inputLine TextIO.stdIn (* Tiene tipo "string option". NO debería tenerlo. *)
-      val strP = case str of
-		               SOME t => t
-		             | NONE => ""
-    in
-		  storeString strP
-	  end
+		let
+      val chr = TextIO.input1 TextIO.stdIn 
+      val str = case chr of
+                	NONE => raise Fail "error input NONE"
+               	| SOME c => implode [c]
+		in
+			storeString str
+		end
 
 	val tabLib: (tigertemp.label, int list -> int) Tabla =
       tabInserList(tabNueva(),

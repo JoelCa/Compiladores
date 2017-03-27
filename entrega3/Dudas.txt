@@ -85,16 +85,23 @@ direcciones de memoria, que genera allocArg(), en la declaración de f?. El inte
 ---------------------------------------------------------------------------------
 
 LO ULTIMO:
+Testear el array.
+Setear correctamente los registros fv, sp, etc.
+Probar con el move (caso 1) y sin el move (caso 2) lo siguiente:
+	let
+		function f (a:int) =
+			a+1
+		var x := f(3)
+	in
+		x * 4
+	end
+
+
+LO HECHO:
 Funciona el intérprete agregandole el prefijo a los labels de funciones.
 Modificamos el interprete para que respete el allocArray de C.
 Arreglado el almacenamiento de strings en el interprete.
-Probar el ejemplo "merge.tig".
-Testear el array.
-Setear correctamente los registros fv, sp, etc.
-
-
-
-
+Modificamos getstrFun para que tome de a un char (antes tomaba toda una línea y por esto no funcionaba el ejemplo del merge).
 
 
 
