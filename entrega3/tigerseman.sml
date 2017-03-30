@@ -189,7 +189,7 @@ fun transExp(venv, tenv) =
               in checkFields flds ((expCode,i')::r) end
           val r' = checkFields fields []
       in
-          {exp = recordExp(rev r'), ty = TRecord (tr, tn)} (* Por que hace rev r'? el orden importa? *)
+          {exp = recordExp(r'), ty = TRecord (tr, tn)} (* Por que hace rev r'? el orden importa? *)
       end
     | trexp(SeqExp(s, nl)) =
       let val lexti = map trexp s

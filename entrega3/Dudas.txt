@@ -82,26 +82,21 @@ direcciones de memoria, que genera allocArg(), en la declaración de f?. El inte
 - A nosotros no nos importa el orden con el cual se declaran los miembros de un record, está bien?. Según la pág. 518 del libro, SI importa.
 
 - ¿Por qué es necesario guardar en un registro el valor de retorno (RV) luego del CALL? Ésto lo vimos del código de Felipe.
----------------------------------------------------------------------------------
 
-LO ULTIMO:
-Testear el array.
-Setear correctamente los registros fv, sp, etc.
-Probar con el move (caso 1) y sin el move (caso 2) lo siguiente:
-	let
-		function f (a:int) =
-			a+1
-		var x := f(3)
-	in
-		x * 4
-	end
+- ¿Por qué la alocación de un record en memoria ocurre en el orden inverso al declarado? (No hay problema al recorrerlo, sólo nos llama la atención
+  que se haga todo en orden inverso)
+---------------------------------------------------------------------------------
+LO ÚLTIMO:
+- Se chequeo hasta el archivo test42.tig.
 
 
 LO HECHO:
-Funciona el intérprete agregandole el prefijo a los labels de funciones.
-Modificamos el interprete para que respete el allocArray de C.
-Arreglado el almacenamiento de strings en el interprete.
-Modificamos getstrFun para que tome de a un char (antes tomaba toda una línea y por esto no funcionaba el ejemplo del merge).
+- Funciona el intérprete agregandole el prefijo a los labels de funciones.
+- Modificamos el interprete para que respete el allocArray de C.
+- Arreglado el almacenamiento de strings en el interprete.
+- Modificamos getstrFun para que tome de a un char (antes tomaba toda una línea y por esto no funcionaba el ejemplo del merge).
+- Testeado el array.
+- Seteado correctamente los registros fv, sp, etc.
 
 
 
