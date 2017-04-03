@@ -1,6 +1,7 @@
 structure tigertree =
 struct
-datatype exp = CONST of int
+datatype exp =
+         CONST of int
 	     | NAME of tigertemp.label (* dirección de memoria de un label *)
 	     | TEMP of tigertemp.temp (* registro *)
 	     | BINOP of binop*exp*exp

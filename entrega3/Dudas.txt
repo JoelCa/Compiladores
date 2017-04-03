@@ -87,7 +87,7 @@ direcciones de memoria, que genera allocArg(), en la declaración de f?. El inte
   que se haga todo en orden inverso)
 ---------------------------------------------------------------------------------
 LO ÚLTIMO:
-- Se chequeo hasta el archivo test42.tig.
+- Hacer llamada a función para assembler en tigercodegen.sml.
 
 
 LO HECHO:
@@ -97,14 +97,4 @@ LO HECHO:
 - Modificamos getstrFun para que tome de a un char (antes tomaba toda una línea y por esto no funcionaba el ejemplo del merge).
 - Testeado el array.
 - Seteado correctamente los registros fv, sp, etc.
-
-
-
-
-
-
-
-
-
-
-
+- Controlamos todos los test usando el intérprete.
