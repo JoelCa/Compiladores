@@ -22,7 +22,7 @@ fun codegen (frame) (stm) =
                                                             dst = [],
                                                             jump = NONE })
         | munchStm (T.MOVE (T.TEMP i, e2)) = emit (A.OPER { assem = "mov 's0, 's1\n",
-                                                            src = [munchExp (T.TEMP i), munchExp e2],
+                                                            src = [i, munchExp e2],
                                                             dst = [],
                                                             jump = NONE })
         | munchStm (T.CJUMP (oper, e1, e2, t, _)) = let fun toAssemOper operacion = 
@@ -48,8 +48,10 @@ fun codegen (frame) (stm) =
                                                            jump = SOME [s]})
         | munchStm (T.LABEL lab) =  emit (A.LABEL { assem = lab^":\n",
                                                     lab = lab} )
-        | munchStm (T.EXP e) =  emit (A.LABEL { assem = lab^":\n",
-                                                    lab = lab} )
+        | munchStm (T.EXP (T.CALL (T.NAME name,args))) =  emit (A.OPER { assem = "bl " ^ name ^ "\n",
+                                                               src = munchArgs (0,args),
+                                                               dst = calldefs,
+                                                               jump = NONE})
       and munchExp (T.MEM (T.BINOP (T.PLUS, e1, T.CONST i))) = result (fn r => emit (A.OPER { assem = "ldr 'd0, ['s0,'s1]\n",
                                                                                               src = [munchExp e1, munchExp (T.CONST i)],
                                                                                               dst = [r],
@@ -75,14 +77,28 @@ fun codegen (frame) (stm) =
                                                                                       dst = [r],
                                                                                       jump = NONE }))
         | munchExp (T.CONST i) = result (fn r => emit (A.OPER { assem = "ldr 'd0, =" ^ Int.toString(i) ^ "\n",
-                                                                src = [],
                                                                 dst = [r],
+                                                                src = [],
                                                                 jump = NONE }))
         | munchExp (T.BINOP (T.PLUS, e1, e2)) = result (fn r => emit (A.OPER { assem = "add 'd0, 's0, 's1\n",
                                                                                src = [munchExp e1, munchExp e2],
                                                                                dst = [r],
                                                                                jump = NONE }))
         | munchExp (T.TEMP t) = t
+      and munchArgs (n, xs) = map (fn (x,y) => munchStm (T.MOVE (tigerframe.exp x (TEMP tigerframe.fp), y))) ListPair.zip(tigerframe.formals(frame), xs)
+
+(*
+        | munchArgs (n, x::xs) = 
+          if n < length argregs
+          then 
+            let var r = "r"^Int.toString(n)
+            in
+              munchStm (T.MOVE (T.TEMP r, x));
+              r :: munchArgs (n+1, xs)
+            end
+          else
+            munchStm (T.MOVE (T.MEM e1, e2))*)
+
   in munchStm stm;
      rev(!ilist)
   end

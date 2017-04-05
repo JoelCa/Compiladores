@@ -87,7 +87,8 @@ direcciones de memoria, que genera allocArg(), en la declaración de f?. El inte
   que se haga todo en orden inverso)
 ---------------------------------------------------------------------------------
 LO ÚLTIMO:
-- Hacer llamada a función para assembler en tigercodegen.sml.
+- Terminar llamada a función para assembler en tigercodegen.sml.
+- Hacer caso para el NAME en munchExp (puede llegar este caso cuando hay una string)
 
 
 LO HECHO:
