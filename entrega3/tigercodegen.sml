@@ -3,11 +3,16 @@ struct
 
 structure A = tigerassem
 structure T = tigertree
+
+open tigerframe
          
 fun codegen (frame) (stm) =
   let val ilist = ref (nil : A.instr list)
       fun emit x = ilist := x :: !ilist
       fun result (gen) = let val t = tigertemp.newtemp() in gen t; t end
+      fun muchArgAux [] = []
+        | muchArgAux (T.TEMP t :: xs) = t :: muchArgAux xs
+        | muchArgAux (_ :: xs) = muchArgAux xs
       fun munchStm (T.SEQ (a,b)) = (munchStm a; munchStm b)
         | munchStm (T.MOVE (T.MEM (T.BINOP (T.PLUS, e1, T.CONST i)), e2)) = emit (A.OPER { assem = "str 's0, ['s1,'s2]\n",
                                                                                            src = [munchExp e2, munchExp e1, munchExp (T.CONST i)],
@@ -17,6 +22,10 @@ fun codegen (frame) (stm) =
                                                                                            src = [munchExp e2, munchExp e1, munchExp (T.CONST i)],
                                                                                            dst = [],
                                                                                            jump = NONE } )
+        | munchStm (T.MOVE (T.MEM e1, T.NAME l)) = emit (A.OPER { assem = "ldr 's0, =" ^ l ^ "\n",
+                                                                  src = [munchExp e1],
+                                                                  dst = [],
+                                                                  jump = NONE })
         | munchStm (T.MOVE (T.MEM e1, e2)) = emit (A.OPER { assem = "str 's0, ['s1]\n",
                                                             src = [munchExp e2, munchExp e1],
                                                             dst = [],
@@ -37,7 +46,7 @@ fun codegen (frame) (stm) =
                                                             | T.ULE => "ls"
                                                             | T.UGT => "hi"
                                                             | T.UGE => "hs"
-                                                    in emit (A.OPER { assem = "cmp s0 s1\n" ^ "b" ^ toAssemOper(oper) ^ " " ^ t ^"\n",
+                                                    in emit (A.OPER { assem = "cmp 's0 's1\n" ^ "b" ^ toAssemOper(oper) ^ " " ^ t ^"\n",
                                                                       src = [munchExp e1, munchExp e2],
                                                                       dst = [],
                                                                       jump = SOME [t] })
@@ -48,10 +57,15 @@ fun codegen (frame) (stm) =
                                                            jump = SOME [s]})
         | munchStm (T.LABEL lab) =  emit (A.LABEL { assem = lab^":\n",
                                                     lab = lab} )
-        | munchStm (T.EXP (T.CALL (T.NAME name,args))) =  emit (A.OPER { assem = "bl " ^ name ^ "\n",
-                                                               src = munchArgs (0,args),
-                                                               dst = calldefs,
-                                                               jump = NONE})
+        | munchStm (T.EXP (T.CALL (T.NAME name,args))) = emit (A.OPER { assem = "bl " ^ name ^ "\n",
+                                                                        src = munchArgs (0,args),
+                                                                        dst = calldefs,
+                                                                        jump = SOME [name]})
+        | munchStm (T.EXP e) = emit (A.OPER { assem = "",
+                                              src = [munchExp e],
+                                              dst = [],
+                                              jump = NONE})
+
       and munchExp (T.MEM (T.BINOP (T.PLUS, e1, T.CONST i))) = result (fn r => emit (A.OPER { assem = "ldr 'd0, ['s0,'s1]\n",
                                                                                               src = [munchExp e1, munchExp (T.CONST i)],
                                                                                               dst = [r],
@@ -84,20 +98,13 @@ fun codegen (frame) (stm) =
                                                                                src = [munchExp e1, munchExp e2],
                                                                                dst = [r],
                                                                                jump = NONE }))
+        | munchExp (T.NAME l) = result (fn r => emit (A.OPER { assem = "ldr 'd0, =" ^ l ^ "\n",
+                                                               src = [],
+                                                               dst = [r],
+                                                               jump = NONE }))
         | munchExp (T.TEMP t) = t
-      and munchArgs (n, xs) = map (fn (x,y) => munchStm (T.MOVE (tigerframe.exp x (TEMP tigerframe.fp), y))) ListPair.zip(tigerframe.formals(frame), xs)
 
-(*
-        | munchArgs (n, x::xs) = 
-          if n < length argregs
-          then 
-            let var r = "r"^Int.toString(n)
-            in
-              munchStm (T.MOVE (T.TEMP r, x));
-              r :: munchArgs (n+1, xs)
-            end
-          else
-            munchStm (T.MOVE (T.MEM e1, e2))*)
+      and munchArgs (n, xs) = muchArgAux (map (fn (x,y) => let val w = exp x (T.TEMP fp) in munchStm (T.MOVE (w, y)); w end) (ListPair.zip (formals(frame), xs)))
 
   in munchStm stm;
      rev(!ilist)

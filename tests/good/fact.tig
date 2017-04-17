@@ -5,6 +5,7 @@ let
     if  n = 0
       then 1
       else n * fact (n - 1)
+  var i := fact(2)
 in
-  fact (10)
+  i
 end
