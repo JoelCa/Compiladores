@@ -86,15 +86,20 @@ direcciones de memoria, que genera allocArg(), en la declaración de f?. El inte
 - ¿Por qué la alocación de un record en memoria ocurre en el orden inverso al declarado? (No hay problema al recorrerlo, sólo nos llama la atención
   que se haga todo en orden inverso)
 
+Selección de instrucciones
+--------------------------
+
 - ¿Esta bien que en la selección de instrucciones, caso del CALL, se ponga como jump a SOME [name] mientras que en el libro se recomienda poner NONE?
 
 - En el caso "EXP e" de munchStm consideramos que la instrucción generada es vacia (el campo assem = ""), ¿Está bien? ¿Es necesario este caso?
 
+- Consideramos que aquellos MOVEs con igual source ("assem = mov 's0, 's1\n", donde s0 = s1), pueden ignorarse, al ser reduntantes, ¿está bien?. 
+
 ---------------------------------------------------------------------------------
 
 LO ÚLTIMO:
-- Hacer los casos de BINOP para las demás operaciones (MINUS, MUL, DIV, etc.)
-- Agregar los casos de error para tener los matching completos del munch
+- Terminar la función "format". El nth tira error, por que en algún caso la estamos llamando mal.
+
 
 LO HECHO:
 - Funciona el intérprete agregandole el prefijo a los labels de funciones.
@@ -106,9 +111,9 @@ LO HECHO:
 - Controlamos todos los test usando el intérprete.
 - Terminar llamada a función para assembler en tigercodegen.sml.
 - Hacer caso para el NAME en munchExp (puede llegar este caso cuando hay una string)
+- Hacer los casos de BINOP para las demás operaciones (MINUS, MUL, DIV, etc.)
+- Agregar los casos de error para tener los matching completos del munch
 
----------------------------------------------------------------------------------
 
 OBSERVACIÓN
-
 - Tener en cuenta que la instrucción "bl" requiere agregar dos instrucciones al término del body de la función a la que se salta.

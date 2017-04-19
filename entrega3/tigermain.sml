@@ -50,9 +50,9 @@ fun main(args) =
     val (procs,strings) = tigertrans.procStringList(fragmentos)
                 (* val stmList = optionFilter (map (tigertrans.procBody) fragmentos) *)
     val stmCanonList = map (fn (s,f) => (traceSchedule (basicBlocks (linearize s)), f)) procs
-                (* val functionInstrCode = map (fn (s,f) => tigercodegen.maximalMunch f s) stmCanonList *)
+    val functionInstrCode = map (fn (s,f) => tigercodegen.maximalMunch f s) stmCanonList 
 		val _ = if ir then print(tigertrans.Ir(fragmentos)) else ()
-                (* val _ = if code then map (map (print o (tigerassem.format (fn a => "")))) functionInstrCode else [[()]] *)
+    val _ = if code then map (map (print o (tigerassem.format tigertemp.makeString))) functionInstrCode else [[()]]
     val _ = if inter then tigerinterp.inter true stmCanonList strings else ()
 	in
 		print "yes!!\n"

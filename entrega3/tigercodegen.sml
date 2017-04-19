@@ -30,10 +30,10 @@ fun codegen (frame) (stm) =
                                                             src = [munchExp e2, munchExp e1],
                                                             dst = [],
                                                             jump = NONE })
-        | munchStm (T.MOVE (T.TEMP i, e2)) = emit (A.OPER { assem = "mov 's0, 's1\n",
+        | munchStm (T.MOVE (T.TEMP i, e2)) = emit (A.MOVE { assem = "mov 's0, 's1\n",
                                                             src = [i, munchExp e2],
-                                                            dst = [],
-                                                            jump = NONE })
+                                                            dst = [] })
+
         | munchStm (T.CJUMP (oper, e1, e2, t, _)) = let fun toAssemOper operacion = 
                                                           case operacion of
                                                               T.EQ  => "eq"
@@ -65,6 +65,7 @@ fun codegen (frame) (stm) =
                                               src = [munchExp e],
                                               dst = [],
                                               jump = NONE})
+        | munchStm _ = raise Fail "No debería llegar! (munchStm)"
 
       and munchExp (T.MEM (T.BINOP (T.PLUS, e1, T.CONST i))) = result (fn r => emit (A.OPER { assem = "ldr 'd0, ['s0,'s1]\n",
                                                                                               src = [munchExp e1, munchExp (T.CONST i)],
@@ -82,27 +83,37 @@ fun codegen (frame) (stm) =
                                                                src = [munchExp e1],
                                                                dst = [r],
                                                                jump = NONE }))
-        | munchExp (T.BINOP (T.PLUS, e1, T.CONST i)) = result (fn r => emit (A.OPER { assem = "add 'd0, 's0, 's1\n",
-                                                                                      src = [munchExp e1, munchExp (T.CONST i)],
-                                                                                      dst = [r],
-                                                                                      jump = NONE }))
-        | munchExp (T.BINOP (T.PLUS, T.CONST i, e1)) = result (fn r => emit (A.OPER { assem = "add 'd0, 's0, 's1\n",
-                                                                                      src = [munchExp e1, munchExp (T.CONST i)],
-                                                                                      dst = [r],
-                                                                                      jump = NONE }))
+        | munchExp (T.BINOP (oper, e1, e2)) = let fun toAssemOper operation =
+                                                    case operation of
+                                                        T.PLUS  => "add"
+                                                      | T.MINUS => "sub"
+                                                      | T.MUL   => "mul"
+                                                      | T.DIV   => "sdiv"
+                                                      | T.AND   => "and"
+                                                      | T.OR    => "orr"
+                                                      | T.XOR   => "eor"
+                                                      | _       => raise Fail "No debería pasar! (munchExp1)\n"
+                                                  fun assemCode operation = 
+                                                    case operation of
+                                                        T.LSHIFT   => "mov 'd0, 's0, lsl 's1\n"
+                                                      | T.RSHIFT   => "mov 'd0, 's0, lsr 's1\n"
+                                                      | T.ARSHIFT  => "mov 'd0, 's0, asr 's1\n"
+                                                      | oper  => toAssemOper(oper) ^ " 'd0, 's0, 's1\n"
+                                              in result (fn r => emit (A.OPER { assem = assemCode oper,
+                                                                                src = [munchExp e1, munchExp e2],
+                                                                                dst = [r],
+                                                                                jump = NONE }))
+                                              end
         | munchExp (T.CONST i) = result (fn r => emit (A.OPER { assem = "ldr 'd0, =" ^ Int.toString(i) ^ "\n",
-                                                                dst = [r],
                                                                 src = [],
+                                                                dst = [r],
                                                                 jump = NONE }))
-        | munchExp (T.BINOP (T.PLUS, e1, e2)) = result (fn r => emit (A.OPER { assem = "add 'd0, 's0, 's1\n",
-                                                                               src = [munchExp e1, munchExp e2],
-                                                                               dst = [r],
-                                                                               jump = NONE }))
         | munchExp (T.NAME l) = result (fn r => emit (A.OPER { assem = "ldr 'd0, =" ^ l ^ "\n",
                                                                src = [],
                                                                dst = [r],
                                                                jump = NONE }))
         | munchExp (T.TEMP t) = t
+        | munchExp _ = raise Fail "No debería llegar! (munchExp2)"
 
       and munchArgs (n, xs) = muchArgAux (map (fn (x,y) => let val w = exp x (T.TEMP fp) in munchStm (T.MOVE (w, y)); w end) (ListPair.zip (formals(frame), xs)))
 
