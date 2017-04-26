@@ -10,9 +10,6 @@ fun codegen (frame) (stm) =
   let val ilist = ref (nil : A.instr list)
       fun emit x = ilist := x :: !ilist
       fun result (gen) = let val t = tigertemp.newtemp() in gen t; t end
-      fun muchArgAux [] = []
-        | muchArgAux (T.TEMP t :: xs) = t :: muchArgAux xs
-        | muchArgAux (_ :: xs) = muchArgAux xs
       fun munchStm (T.SEQ (a,b)) = (munchStm a; munchStm b)
         | munchStm (T.MOVE (T.MEM (T.BINOP (T.PLUS, e1, T.CONST i)), e2)) = emit (A.OPER { assem = "str 's0, ['s1,'s2]\n",
                                                                                            src = [munchExp e2, munchExp e1, munchExp (T.CONST i)],
@@ -115,8 +112,17 @@ fun codegen (frame) (stm) =
         | munchExp (T.TEMP t) = t
         | munchExp _ = raise Fail "No debería llegar! (munchExp2)"
 
-      and munchArgs (n, xs) = muchArgAux (map (fn (x,y) => let val w = exp x (T.TEMP fp) in munchStm (T.MOVE (w, y)); w end) (ListPair.zip (formals(frame), xs)))
-
+      and munchArgs (n, xs) = 
+        let fun muchArgsAux [] _ _ = []
+              | muchArgsAux (x::xs) n i = if n < 4 then let val r = List.nth (tigerframe.argregs, n)
+                                                            val _ = munchStm (T.MOVE (T.TEMP r, x))
+                                                        in r :: muchArgsAux xs (n+1) i
+                                                        end
+                                          else let val _ = munchStm (T.MOVE (T.MEM(T.BINOP(T.PLUS, T.TEMP(tigerframe.fp), T.CONST (tigerframe.wSz * i))), x))
+                                               in muchArgsAux xs (n+1) (i+1)
+                                               end
+        in muchArgsAux xs n 0 
+        end
   in munchStm stm;
      rev(!ilist)
   end

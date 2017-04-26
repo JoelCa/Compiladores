@@ -91,15 +91,15 @@ fun Ir(e) =
 
 fun nombreFrame frame = print(".globl " ^ tigerframe.name frame ^ "\n")
 
-fun procStringList ((PROC {body = b, frame = f})::zs) =
-	let val (xs,ys) = procStringList zs
-	in ((b,f)::xs,ys)
+fun procStringList g ((PROC {body = b, frame = f})::zs) =
+	let val (xs,ys) = procStringList g zs
+	in ((g b,f)::xs,ys)
 	end
-	| procStringList ((STRING (l,s))::zs) =
-		let val (xs,ys) = procStringList zs
+	| procStringList g ((STRING (l,s))::zs) =
+		let val (xs,ys) = procStringList g zs
 		in (xs,(l,s)::ys)
 		end
-	| procStringList [] = ([],[]) 
+	| procStringList _ [] = ([],[]) 
 
 fun procBody (PROC {body = b, frame = f}) = SOME (b,f)
 	| procBody _  = NONE

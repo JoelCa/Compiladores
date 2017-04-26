@@ -54,6 +54,6 @@ val unNx : exp -> tigertree.stm
 
 val procBody : tigerframe.frag -> (tigertree.stm * tigerframe.frame) option
 
-val procStringList : tigerframe.frag list -> (tigertree.stm*tigerframe.frame) list * (tigertemp.label*string) list
+val procStringList : (tigertree.stm -> 'a) -> tigerframe.frag list -> ('a*tigerframe.frame) list * (tigertemp.label*string) list
                                                                      
 end

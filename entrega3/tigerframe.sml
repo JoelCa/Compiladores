@@ -142,7 +142,7 @@ fun procEntryExit1 (fr: frame, body) =
                                                in (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP r, TEMP nt)::exi)
                                                end ) ([],[]) calleesaves
       val acomodaArgs = recorreArgs (rev (!(#ftAccesos fr))) argregs
-      val acomoda = acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
+      val acomoda =  (LABEL (#name fr)) :: acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
   in seq(entry@acomoda@[body]@exit) end
 
 (* fun procEntryExit2(frame,body) = *)

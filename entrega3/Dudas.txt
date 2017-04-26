@@ -95,11 +95,11 @@ Selección de instrucciones
 
 - Consideramos que aquellos MOVEs con igual source ("assem = mov 's0, 's1\n", donde s0 = s1), pueden ignorarse, al ser reduntantes, ¿está bien?. 
 
+- ¿Es correcto utilizar push para poner los argumentos de la función llamada en memoria?
 ---------------------------------------------------------------------------------
 
 LO ÚLTIMO:
-- Terminar la función "format". El nth tira error, por que en algún caso la estamos llamando mal.
-
+- Arreglar munchArgs. Guardar correctamente los argumentos que van a memoria (usar push).
 
 LO HECHO:
 - Funciona el intérprete agregandole el prefijo a los labels de funciones.
@@ -110,10 +110,10 @@ LO HECHO:
 - Seteado correctamente los registros fv, sp, etc.
 - Controlamos todos los test usando el intérprete.
 - Terminar llamada a función para assembler en tigercodegen.sml.
-- Hacer caso para el NAME en munchExp (puede llegar este caso cuando hay una string)
-- Hacer los casos de BINOP para las demás operaciones (MINUS, MUL, DIV, etc.)
-- Agregar los casos de error para tener los matching completos del munch
-
+- Hecho caso para el NAME en munchExp (puede llegar este caso cuando hay una string).
+- Hechos los casos de BINOP para las demás operaciones (MINUS, MUL, DIV, etc.).
+- Agregar los casos de error para tener los matching completos del munch.
+- Terminada función "format" de codegen.sml.
 
 OBSERVACIÓN
 - Tener en cuenta que la instrucción "bl" requiere agregar dos instrucciones al término del body de la función a la que se salta.
