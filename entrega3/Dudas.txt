@@ -58,22 +58,30 @@ Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests
 - En el maximal munch de un jump "simple", ¿siempre tenemos un label como expresión?.
 
 --------------------------------------------------------------------------------
-Dudas 2017
+Dudas RESUELTAS 2017
 
 - En la variable "datosGlobs", cuando se agrega el PROC de una función f, asociamos como frame de f, 
 el frame que viene del level, el cual se crea con el nombre de f más un prefijo formado por una string obtenida de tigertemp.newLabel(). ¿Está bien?.
-El prefijo nos estorba para usar el intérprete, debido a que busca el frame por el nombre de las funciones sin tener en cuenta el prefijo ¿como lo solucionamos, si mantenemos este prefijo?. Resuelto.
-
-- En el chequeo de tipos, ¿deberiamos capturar la excepción Ciclo, y mostrar un error más detallado?.
+El prefijo nos estorba para usar el intérprete, debido a que busca el frame por el nombre de las funciones sin tener en cuenta el prefijo ¿como lo solucionamos, si mantenemos este prefijo?.
 
 - En el código intermedio del CALL f, ¿deberíamos incluir MOVEs de los valores con los que se llama f, a los registros o
-direcciones de memoria, que genera allocArg(), en la declaración de f?. El interpete lo hace solo, si incluimos la función "formals" y hacemos MOVEs en el preambulo de la función, en procEntryExit1.
+direcciones de memoria, que genera allocArg(), en la declaración de f?. El interpete lo hace solo, si incluimos la función
+"formals" y hacemos MOVEs en el preambulo de la función, en procEntryExit1.
 
-- ¿Qué pasa cuando no esté el intérprete?. ¿El trabajo lo hace la instrucción CALL de ARM?.
+- ¿Qué pasa cuando no esté el intérprete?. ¿El trabajo lo hace la instrucción CALL de ARM?. -----> NO
 
-- ¿Como es la estructura del frame de ARM Cortex-A8?. ¿Utilizamos un registro especial para el static link, o lo mantenemos en memoria?.
+- ¿Como es la estructura del frame de ARM Cortex-A8?. ¿Utilizamos un registro especial para el static link, o lo mantenemos en memoria?. -----> EN MEMORIA
 
-- En ARM, ¿La dirección de retorno se guarda en el registro lr?.
+- En ARM, ¿La dirección de retorno se guarda en el registro lr?. -----> Si se implementa con BL, SI
+
+- ¿Por qué es necesario guardar en un registro el valor de retorno (RV) luego del CALL? Ésto lo vimos del código de Felipe. -----> Respondida por Guillermo
+
+
+
+
+Dudas no resueltas 2017
+
+- En el chequeo de tipos, ¿deberiamos capturar la excepción Ciclo, y mostrar un error más detallado?.
 
 - ¿Esta bien mantener dos levels donde el nombre del frame sea "_tigermain", en la pila de levels (uno viene por defecto, al crear la pila)?.
 
@@ -81,10 +89,10 @@ direcciones de memoria, que genera allocArg(), en la declaración de f?. El inte
 
 - A nosotros no nos importa el orden con el cual se declaran los miembros de un record, está bien?. Según la pág. 518 del libro, SI importa.
 
-- ¿Por qué es necesario guardar en un registro el valor de retorno (RV) luego del CALL? Ésto lo vimos del código de Felipe.
-
 - ¿Por qué la alocación de un record en memoria ocurre en el orden inverso al declarado? (No hay problema al recorrerlo, sólo nos llama la atención
   que se haga todo en orden inverso)
+
+
 
 Selección de instrucciones
 --------------------------
@@ -96,6 +104,34 @@ Selección de instrucciones
 - Consideramos que aquellos MOVEs con igual source ("assem = mov 's0, 's1\n", donde s0 = s1), pueden ignorarse, al ser reduntantes, ¿está bien?. 
 
 - ¿Es correcto utilizar push para poner los argumentos de la función llamada en memoria?
+
+- Cuando se hace la selección de instrucciones del CALL, el libro recomiendo hacer una función auxiliar munchArgs, que genere el código encargado de mover 
+los argumentos a donde correspondan (registro, o memoria). 
+Sabemos que del quinto argumento, en adelante, los argumentos van a memoria, ¿esto lo hacemos mediante PUSHs?.
+Luego de la instrucción BL (asociada al CALL), ¿deberían estar los POPs correspodientes?
+
+Codigo intermedio:
+CALL (f, a0,a1,a2,a3,a4,a5) 
+
+Código ARM:
+..
+(movimientos de los argumentos a los registros r0-r3)
+PUSH {a4, a5}
+BL f
+POP {a4, a5}
+..
+
+- En procEntryExit1 agregamos como preludio y epilogo al cuerpo de la función, el código intermedio correspondiente a guardar y restaurar los registros callee saves.
+Esto lo hicimos con MOVEs a temporarios frescos.
+Ejemplo: 
+Si r4 y r5 son todos los callee saves, entonces nos queda un código intermedio de la forma
+PROLOGO @ BODY @ EPILOGO
+Donde, PROLOGO contiene: MOVE(t0, r4) ; MOVE(t1, r5)
+EPILOGO contiene: MOVE(r4, t0); MOVE (r5, t1)
+
+Así está bien?.
+O deberiamos implementarlo con instrucciones que los guarden a memoria (haciendo pushs o pops de "alto nivel")?
+
 ---------------------------------------------------------------------------------
 
 LO ÚLTIMO:
