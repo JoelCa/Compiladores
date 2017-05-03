@@ -54,10 +54,13 @@ fun codegen (frame) (stm) =
                                                            jump = SOME [s]})
         | munchStm (T.LABEL lab) =  emit (A.LABEL { assem = lab^":\n",
                                                     lab = lab} )
-        | munchStm (T.EXP (T.CALL (T.NAME name,args))) = emit (A.OPER { assem = "bl " ^ name ^ "\n",
-                                                                        src = munchArgs (0,args),
-                                                                        dst = calldefs,
-                                                                        jump = SOME [name]})
+        | munchStm (T.EXP (T.CALL (T.NAME name,args))) =  let val (rList, mList) = munchArgs (0,args)
+                                                          in emit (A.OPER { assem = "bl " ^ name ^ "\n",
+                                                                            src = rList,
+                                                                            dst = calldefs,
+                                                                            jump = SOME [name]}) 
+                                                            ; makePops mList
+                                                          end
         | munchStm (T.EXP e) = emit (A.OPER { assem = "",
                                               src = [munchExp e],
                                               dst = [],
@@ -112,17 +115,27 @@ fun codegen (frame) (stm) =
         | munchExp (T.TEMP t) = t
         | munchExp _ = raise Fail "No debería llegar! (munchExp2)"
 
-      and munchArgs (n, xs) = 
-        let fun muchArgsAux [] _ _ = []
-              | muchArgsAux (x::xs) n i = if n < 4 then let val r = List.nth (tigerframe.argregs, n)
-                                                            val _ = munchStm (T.MOVE (T.TEMP r, x))
-                                                        in r :: muchArgsAux xs (n+1) i
-                                                        end
-                                          else let val _ = munchStm (T.MOVE (T.MEM(T.BINOP(T.PLUS, T.TEMP(tigerframe.fp), T.CONST (tigerframe.wSz * i))), x))
-                                               in muchArgsAux xs (n+1) (i+1)
+      and munchArgs (_,[])     = ([], [])
+        | munchArgs (n, x::xs) = if n < 4 then let val y = List.nth (tigerframe.argregs, n)
+                                                   val _ = munchStm (T.MOVE (T.TEMP y, x))
+                                                   val (r1,r2) = munchArgs (n+1, xs)
+                                               in (y :: r1, r2)
                                                end
-        in muchArgsAux xs n 0 
-        end
+                                 else let val z = munchExp x
+                                          val _ = emit (A.OPER { assem = "push 's0\n",
+                                                                 src = [z],
+                                                                 dst = [],
+                                                                 jump = NONE } )
+                                          val (r1, r2) = munchArgs (n+1, xs)
+                                      in (r1, z :: r2)
+                                      end
+      and makePops []      = ()
+        | makePops (x::xs) =  let val _ = emit (A.OPER { assem = "pop 's0\n",
+                                                         src = [x],
+                                                         dst = [],
+                                                         jump = NONE } )
+                              in makePops xs
+                              end
   in munchStm stm;
      rev(!ilist)
   end

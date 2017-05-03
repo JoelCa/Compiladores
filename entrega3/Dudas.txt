@@ -135,7 +135,7 @@ O deberiamos implementarlo con instrucciones que los guarden a memoria (haciendo
 ---------------------------------------------------------------------------------
 
 LO ÚLTIMO:
-- Arreglar munchArgs. Guardar correctamente los argumentos que van a memoria (usar push).
+- Terminar el código que guarda y restaura los callee saves. Arreglar el ejemplo "testMultipleArgs.tig".
 
 LO HECHO:
 - Funciona el intérprete agregandole el prefijo a los labels de funciones.
@@ -150,6 +150,7 @@ LO HECHO:
 - Hechos los casos de BINOP para las demás operaciones (MINUS, MUL, DIV, etc.).
 - Agregar los casos de error para tener los matching completos del munch.
 - Terminada función "format" de codegen.sml.
+- Arreglar munchArgs. Guardar correctamente los argumentos que van a memoria (usar push).
 
 OBSERVACIÓN
 - Tener en cuenta que la instrucción "bl" requiere agregar dos instrucciones al término del body de la función a la que se salta.

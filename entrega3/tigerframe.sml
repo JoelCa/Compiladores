@@ -54,7 +54,7 @@ val calldefs       = [rv]
 val specialregs    = [rv, fp, sp]
 val argregs        = ["r0","r1","r2","r3"]
 val callersaves    = []
-val calleesaves    = [] (*["r4","r5","r6","r7","r8","r9","r10","lr"]*)
+val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10","lr"]
 
 datatype access = InFrame of int | InReg of tigertemp.label
 
@@ -137,9 +137,11 @@ fun seq [] = EXP (CONST 0)
   | seq (x::xs) = SEQ (x, seq xs)
 
 fun procEntryExit1 (fr: frame, body) = 
-  let val (entry,exit) = List.foldl 
+  let val (entry,exit) = List.foldl
                           (fn (r,(ent,exi)) => let val nt = tigertemp.newtemp()
-                                               in (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP r, TEMP nt)::exi)
+                                               in if r = "lr"
+                                                  then (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP "pc", TEMP nt)::exi) (*TERMINAR*)
+                                                  else (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP r, TEMP nt)::exi)
                                                end ) ([],[]) calleesaves
       val acomodaArgs = recorreArgs (rev (!(#ftAccesos fr))) argregs
       val acomoda =  (LABEL (#name fr)) :: acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
