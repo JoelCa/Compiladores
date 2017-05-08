@@ -40,6 +40,8 @@ type level = int
 val fp             = "r11"         (* frame pointer *)
 val sp             = "r13"         (* stack pointer *)
 val rv             = "r0"          (* return value  *)
+val lr             = "r14"         (* link register  *)
+val pc             = "r15"         (* program counter  *)
 (*val ov             = "OV"          (* overflow value (edx en el 386) *)*)
 val wSz            = 4             (* word size in bytes *)
 val log2WSz        = 2             (* base two logarithm of word size in bytes *)
@@ -51,10 +53,10 @@ val argsGap        = wSz           (* bytes *)
 val localsInicial  = 0             (* words *)
 val localsGap      = ~8            (* bytes que indican el espacio entre el fp y el 1º local *)
 val calldefs       = [rv]
-val specialregs    = [rv, fp, sp]
+val specialregs    = [rv, fp, sp, pc]
 val argregs        = ["r0","r1","r2","r3"]
 val callersaves    = []
-val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10","lr"]
+val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10",lr]
 
 datatype access = InFrame of int | InReg of tigertemp.label
 
@@ -115,7 +117,6 @@ fun allocArg (f: frame) b =
           val _ = #actualArg f := !(#actualArg f)+1
       in acc end
 
-
 fun allocLocal (f: frame) b =
   case b of
     true =>
@@ -139,15 +140,15 @@ fun seq [] = EXP (CONST 0)
 fun procEntryExit1 (fr: frame, body) = 
   let val (entry,exit) = List.foldl
                           (fn (r,(ent,exi)) => let val nt = tigertemp.newtemp()
-                                               in if r = "lr"
-                                                  then (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP "pc", TEMP nt)::exi) (*TERMINAR*)
+                                               in if r = lr
+                                                  then (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP pc, TEMP nt)::exi) (*TERMINAR*)
                                                   else (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP r, TEMP nt)::exi)
                                                end ) ([],[]) calleesaves
       val acomodaArgs = recorreArgs (rev (!(#ftAccesos fr))) argregs
-      val acomoda =  (LABEL (#name fr)) :: acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
-  in seq(entry@acomoda@[body]@exit) end
+      val acomoda =  acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
+      val functionLabel = [LABEL (#name fr)]
+  in seq(functionLabel@(rev entry)@acomoda@[body]@exit) end
 
-(* fun procEntryExit2(frame,body) = *)
-(*     body@(tigerassem.Oper{assem="",src[rv,rf,ff]@callee_saves,drt=[],jump=NONE}) *)
-
+fun procEntryExit2(frame,body) = 
+     body@[tigerassem.OPER {assem = "", src = [rv,sp]@calleesaves, dst = [], jump = NONE}]
 end

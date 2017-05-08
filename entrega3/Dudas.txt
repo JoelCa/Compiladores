@@ -132,10 +132,50 @@ EPILOGO contiene: MOVE(r4, t0); MOVE (r5, t1)
 Así está bien?.
 O deberiamos implementarlo con instrucciones que los guarden a memoria (haciendo pushs o pops de "alto nivel")?
 
+
+- Implementamos el munch del CALL, mas o menos así:
+munchStm (CALL (NAME f) xs) = 
+  emit (A.OPER { assem = "bl " ^ f ^ "\n",
+                 src = muchArgs,
+                 dst = calldefs,
+                 jump = SOME [f]}) 
+  ; makePops(temporaries)
+Donde "makePops" hace los emits de las operaciones correspondientes a la instrucción pop,
+según la lista de temporarios a los que se les hizo push.
+
+¿Así esta bien?. Solo pudimos agregar los pops de esta forma.
+
+Como esta forma no nos convencia. 
+Pensamos que quizas habría una forma de patear el problema de generar el código de los pushs y pop
+de los argumentos que van a memoria, para más adelante, en el coloreo (como se hace con los MOVEs a
+temporarios frescos de los registros calle saves, en procEntryExit1).
+
+- Si r5 y LR con todos los registros calle saves, ¿podemos usar cualquiera de estas dos formas
+para retornar a la próxima intrucción de la función llamante?.
+
+  ...
+  BL function1
+  ...
+
+
+function1 (Opción 1)
+  PUSH  {R5,LR}
+  ...
+  POP {R5,PC}
+
+function1 (Opción 2)
+  PUSH  {R5,LR}
+  ...
+  POP {R5,LR}
+  BX  LR
+
+- ¿Como deberíamos implementar procEntryExit2?. A que se refiere con: "indica al register allocator que ciertos registros se mantienen vivos 
+en la salida de la función".
+
 ---------------------------------------------------------------------------------
 
 LO ÚLTIMO:
-- Terminar el código que guarda y restaura los callee saves. Arreglar el ejemplo "testMultipleArgs.tig".
+- Terminado selección de instruciones. Probar un ejemplo en la máquina virtualizada. Leer el capítulo de Liveness.
 
 LO HECHO:
 - Funciona el intérprete agregandole el prefijo a los labels de funciones.
@@ -151,6 +191,7 @@ LO HECHO:
 - Agregar los casos de error para tener los matching completos del munch.
 - Terminada función "format" de codegen.sml.
 - Arreglar munchArgs. Guardar correctamente los argumentos que van a memoria (usar push).
+- Terminar el código que guarda y restaura los callee saves. Arreglar el ejemplo "testMultipleArgs.tig".
 
 OBSERVACIÓN
 - Tener en cuenta que la instrucción "bl" requiere agregar dos instrucciones al término del body de la función a la que se salta.
