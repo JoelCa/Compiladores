@@ -175,7 +175,8 @@ en la salida de la función".
 ---------------------------------------------------------------------------------
 
 LO ÚLTIMO:
-- Terminado selección de instruciones. Probar un ejemplo en la máquina virtualizada. Leer el capítulo de Liveness.
+- Terminar tigergraph.sml
+- Probar un ejemplo en la máquina virtualizada.
 
 LO HECHO:
 - Funciona el intérprete agregandole el prefijo a los labels de funciones.
@@ -192,6 +193,7 @@ LO HECHO:
 - Terminada función "format" de codegen.sml.
 - Arreglar munchArgs. Guardar correctamente los argumentos que van a memoria (usar push).
 - Terminar el código que guarda y restaura los callee saves. Arreglar el ejemplo "testMultipleArgs.tig".
+- Terminado selección de instruciones.
 
 OBSERVACIÓN
 - Tener en cuenta que la instrucción "bl" requiere agregar dos instrucciones al término del body de la función a la que se salta.
