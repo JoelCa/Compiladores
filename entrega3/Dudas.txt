@@ -172,6 +172,13 @@ function1 (Opción 2)
 - ¿Como deberíamos implementar procEntryExit2?. A que se refiere con: "indica al register allocator que ciertos registros se mantienen vivos 
 en la salida de la función".
 
+- ¿Tenemos que hacer una arista "de vuelta", entre el último nodo del flujo del body de una función f y el nodo sucesor del nodo que represental al call f?.
+Si es necesario, ¿como podemos hacerla?.
+
+- ¿Es necesario hacer un nodo para cada una de las instr de assembler o solo para las OPER?
+
+- ¿Cómo podemos probar las cosas relacionadas con los grafos?
+
 ---------------------------------------------------------------------------------
 
 LO ÚLTIMO:

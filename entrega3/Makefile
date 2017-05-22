@@ -8,7 +8,7 @@
 #MOSMLYACC=$(MOSMLHOME)/mosmlyac -v
 
 # Para el DCC y lab. de 2º piso
-HOME=/usr/bin
+HOME=/usr/local/bin
 MOSMLHOME=${HOME}
 MOSMLTOOLS=$(MOSMLHOME)/camlrunm $(MOSMLHOME)/tools
 MOSMLLEX=$(MOSMLHOME)/mosmllex
@@ -52,7 +52,7 @@ EXEFILE=
 GRALOBJS= tigerabs.uo tigergrm.uo tigerlex.uo tigermain.uo \
 	  tigernlin.uo tigerpp.uo tigerescap.uo tigertab.uo tigerseman.uo tigertemp.uo topsort.uo tigertree.uo \
 	  tigerframe.uo tigertrans.uo tigerit.uo tigerpila.uo tigercanon.uo \
-	  tigerassem.uo tigercodegen.uo tigergraph.uo tigerflow.uo
+	  tigerassem.uo tigercodegen.uo tigergraph.uo tigerflow.uo tigermg.uo
 
 
 all: tiger
@@ -126,3 +126,5 @@ tigercodegen.ui: tigerframe.ui tigerassem.uo tigertree.uo
 tigerassem.uo: tigertemp.ui
 tigergraph.uo: tigertemp.ui tigergraph.ui
 tigerflow.uo: tigertemp.ui tigergraph.ui
+tigermg.ui : tigerassem.uo tigerflow.ui
+tigermg.uo : tigermg.ui tigergraph.ui tigergraph.uo tigerflow.uo tigerassem.uo
