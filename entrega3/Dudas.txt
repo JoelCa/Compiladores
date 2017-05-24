@@ -97,11 +97,23 @@ Dudas no resueltas 2017
 Selección de instrucciones
 --------------------------
 
-- ¿Esta bien que en la selección de instrucciones, caso del CALL, se ponga como jump a SOME [name] mientras que en el libro se recomienda poner NONE?
-
 - En el caso "EXP e" de munchStm consideramos que la instrucción generada es vacia (el campo assem = ""), ¿Está bien? ¿Es necesario este caso?
 
 - Consideramos que aquellos MOVEs con igual source ("assem = mov 's0, 's1\n", donde s0 = s1), pueden ignorarse, al ser reduntantes, ¿está bien?. 
+
+- ¿Como deberíamos implementar procEntryExit2?. A que se refiere con: "indica al register allocator que ciertos registros se mantienen vivos 
+  en la salida de la función".
+
+- En el munchStm para el caso del CALL al OPER que generamos nosotros pusimos jump = SOME [name] y en el libro esta como jump = NONE ¿Cuál de las opciones es la correcta?
+
+- Para tratar las instrucciones OPER que representan el jump y el cjump las diferenciamos de las demás comprobando que tienen jump = SOME [l].
+  Por otra parte diferenciamos el jump del cjump teniendo en cuenta que en el primero el src = [], los difernciamos porque al procesar el jump
+  vamos a hacer la arista desde el jump hasta el label y en el caso del cjump se le agrega la arista desde el jump hasta la siguiente instrucción.
+  ¿Son correctos estos supuestos? ¿Esta bien hacer 2 aristas para el cjump?
+
+
+---------------------------------------------------------------------------------
+Respondidas:
 
 - ¿Es correcto utilizar push para poner los argumentos de la función llamada en memoria?
 
@@ -169,11 +181,8 @@ function1 (Opción 2)
   POP {R5,LR}
   BX  LR
 
-- ¿Como deberíamos implementar procEntryExit2?. A que se refiere con: "indica al register allocator que ciertos registros se mantienen vivos 
-en la salida de la función".
-
 - ¿Tenemos que hacer una arista "de vuelta", entre el último nodo del flujo del body de una función f y el nodo sucesor del nodo que represental al call f?.
-Si es necesario, ¿como podemos hacerla?.
+  Si es necesario, ¿como podemos hacerla?.
 
 - ¿Es necesario hacer un nodo para cada una de las instr de assembler o solo para las OPER?
 
