@@ -188,9 +188,12 @@ function1 (Opción 2)
 
 - ¿Cómo podemos probar las cosas relacionadas con los grafos?
 
+- Está bien hacer que los campos "use" y "def" de un grafo de flujo, sean conjuntos (en el libro, son listas)?.
+
 ---------------------------------------------------------------------------------
 
 LO ÚLTIMO:
+- Haciendo del gráfico de interferencias.
 - Probar un ejemplo en la máquina virtualizada.
 
 LO HECHO:
