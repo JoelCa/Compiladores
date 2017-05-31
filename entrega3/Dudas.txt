@@ -111,6 +111,16 @@ Selección de instrucciones
   vamos a hacer la arista desde el jump hasta el label y en el caso del cjump se le agrega la arista desde el jump hasta la siguiente instrucción.
   ¿Son correctos estos supuestos? ¿Esta bien hacer 2 aristas para el cjump?
 
+- ¿Cuando deberiamos utilizar el constructor MOVE para generar la intrucción "assem"?. Nosotros creemos que solo irian cuando se transfiere datos
+de un temporario a otro.
+
+- ¿Podemos "llenar" el campo "dst" de una instrucción assem, tanto en la función muchExp como muchStm?
+Nosotros queremos hacer:
+munchStm (T.MOVE (TEMP i) e2) = emit (MOVE {src = [muchExp e2], dst=[i], ..})
+¿Está bien?. Nosotros creiamos que como un statement no devuelve un valor, y por lo tanto no debia utilizarse el campo "dst" de la instrucción
+asociada.
+
+
 
 ---------------------------------------------------------------------------------
 Respondidas:
