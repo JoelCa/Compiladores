@@ -27,9 +27,9 @@ fun codegen (frame) (stm) =
                                                             src = [munchExp e2, munchExp e1],
                                                             dst = [],
                                                             jump = NONE })
-        | munchStm (T.MOVE (T.TEMP i, e2)) = emit (A.MOVE { assem = "mov 's0, 's1\n",
-                                                            src = [i, munchExp e2],
-                                                            dst = [] })
+        | munchStm (T.MOVE (T.TEMP i, e2)) = emit (A.MOVE { assem = "mov 'd0, 's1\n",
+                                                            src = [munchExp e2],
+                                                            dst = [i] })
 
         | munchStm (T.CJUMP (oper, e1, e2, t, _)) = let fun toAssemOper operacion = 
                                                           case operacion of

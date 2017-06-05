@@ -2,11 +2,12 @@ structure tigerliveness :> tigerliveness =
 struct
   open tigergraph
   open Splayset
+  open Splaymap
 
   datatype igraph =
     IGraph of {graph: tigergraph.graph,
-               tnode: tigertemp.temp -> tigergraph.node,
-               gtemp: tigergraph.node -> tigertemp.temp,
+               tnode: (tigertemp.temp, tigergraph.node) dict ref,
+               gtemp: (tigergraph.node, tigertemp.temp) dict ref,
                moves: (tigergraph.node * tigergraph.node) list}
 
   type liveSet = tigertemp.temp list
@@ -40,27 +41,44 @@ struct
         liveOuts ({control = fg, use = u, def = d, ismove = m}) false
     end
 
-  fun interferenceGraph ({control = fg, use = u, def = d, ismove = m}) = 
+  (*TERMINAR*)
+  fun interferenceGraph ({control = fg, use = u, def = d, ismove = m}) =
     let val ns = nodes fg
         val (lin, lout) = liveOuts ({control = fg, use = u, def = d, ismove = m}) true
-        val ig = foldl (fn (n, g) => newNode (g,n)) (newGraph ()) ns
-        val _ = app body ns
+        
+        val ig = newGraph ()
+        val itn = ref (Splaymap.mkDict (String.compare))
+        val igt = ref (Splaymap.mkDict compareNodes)
+        val moves = ref []
+
+        fun getNode a = case Splaymap.peek(!itn,a) of
+                          SOME x => x 
+                        | NONE   => let val y = newNode ig
+                                    in itn := Splaymap.insert (!itn, a, y);
+                                       igt := Splaymap.insert (!igt, y, a);
+                                       y
+                                    end
+
+        fun moveEdge (n, na, b) =
+          if member (T.find (u, n), b) 
+          then ()
+          else mk_edge (na, getNode b)
+
         fun body n =
           if T.find(m, n)
-          then mk_edge
+          then
+            Splayset.app (fn a =>
+                            let val na = getNode a
+                                val _ = Splayset.app (fn c => moves := (na, getNode c) :: !moves) (T.find (u, n))
+                            in Splayset.app (fn b => moveEdge (n, na, b)) (T.find (lout, n))
+                            end) (T.find (d, n))
           else
+            Splayset.app (fn a =>
+                            let val na = getNode a
+                            in Splayset.app (fn b => mk_edge (na, getNode b)) (T.find (lout, n))
+                            end) (T.find (d, n))
+        val _ = List.app body ns
     in
+      (IGraph {graph = ig, tnode = itn, gtemp = igt, moves = !moves}, fn n => ["d"])
     end
-(*
-{ control: graph,
-  def: tigertemp.temp list table,
-  use: tigertemp.temp list table,
-  ismove: bool table }
-*)
-
-  datatype igraph =
-    IGraph of {graph: tigergraph.graph,
-               tnode: tigertemp.temp -> tigergraph.node,
-               gtemp: tigergraph.node -> tigertemp.temp,
-               moves: (tigergraph.node * tigergraph.node) list}
 end

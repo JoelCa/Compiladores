@@ -1,4 +1,4 @@
-Preguntas Resueltas del 2014.
+Dudas resueltas del 2014.
 
 En el diagrama:
 		|    argn    |	fp+4*(n+1)
@@ -77,53 +77,8 @@ direcciones de memoria, que genera allocArg(), en la declaración de f?. El inte
 - ¿Por qué es necesario guardar en un registro el valor de retorno (RV) luego del CALL? Ésto lo vimos del código de Felipe. -----> Respondida por Guillermo
 
 
-
-
-Dudas no resueltas 2017
-
-- En el chequeo de tipos, ¿deberiamos capturar la excepción Ciclo, y mostrar un error más detallado?.
-
-- ¿Esta bien mantener dos levels donde el nombre del frame sea "_tigermain", en la pila de levels (uno viene por defecto, al crear la pila)?.
-
-- ¿Podemos definir en tiger una función de nombre "_tigermain"?.
-
-- A nosotros no nos importa el orden con el cual se declaran los miembros de un record, está bien?. Según la pág. 518 del libro, SI importa.
-
-- ¿Por qué la alocación de un record en memoria ocurre en el orden inverso al declarado? (No hay problema al recorrerlo, sólo nos llama la atención
-  que se haga todo en orden inverso)
-
-
-
-Selección de instrucciones
---------------------------
-
-- En el caso "EXP e" de munchStm consideramos que la instrucción generada es vacia (el campo assem = ""), ¿Está bien? ¿Es necesario este caso?
-
-- Consideramos que aquellos MOVEs con igual source ("assem = mov 's0, 's1\n", donde s0 = s1), pueden ignorarse, al ser reduntantes, ¿está bien?. 
-
-- ¿Como deberíamos implementar procEntryExit2?. A que se refiere con: "indica al register allocator que ciertos registros se mantienen vivos 
-  en la salida de la función".
-
-- En el munchStm para el caso del CALL al OPER que generamos nosotros pusimos jump = SOME [name] y en el libro esta como jump = NONE ¿Cuál de las opciones es la correcta?
-
-- Para tratar las instrucciones OPER que representan el jump y el cjump las diferenciamos de las demás comprobando que tienen jump = SOME [l].
-  Por otra parte diferenciamos el jump del cjump teniendo en cuenta que en el primero el src = [], los difernciamos porque al procesar el jump
-  vamos a hacer la arista desde el jump hasta el label y en el caso del cjump se le agrega la arista desde el jump hasta la siguiente instrucción.
-  ¿Son correctos estos supuestos? ¿Esta bien hacer 2 aristas para el cjump?
-
-- ¿Cuando deberiamos utilizar el constructor MOVE para generar la intrucción "assem"?. Nosotros creemos que solo irian cuando se transfiere datos
-de un temporario a otro.
-
-- ¿Podemos "llenar" el campo "dst" de una instrucción assem, tanto en la función muchExp como muchStm?
-Nosotros queremos hacer:
-munchStm (T.MOVE (TEMP i) e2) = emit (MOVE {src = [muchExp e2], dst=[i], ..})
-¿Está bien?. Nosotros creiamos que como un statement no devuelve un valor, y por lo tanto no debia utilizarse el campo "dst" de la instrucción
-asociada.
-
-
-
----------------------------------------------------------------------------------
-Respondidas:
+Dudas resueltas por Guillermo
+-----------------------------
 
 - ¿Es correcto utilizar push para poner los argumentos de la función llamada en memoria?
 
@@ -198,9 +153,52 @@ function1 (Opción 2)
 
 - ¿Cómo podemos probar las cosas relacionadas con los grafos?
 
+- En la función munchStm, cuando procesa un CALL (NAME name, ...), el datatype que generamos es un OPER, donde fijamos "jump = SOME [name]", 
+pero en el libro esta como "jump = NONE" . ¿Cuál es la correcta?.
+
+- A la hora de crear el grafo de flujo, sabemos que si llegamos a una instrucción X con un jump a Y, tenemos que crear una arista entre el
+nodo X y el nodo de la proxima instrucción a Y. Pero, ¿qué pasa si la instrucción se corresponde a un CJUMP?. Creemos que en este caso deberiamos
+hacer no solo la arista a la proxima instrucción del label, sino tambien una arista entre la proxima instrucción al CJUMP.
+
+- Nosotros generamos una instrucción utilizando el constructor MOVE solo cuando se transfiere datos de un temporario a otro.
+¿Así está bien?
+
+- ¿Podemos llenar el campo "dst" de una instrucción, tanto en la función muchExp como muchStm?
+Por ejemplo, queremos hacer:
+munchStm (T.MOVE (TEMP i) e2) = emit (MOVE {src = [muchExp e2], dst=[i], ..})
+¿Está bien?. 
+Nosotros creiamos que como un statement no devuelve un valor, no debia utilizarse el campo "dst" de la instrucción asociada.
+
+
+--------------------------------------------------------------------------------
+Dudas NO resueltas 2017
+
+- En el chequeo de tipos, ¿deberiamos capturar la excepción Ciclo, y mostrar un error más detallado?.
+
+- ¿Esta bien mantener dos levels donde el nombre del frame sea "_tigermain", en la pila de levels (uno viene por defecto, al crear la pila)?.
+
+- ¿Podemos definir en tiger una función de nombre "_tigermain"?.
+
+- A nosotros no nos importa el orden con el cual se declaran los miembros de un record, está bien?. Según la pág. 518 del libro, SI importa.
+
+- ¿Por qué la alocación de un record en memoria ocurre en el orden inverso al declarado? (No hay problema al recorrerlo, sólo nos llama la atención
+  que se haga todo en orden inverso)
+
+
+Selección de instrucciones y Livennes
+-------------------------------------
+
+- En el caso "EXP e" de munchStm consideramos que la instrucción generada es vacia (el campo assem = ""), ¿Está bien? ¿Es necesario este caso?
+
+- ¿Como deberíamos implementar procEntryExit2?. A que se refiere con: "indica al register allocator que ciertos registros se mantienen vivos 
+  en la salida de la función".
+
 - Está bien hacer que los campos "use" y "def" de un grafo de flujo, sean conjuntos (en el libro, son listas)?.
 
----------------------------------------------------------------------------------
+
+
+ARREGLAR:
+- Consideramos que aquellos MOVEs con igual source ("assem = mov 's0, 's1\n", donde s0 = s1), pueden ignorarse, al ser reduntantes. 
 
 LO ÚLTIMO:
 - Haciendo del gráfico de interferencias.
