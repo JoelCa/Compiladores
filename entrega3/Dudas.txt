@@ -195,14 +195,17 @@ Selección de instrucciones y Livennes
 
 - Está bien hacer que los campos "use" y "def" de un grafo de flujo, sean conjuntos (en el libro, son listas)?.
 
+- En el libro, páginas 225 y 226, plantea un caso particular en el que puede definirse una variable que luego no se utiliza. Menciona que
+  interfiere con aquellas variable cuyo rango de vida que se solape con el rango de vida de esta variable (rango nulo).
+  ¿Me podrías plantear un caso en el que se dé esta situación?
+  ¿Como deberíamos tratarlo, si es necesario?
 
 
-ARREGLAR:
-- Consideramos que aquellos MOVEs con igual source ("assem = mov 's0, 's1\n", donde s0 = s1), pueden ignorarse, al ser reduntantes. 
+
 
 LO ÚLTIMO:
-- Haciendo del gráfico de interferencias.
 - Probar un ejemplo en la máquina virtualizada.
+
 
 LO HECHO:
 - Funciona el intérprete agregandole el prefijo a los labels de funciones.
@@ -221,6 +224,7 @@ LO HECHO:
 - Terminar el código que guarda y restaura los callee saves. Arreglar el ejemplo "testMultipleArgs.tig".
 - Terminado selección de instruciones.
 - Terminado tigergraph.sml
+- Haciendo del gráfico de interferencias.
 
 
 OBSERVACIÓN

@@ -35,17 +35,13 @@ struct
         end
     | replaceTemps src dst (other::xs) = other :: (replaceTemps src dst xs)      
 
-  (* ARREGLAR *)
   fun format (coloreo : temp -> string) (OPER {assem = s, dst = dst, src = src, ...}) = implode (replaceTemps (map coloreo src) (map coloreo dst) (explode s))
     | format _ (LABEL {assem = s, ...}) = s
     | format coloreo (MOVE {assem = s, dst = dst, src = src}) =
-      let fun stringCompare (a : string) (b : string) =
-            case String.compare(a,b) of
-              EQUAL => true
-            | _     => false
-          val regSource = map coloreo src
+      let val regSource = map coloreo src
+          val regDestination = map coloreo dst
       in
-        if List.all (stringCompare (List.hd(regSource))) (List.tl(regSource)) then ""
+        if regSource = regDestination then ""
         else implode (replaceTemps regSource (map coloreo dst) (explode s))
       end
 end

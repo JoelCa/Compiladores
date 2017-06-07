@@ -44,7 +44,7 @@ struct
   (*TERMINAR*)
   fun interferenceGraph ({control = fg, use = u, def = d, ismove = m}) =
     let val ns = nodes fg
-        val (lin, lout) = liveOuts ({control = fg, use = u, def = d, ismove = m}) true
+        val (_, lout) = liveOuts ({control = fg, use = u, def = d, ismove = m}) true
         
         val ig = newGraph ()
         val itn = ref (Splaymap.mkDict (String.compare))
@@ -79,6 +79,6 @@ struct
                             end) (T.find (d, n))
         val _ = List.app body ns
     in
-      (IGraph {graph = ig, tnode = itn, gtemp = igt, moves = !moves}, fn n => ["d"])
+      (IGraph {graph = ig, tnode = itn, gtemp = igt, moves = !moves}, T.map (fn (k,s) => Splayset.listItems s) lout)
     end
 end
