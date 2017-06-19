@@ -2,7 +2,41 @@ structure tigersimpleregalloc :> tigersimpleregalloc =
 struct
 	structure frame = tigerframe
 	open tigerassem
+  open tigergraph
+  
+  structure Table = Splaymap
+  structure Set = Splayset
 	
+  val moveList : (tigertemp.temp, tigergraph.node Set.set) Table.dict ref = ref (Table.mkDict String.compare)
+
+
+	fun livenessAnalysis (body : instr list) = #1 (tigermg.instr2graph body)
+
+	fun build (flowg : tigerflow.flowgraph) =
+		let val g      = #control flowg
+			  val moves  = #ismove flowg
+		    val instrs = tigergraph.nodes g
+			  val louts  = tigerliveness.liveOuts flowg
+				fun buildAux n = 
+			  	let val live = ref (T.find (louts, n))
+			  			val useSet = T.find (#use flowg, n)
+			  			val defSet = T.find (#def flowg, n)
+			  	in
+			  		if T.find (moves, n)
+			  		then
+			  			let val _ = live := Set.difference (!live, useSet)
+			  			in Set.app (fn x => moveList := Table.insert(!moveList, x, Set.union(Table.find(!moveList, x), Set.singleton compareNodes n))) (Set.union (defSet,useSet))
+			  			end
+			  		else
+			  			()
+			  	end
+
+			  val _ = app buildAux instrs
+		in
+			()
+		end
+
+
 	fun simpleregalloc (frm:frame.frame) (body:instr list) =
 	let
 		(* COMPLETAR: Temporarios que ya tienen color asignado (p.ej, el temporario que representa a rax) *)
@@ -28,7 +62,7 @@ struct
 					let
 						fun f (OPER r, tmplist) = List.concat [#dst r, #src r, tmplist]
 						| f (LABEL _, tmplist) = tmplist
-						| f (MOVE r, tmplist) = (#dst r)::(#src r)::tmplist
+						(*| f (MOVE r, tmplist) = (#dst r)::(#src r)::tmplist*)
 					in
 						List.foldr f [] body
 					end
@@ -86,7 +120,7 @@ struct
 			let
 				val precoloredSet = Splayset.addList(Splayset.empty String.compare, precolored)
 			in
-				if Splayset.member(precoloredSet, dst) andalso Splayset.member(precoloredSet, src) then [OPER {assem=assem, dst=[dst], src=[src], jump=NONE}]
+			(*	if Splayset.member(precoloredSet, dst) andalso Splayset.member(precoloredSet, src) then [OPER {assem=assem, dst=[dst], src=[src], jump=NONE}]
 				else if Splayset.member(precoloredSet, dst) then [movaTemp(getFramePos src, dst)]
 				else if Splayset.member(precoloredSet, src) then [movaMem(src, getFramePos dst)]
 				else
@@ -94,7 +128,7 @@ struct
 						val color = hd(asignables)
 					in
 						[movaTemp(getFramePos src, color), movaMem(color, getFramePos dst)]
-					end
+					end*) []
 			end
 	in
 		List.concat (map rewriteInstr body)

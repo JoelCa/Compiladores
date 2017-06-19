@@ -200,10 +200,17 @@ Selección de instrucciones y Livennes
   ¿Me podrías plantear un caso en el que se dé esta situación?
   ¿Como deberíamos tratarlo, si es necesario?
 
+- Nosotros calculamos los liveouts para cada instrucción (liveMap), pero en la función Build (del pseudo-código de coloreo) inicia calculando los liveouts de un bloque 
+de instrucciones, "liveOut (bloque)", y lo guarda en una variable llamada "live". ¿A qué se refiere "liveOut(bloque)" ?.
+Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya que en el libro no explica como se calcula, ¿podemos adaptar el pseudo-código para usar liveMap?.
+
+- Una de las sentencias de Build agrega a la variable "live" los def(Instr), esto provoca que luego se generen bucles en el grafo de interferencias sobre los nodos que se corresponden a los temporarios de def. ¿Esta bien que suceda ésto?.
+
 
 
 
 LO ÚLTIMO:
+- Register Allocator.
 - Probar un ejemplo en la máquina virtualizada.
 
 
