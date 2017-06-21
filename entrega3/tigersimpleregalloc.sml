@@ -3,39 +3,68 @@ struct
 	structure frame = tigerframe
 	open tigerassem
   open tigergraph
+  open tigerliveness
   
   structure Table = Splaymap
   structure Set = Splayset
 	
   val moveList : (tigertemp.temp, tigergraph.node Set.set) Table.dict ref = ref (Table.mkDict String.compare)
-
+  val worklistMoves : tigergraph.node Set.set ref = ref (Set.empty compareNodes)
+  val adjSet : (tigertemp.temp * tigertemp.temp) Set.set ref = ref (Set.empty (fn ((a,b),(c,d))  => if (a,b) = (c,d) then EQUAL else String.compare (a,c)))
+  val adjList : (tigertemp.temp, tigertemp.temp Set.set) Table.dict ref = ref (Table.mkDict String.compare)
+  val degree : (tigertemp.temp, int) Table.dict ref = ref (Table.mkDict String.compare)
+  val precolored : tigerframe.register list ref = ref []
 
 	fun livenessAnalysis (body : instr list) = #1 (tigermg.instr2graph body)
+
+	fun tableUpdate(t,n,x) =
+		t := Table.insert(!t, n, Set.add(Table.find(!t, n), x))
+
+	fun addEdge (u,v) =
+		if not(Set.member (!adjSet, (u,v))) andalso not(u = v)
+		then
+			let val _ = adjSet := Set.add (Set.add (!adjSet, (u,v)), (v,u))
+				  val _ = if not(List.exists (fn x => x = u) (!precolored))
+				          then (tableUpdate(adjList,u,v);
+				          		 degree := Table.insert (!degree, u, Table.find (!degree, u) + 1))
+				          else ()
+				  val _ = if not(List.exists (fn x => x = v) (!precolored))
+				          then (tableUpdate(adjList,v,u);
+				          		 degree := Table.insert (!degree, v, Table.find (!degree, v) + 1))
+				          else ()
+			in () end
+		else ()
 
 	fun build (flowg : tigerflow.flowgraph) =
 		let val g      = #control flowg
 			  val moves  = #ismove flowg
 		    val instrs = tigergraph.nodes g
 			  val louts  = tigerliveness.liveOuts flowg
-				fun buildAux n = 
-			  	let val live = ref (T.find (louts, n))
-			  			val useSet = T.find (#use flowg, n)
-			  			val defSet = T.find (#def flowg, n)
-			  	in
-			  		if T.find (moves, n)
-			  		then
-			  			let val _ = live := Set.difference (!live, useSet)
-			  			in Set.app (fn x => moveList := Table.insert(!moveList, x, Set.union(Table.find(!moveList, x), Set.singleton compareNodes n))) (Set.union (defSet,useSet))
-			  			end
-			  		else
-			  			()
+				fun buildAux i = 
+			  	let val live = ref (T.find (louts, i))
+			  			val useSet = T.find (#use flowg, i)
+			  			val defSet = T.find (#def flowg, i)
+			  			val _ = if T.find (moves, i)
+								  		then
+								  			let
+								  				val _ = live := Set.difference (!live, useSet)
+								  				val iSet = Set.singleton compareNodes i
+								  			in
+								  				Set.app (fn x => moveList := Table.insert(!moveList, x, Set.union(Table.find(!moveList, x), iSet))) (Set.union (defSet,useSet));
+								  				worklistMoves := Set.union (!worklistMoves, iSet)
+								  			end
+								  		else
+								  			()
+							val _ = live := Set.union (!live, defSet)
+
+			    in
+			     	Set.app (fn a =>
+	                   	Set.app (fn b => addEdge (a,b)) (!live)
+	                  ) defSet
 			  	end
-
-			  val _ = app buildAux instrs
 		in
-			()
+			app buildAux instrs
 		end
-
 
 	fun simpleregalloc (frm:frame.frame) (body:instr list) =
 	let
