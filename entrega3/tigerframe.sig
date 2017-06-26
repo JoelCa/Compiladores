@@ -28,6 +28,6 @@ val procEntryExit2 : frame * tigerassem.instr list -> tigerassem.instr list
 datatype frag = PROC of {body: tigertree.stm, frame: frame}
 	| STRING of tigertemp.label * string
 val argregs : string list
-
+val allRegs : string list
 
 end

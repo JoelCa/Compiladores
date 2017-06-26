@@ -13,24 +13,57 @@ struct
   val adjSet : (tigertemp.temp * tigertemp.temp) Set.set ref = ref (Set.empty (fn ((a,b),(c,d))  => if (a,b) = (c,d) then EQUAL else String.compare (a,c)))
   val adjList : (tigertemp.temp, tigertemp.temp Set.set) Table.dict ref = ref (Table.mkDict String.compare)
   val degree : (tigertemp.temp, int) Table.dict ref = ref (Table.mkDict String.compare)
-  val precolored : tigerframe.register list ref = ref []
+  val precolored : tigerframe.register list ref = ref tigerframe.allRegs
+  val initial : tigertemp.temp Set.set ref = ref  (Set.empty String.compare)
+  val spillWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
+  val colorCount = length tigerframe.allRegs
+  val activeMoves : tigergraph.node Set.set ref = ref (Set.empty compareNodes)
+  val freezeWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
+	val simplifyWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
+	val selectStack : tigertemp.temp list ref = ref []
+	val coalescedNodes : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
+	val useDef : (tigergraph.node, tigertemp.temp * tigertemp.temp) Table.dict ref = ref (Table.mkDict tigergraph.compareNodes)
+  
+
 
 	fun livenessAnalysis (body : instr list) = #1 (tigermg.instr2graph body)
 
-	fun tableUpdate(t,n,x) =
+	fun updateTable(t,n,x) =
 		t := Table.insert(!t, n, Set.add(Table.find(!t, n), x))
+
+	fun updateSet(s,x) =
+		s := Set.add(!s, x)
+
+	fun updateTableInt(t,n,f) =
+		t := Table.insert(!t, n, f (Table.find(!t, n)))
+
+	fun removeElemTempSet(s,x) =
+		s := Set.difference(!s, Set.singleton String.compare x)
+
+	fun removeElemNodeSet(s,x) =
+		s := Set.difference(!s, Set.singleton tigergraph.compareNodes x)
+
+	fun listToSet(l) =
+		Set.addList(Set.empty String.compare, !l)
+
+	fun push(x,xs) = x::(!xs)
+	
+	(*FALTA TRATAR EL TEMA DE CUANDO XS ES VACIO*)
+	fun pop(xs) = hd(!xs)
 
 	fun addEdge (u,v) =
 		if not(Set.member (!adjSet, (u,v))) andalso not(u = v)
 		then
 			let val _ = adjSet := Set.add (Set.add (!adjSet, (u,v)), (v,u))
 				  val _ = if not(List.exists (fn x => x = u) (!precolored))
-				          then (tableUpdate(adjList,u,v);
-				          		 degree := Table.insert (!degree, u, Table.find (!degree, u) + 1))
+				          then (updateTable(adjList,u,v);				          		
+				          		  updateTableInt (degree, u, fn x => x+1);
+				          		  updateSet(initial, u))
 				          else ()
 				  val _ = if not(List.exists (fn x => x = v) (!precolored))
-				          then (tableUpdate(adjList,v,u);
-				          		 degree := Table.insert (!degree, v, Table.find (!degree, v) + 1))
+				          then (updateTable(adjList,v,u);
+				          		  updateTableInt (degree, u, fn x => x+1);
+				          		  updateSet(initial, v))
 				          else ()
 			in () end
 		else ()
@@ -48,10 +81,10 @@ struct
 								  		then
 								  			let
 								  				val _ = live := Set.difference (!live, useSet)
-								  				val iSet = Set.singleton compareNodes i
+								  				val _ = Set.app (fn d => Set.app (fn u => useDef := Table.insert(!useDef, i, (d,u))) useSet) defSet
 								  			in
-								  				Set.app (fn x => moveList := Table.insert(!moveList, x, Set.union(Table.find(!moveList, x), iSet))) (Set.union (defSet,useSet));
-								  				worklistMoves := Set.union (!worklistMoves, iSet)
+								  				Set.app (fn x => updateTable(moveList, x, i)) (Set.union (defSet,useSet));
+								  				updateSet(worklistMoves, i)
 								  			end
 								  		else
 								  			()
@@ -65,6 +98,72 @@ struct
 		in
 			app buildAux instrs
 		end
+
+	fun nodeMoves(n) =
+		Set.intersection(Table.find(!moveList, n), Set.union(!activeMoves, !worklistMoves))
+	
+	fun moveRelated(n) =
+		not(Set.isEmpty(nodeMoves(n)))
+
+	fun makeWorkList () =
+		let
+			fun makeWorkL x =
+				let
+					val _ = removeElemTempSet(initial, x)
+				in
+					if Table.find(!degree, x) >= colorCount
+					then
+						updateSet(spillWorklist, x)
+					else 
+						if moveRelated(x)
+						then updateSet(freezeWorklist, x)
+						else updateSet(simplifyWorklist, x)
+				end
+		in
+			Set.app makeWorkL (!initial)
+		end
+
+	fun adjacent(n) =
+		Set.difference(Table.find(!adjList, n), Set.union(listToSet(selectStack), !coalescedNodes))
+
+	fun enableMoves(nodes) =
+		let fun enableMovesAux m =
+			    if Set.member (!activeMoves, m)
+			    then
+			    	(removeElemNodeSet(activeMoves, m);
+			    	 updateSet(worklistMoves, m))
+			    else
+			    	()
+		in
+			Set.app (fn n => Set.app (fn m => enableMovesAux m) (nodeMoves(n))) nodes
+		end 
+
+	fun decrementDegree(m) =
+		let val d = Table.find(!degree, m)
+			  val _ = updateTableInt(degree, m, fn _ => d-1)
+		in
+			if d = colorCount
+			then
+				(enableMoves(Set.add(adjacent(m) ,m));
+				 removeElemTempSet(spillWorklist, m);
+				 if moveRelated(m)
+				 then
+				   updateSet(freezeWorklist, m)
+				 else
+				   updateSet(simplifyWorklist, m))
+			else
+				()
+		end
+
+	fun simplify() =
+		case Set.find (fn _ => true) (!simplifyWorklist) of
+		  SOME s => 
+			let val _ = removeElemTempSet(simplifyWorklist, s)
+				  val _ = push(s,selectStack)
+			in
+				Set.app decrementDegree (adjacent(s))
+			end
+		| NONE => ()
 
 	fun simpleregalloc (frm:frame.frame) (body:instr list) =
 	let
