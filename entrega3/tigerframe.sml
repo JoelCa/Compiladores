@@ -59,6 +59,15 @@ val callersaves    = []
 val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10",lr]
 val allRegs        = argregs @ calleesaves @ [fp, sp, pc]
 
+(* allRegs    = ["r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10",lr,fp, sp, pc] *)
+(* asignables = ["r4","r5","r6","r7","r8","r9","r10"] *)
+
+(*
+  pc: En todo momento se está modificando
+  sp: Apunta al tope del stack y en caso de modificarlo se está afectando la posición en la que se agregan cosas al stack
+  fp: Apunta al frame actual y en caso de modificarlo no se estarían accediendo al frame correspondiente
+*)
+
 datatype access = InFrame of int | InReg of tigertemp.label
 
 type frame = {

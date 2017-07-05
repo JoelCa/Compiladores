@@ -207,10 +207,27 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
 - Una de las sentencias de Build agrega a la variable "live" los def(Instr), esto provoca que luego se generen bucles en el grafo de interferencias sobre los nodos que se corresponden a los temporarios de def. ¿Esta bien que suceda ésto?.
 
 
+ Coloreo
+ --------
+
+- En la función "simpleregalloc", la variable "precolored", ¿se refiere a los registros de la arquitectura?. 
+ ¿A qué se refiere la variable "asignables"? ¿Son aquellos registros que se pueden utilizar para colorear?.
+ ¿La cantidad de colores K sería la cantidad de registros asignables?.
+
+- La función "simpleregalloc" que está en el archivo tigersimpleregalloc.sml (en entrega3, lo adjunto), hace un coloreo y reescritura de la instrucciones "básico", ¿verdad?.
+ Vale la pena que lo adaptemos a nuestra arquitectura para ir probando lo que hicimos, antes de terminar de implementar el coloreo recomendado en el libro?.
+
+- ¿Los registros "asignables" son los registros de propósito general?. En nuestro caso tenemos:
+Total de registros = ["r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10",lr,fp, sp, pc]
+Asignables = ["r4","r5","r6","r7","r8","r9","r10"]
+
+Nosotros excluimos de los registros asignables aquellos que tienen un proposito especifico, por ejemplo r0 es el valor de retorno o el primer arg.
+En caso de no ser correcto el razonamiento anterior, ¿Qué razonamiento debemos seguir para encontrar los registros asignables?
+
 
 
 LO ÚLTIMO:
-- Register Allocator.
+- Adaptar el coloreo echo por Guido.
 - Probar un ejemplo en la máquina virtualizada.
 
 

@@ -13,7 +13,7 @@ struct
   val adjSet : (tigertemp.temp * tigertemp.temp) Set.set ref = ref (Set.empty (fn ((a,b),(c,d))  => if (a,b) = (c,d) then EQUAL else String.compare (a,c)))
   val adjList : (tigertemp.temp, tigertemp.temp Set.set) Table.dict ref = ref (Table.mkDict String.compare)
   val degree : (tigertemp.temp, int) Table.dict ref = ref (Table.mkDict String.compare)
-  val precolored : tigerframe.register Set.set ref = ref (Set.addList((Set.empty String.compare), tigerframe.allRegs))
+  val precolored : tigerframe.register Set.set = Set.addList((Set.empty String.compare), tigerframe.allRegs)
   val initial : tigertemp.temp Set.set ref = ref  (Set.empty String.compare)
   val spillWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
   val colorCount = length tigerframe.allRegs
@@ -65,6 +65,8 @@ struct
 
 	fun inSet(x,s) = Set.member(!s, x)
 
+	fun inSetNoRef(x,s) = Set.member(s, x)
+
 	fun takeElem(s) = Set.find (fn _ => true) (!s)
 
 
@@ -72,12 +74,12 @@ struct
 		if not(inSet((u,v), adjSet)) andalso not(u = v)
 		then
 			let val _ = adjSet := Set.add (Set.add (!adjSet, (u,v)), (v,u))
-				  val _ = if not(inSet(u, precolored))
+				  val _ = if not(inSetNoRef(u, precolored))
 				          then (updateSetTable(adjList,u,v);				          		
 				          		  updateTable (degree, u, fn x => x+1);
 				          		  updateSet(initial, u))
 				          else ()
-				  val _ = if not(inSet(v, precolored))
+				  val _ = if not(inSetNoRef(v, precolored))
 				          then (updateSetTable(adjList,v,u);
 				          		  updateTable (degree, u, fn x => x+1);
 				          		  updateSet(initial, v))
@@ -183,7 +185,7 @@ struct
 		| NONE => ()
 
 	fun addWorkList(u) =
-		if not(inSet(u, precolored)) andalso not(moveRelated(u)) andalso (getTableValue(degree, u) < colorCount)
+		if not(inSetNoRef(u, precolored)) andalso not(moveRelated(u)) andalso (getTableValue(degree, u) < colorCount)
 		then
 			(removeElemTempSet(freezeWorklist, u);
 			 updateSet(simplifyWorklist, u))
@@ -191,7 +193,7 @@ struct
 			()
 
 	fun ok(t,r) =
-		getTableValue(degree, t) < colorCount orelse inSet(t, precolored) orelse inSet((t,r), adjSet)
+		getTableValue(degree, t) < colorCount orelse inSetNoRef(t, precolored) orelse inSet((t,r), adjSet)
 
 	fun conservative(nodes) =
 		let val k = ref 0
@@ -231,7 +233,7 @@ struct
 			SOME m =>  
 			  let val (x,y) = getTableValue(movesPair, m)
 		    		val (x,y) = (getAlias(x), getAlias(y))
-		    		val (u,v) = if inSet(y, precolored) then (y,x) else (x,y)
+		    		val (u,v) = if inSetNoRef(y, precolored) then (y,x) else (x,y)
 		    		val _ = removeElemNodeSet(worklistMoves,m)
 		    in
 		    	if u = v
@@ -239,14 +241,14 @@ struct
 		    		(updateSet(coalescedMoves, m);
 		    		 addWorkList(u))
 		    	else
-		    		if inSet(v, precolored) orelse inSet((u,v), adjSet)
+		    		if inSetNoRef(v, precolored) orelse inSet((u,v), adjSet)
 		    		then
 		    			(updateSet(constrainedMoves, m);
 		    			 addWorkList(u);
 		    			 addWorkList(v))
 		    		else
-		    			if (inSet(u, precolored) andalso (Set.foldl (fn (x,r) => ok(x,u) andalso r) true (adjacent(v))))
-		    			   orelse (not(inSet(u, precolored)) andalso conservative(Set.union(adjacent(u), adjacent(v))))
+		    			if (inSetNoRef(u, precolored) andalso (Set.foldl (fn (x,r) => ok(x,u) andalso r) true (adjacent(v))))
+		    			   orelse (not(inSetNoRef(u, precolored)) andalso conservative(Set.union(adjacent(u), adjacent(v))))
 		    			then
 		    				(updateSet(coalescedMoves, m);
 		    				 combine(u, v);
@@ -294,7 +296,7 @@ struct
 								  	| createList(k) = (colorCount - k)::(createList(k-1))
 							    val okColors = ref (Set.addList((Set.empty Int.compare), createList(colorCount)))
 							    fun aux(w) =
-							    	if Set.member(Set.union(!coloredNodes, !precolored), getAlias(w))
+							    	if Set.member(Set.union(!coloredNodes, precolored), getAlias(w))
 							    	then
 							    		removeElemIntSet(okColors, getTableValue(color, getAlias(w)))
 							    	else
@@ -316,9 +318,11 @@ struct
 	fun simpleregalloc (frm:frame.frame) (body:instr list) =
 	let
 		(* COMPLETAR: Temporarios que ya tienen color asignado (p.ej, el temporario que representa a rax) *)
-		val precolored = ["a", "b", "c", "d", "e", "f"]
+		val precolored = tigerframe.allRegs
 		(* COMPLETAR: Temporarios que se pueden usar (p.ej, el temporario que representa a rax. Diferencia con precolored: el temporario que representa a rbp no se puede usar) *)
-		val asignables = ["b", "c", "d", "e", "f"]
+		val asignables = ["r4","r5","r6","r7","r8","r9","r10"]
+		
+
 		(* COMPLETAR: movaMem crea una instrucción que mueve un temporario a memoria. movaTemp, de memoria a un temporario.*)
 		fun movaMem(temp, mempos) =
 			let
@@ -332,13 +336,15 @@ struct
 			in
 				OPER {assem="mov M(a" ^ desp ^ ") `d0", src=[], dst=[temp], jump=NONE}
 			end
+		
+
 		val temps =
 			let
 				val tempList = 
 					let
 						fun f (OPER r, tmplist) = List.concat [#dst r, #src r, tmplist]
-						| f (LABEL _, tmplist) = tmplist
-						(*| f (MOVE r, tmplist) = (#dst r)::(#src r)::tmplist*)
+						  | f (LABEL _, tmplist) = tmplist
+						  | f (MOVE r, tmplist) = List.concat [#dst r, #src r, tmplist]
 					in
 						List.foldr f [] body
 					end
@@ -352,7 +358,7 @@ struct
 		fun getFramePos T =
 			let
 				fun gfp T [] = raise Fail("Temporario no encontrado: "^T)
-				| gfp T ((a,b)::xs) = if a=T then b else gfp T xs
+				  | gfp T ((a,b)::xs) = if a = T then b else gfp T xs
 			in
 				gfp T accesses
 			end
@@ -372,7 +378,7 @@ struct
 				fun getTempCol T =
 				let
 					fun gtc T [] = if Splayset.member(precoloredSet, T) then T else raise Fail("Temporario no encontrado: "^T)
-					| gtc T ((a,b)::xs) = if a=T then b else gtc T xs
+					  | gtc T ((a,b)::xs) = if a = T then b else gtc T xs
 				in
 					gtc T tempcols
 				end
@@ -385,13 +391,14 @@ struct
 				in
 					(map mkgetMov (List.filter filterPC src), map mksetMov (List.filter filterPC dst))
 				end
+				
 				val newdst = map getTempCol dst
 				val newsrc = map getTempCol src
 				val newinstr = OPER {assem=assem, dst=newdst, src=newsrc, jump=jump}
 			in
 				List.concat [prevMovs, [newinstr], posMovs]
 			end
-		  | rewriteInstr (LABEL l) = [LABEL l]
+			| rewriteInstr (LABEL l) = [LABEL l]
 		  | rewriteInstr (MOVE {assem, dst, src}) =
 			let
 				val precoloredSet = Splayset.addList(Splayset.empty String.compare, precolored)
