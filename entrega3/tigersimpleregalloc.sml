@@ -328,7 +328,7 @@ struct
 			let
 				val desp = if mempos<0 then " - " ^ Int.toString(~mempos) else if mempos>0 then " + " ^ Int.toString(mempos) else ""
 			in
-				OPER {assem="mov `s0 M(a" ^ desp ^ ")", src=[temp], dst=[], jump=NONE}
+				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "str `s0 [d0]", src=[temp], dst=[tigertemp.newtemp()], jump=NONE}
 			end
 		fun movaTemp(mempos, temp) =
 			let
@@ -337,7 +337,7 @@ struct
 				OPER {assem="mov M(a" ^ desp ^ ") `d0", src=[], dst=[temp], jump=NONE}
 			end
 		
-
+		(* temps = {todos los temporarios de todas las instrucciones} / {temporarios precoloreados} *)
 		val temps =
 			let
 				val tempList = 
@@ -392,6 +392,13 @@ struct
 					(map mkgetMov (List.filter filterPC src), map mksetMov (List.filter filterPC dst))
 				end
 				
+(*				OPER {assem="", src=[t1], dst=[t2], jump=NONE}
+				movaTemp t1 -----> "t1 :=  mempos"
+				movaMem t2  -----> "mempos :=  t2"
+
+				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "str `s0 [d0]", src=[temp], dst=[tigertemp.newtemp()], jump=NONE}
+				src=[t1,t]*)
+
 				val newdst = map getTempCol dst
 				val newsrc = map getTempCol src
 				val newinstr = OPER {assem=assem, dst=newdst, src=newsrc, jump=jump}

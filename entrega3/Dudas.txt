@@ -253,3 +253,10 @@ LO HECHO:
 
 OBSERVACIÓN
 - Tener en cuenta que la instrucción "bl" requiere agregar dos instrucciones al término del body de la función a la que se salta.
+
+
+CASOS:
+¿En el coloreo de Guido, puede suceder lo siguiente?
+r9 <- 4
+t0 <- 10 (donde t0 puede ser coloreado con r9)
+t1 <- r9 <------------- ¿Qué valor tiene r9? ¿r9 == 4 ó r9 == 10?

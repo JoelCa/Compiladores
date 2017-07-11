@@ -5,6 +5,8 @@ structure A = tigerassem
 structure T = tigertree
 
 open tigerframe
+
+(* T.MOVE (a, b)  <-----> a := b *)
          
 fun codegen (frame) (stm) =
   let val ilist = ref (nil : A.instr list)
