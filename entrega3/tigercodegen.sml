@@ -7,11 +7,12 @@ structure T = tigertree
 open tigerframe
 
 (* T.MOVE (a, b)  <-----> a := b *)
-         
+
 fun codegen (frame) (stm) =
   let val ilist = ref (nil : A.instr list)
       fun emit x = ilist := x :: !ilist
       fun result (gen) = let val t = tigertemp.newtemp() in gen t; t end
+      fun intToString n = if n<0 then "-" ^ Int.toString(~n) else if n>0 then Int.toString(n) else ""
       fun munchStm (T.SEQ (a,b)) = (munchStm a; munchStm b)
         | munchStm (T.MOVE (T.MEM (T.BINOP (T.PLUS, e1, T.CONST i)), e2)) = emit (A.OPER { assem = "str 's0, ['s1,'s2]\n",
                                                                                            src = [munchExp e2, munchExp e1, munchExp (T.CONST i)],
@@ -29,7 +30,7 @@ fun codegen (frame) (stm) =
                                                             src = [munchExp e2, munchExp e1],
                                                             dst = [],
                                                             jump = NONE })
-        | munchStm (T.MOVE (T.TEMP i, e2)) = emit (A.MOVE { assem = "mov 'd0, 's1\n",
+        | munchStm (T.MOVE (T.TEMP i, e2)) = emit (A.MOVE { assem = "mov 'd0, 's0\n",
                                                             src = [munchExp e2],
                                                             dst = [i] })
 
@@ -45,7 +46,7 @@ fun codegen (frame) (stm) =
                                                             | T.ULE => "ls"
                                                             | T.UGT => "hi"
                                                             | T.UGE => "hs"
-                                                    in emit (A.OPER { assem = "cmp 's0 's1\n" ^ "b" ^ toAssemOper(oper) ^ " " ^ t ^"\n",
+                                                    in emit (A.OPER { assem = "cmp 's0, 's1\n" ^ "b" ^ toAssemOper(oper) ^ " " ^ t ^"\n",
                                                                       src = [munchExp e1, munchExp e2],
                                                                       dst = [],
                                                                       jump = SOME [t] })
@@ -106,7 +107,7 @@ fun codegen (frame) (stm) =
                                                                                 dst = [r],
                                                                                 jump = NONE }))
                                               end
-        | munchExp (T.CONST i) = result (fn r => emit (A.OPER { assem = "ldr 'd0, =" ^ Int.toString(i) ^ "\n",
+        | munchExp (T.CONST i) = result (fn r => emit (A.OPER { assem = "ldr 'd0, = " ^ intToString(i) ^ "\n",
                                                                 src = [],
                                                                 dst = [r],
                                                                 jump = NONE }))
@@ -124,7 +125,7 @@ fun codegen (frame) (stm) =
                                                in (y :: r1, r2)
                                                end
                                  else let val z = munchExp x
-                                          val _ = emit (A.OPER { assem = "push 's0\n",
+                                          val _ = emit (A.OPER { assem = "push {'s0}\n",
                                                                  src = [z],
                                                                  dst = [],
                                                                  jump = NONE } )
@@ -132,7 +133,7 @@ fun codegen (frame) (stm) =
                                       in (r1, z :: r2)
                                       end
       and makePops []      = ()
-        | makePops (x::xs) =  let val _ = emit (A.OPER { assem = "pop 's0\n",
+        | makePops (x::xs) =  let val _ = emit (A.OPER { assem = "pop {'s0}\n",
                                                          src = [x],
                                                          dst = [],
                                                          jump = NONE } )

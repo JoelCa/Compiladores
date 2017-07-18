@@ -218,18 +218,18 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
  Vale la pena que lo adaptemos a nuestra arquitectura para ir probando lo que hicimos, antes de terminar de implementar el coloreo recomendado en el libro?.
 
 - ¿Los registros "asignables" son los registros de propósito general?. En nuestro caso tenemos:
-Total de registros = ["r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10",lr,fp, sp, pc]
-Asignables = ["r4","r5","r6","r7","r8","r9","r10"]
+  Total de registros = ["r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10",lr,fp, sp, pc]
+  Asignables = ["r4","r5","r6","r7","r8","r9","r10"]
 
-Nosotros excluimos de los registros asignables aquellos que tienen un proposito especifico, por ejemplo r0 es el valor de retorno o el primer arg.
-En caso de no ser correcto el razonamiento anterior, ¿Qué razonamiento debemos seguir para encontrar los registros asignables?
+  Nosotros excluimos de los registros asignables aquellos que tienen un proposito especifico, por ejemplo r0 es el valor de retorno o el primer arg.
+  En caso de no ser correcto el razonamiento anterior, ¿Qué razonamiento debemos seguir para encontrar los registros asignables?
 
 
 
 LO ÚLTIMO:
-- Adaptar el coloreo echo por Guido.
-- Probar un ejemplo en la máquina virtualizada.
-
+- Chequear "ejemploFinal1.tig"
+- Hacer que las etiquetas de funciones esten antes de su preludio.
+- Arreglar "test01.tig"
 
 LO HECHO:
 - Funciona el intérprete agregandole el prefijo a los labels de funciones.
@@ -249,14 +249,16 @@ LO HECHO:
 - Terminado selección de instruciones.
 - Terminado tigergraph.sml
 - Haciendo del gráfico de interferencias.
+- Adaptar el coloreo echo por Guido.
+- Probar un ejemplo en la máquina virtualizada.
 
 
 OBSERVACIÓN
 - Tener en cuenta que la instrucción "bl" requiere agregar dos instrucciones al término del body de la función a la que se salta.
 
-
-CASOS:
-¿En el coloreo de Guido, puede suceder lo siguiente?
+- En el coloreo de Guido, NO puede suceder lo siguiente:
 r9 <- 4
 t0 <- 10 (donde t0 puede ser coloreado con r9)
 t1 <- r9 <------------- ¿Qué valor tiene r9? ¿r9 == 4 ó r9 == 10?
+Pues nosotros NO "usamos" a r9.
+

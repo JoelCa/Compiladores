@@ -38,6 +38,7 @@ open tigertree
 type level = int
 
 val fp             = "r11"         (* frame pointer *)
+val ip             = "r12"         (* new-static base in inter-link-unit calls *)
 val sp             = "r13"         (* stack pointer *)
 val rv             = "r0"          (* return value  *)
 val lr             = "r14"         (* link register  *)
@@ -56,10 +57,10 @@ val calldefs       = [rv]
 val specialregs    = [rv, fp, sp, pc]
 val argregs        = ["r0","r1","r2","r3"]
 val callersaves    = []
-val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10",lr]
+val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10",ip,lr]
 val allRegs        = argregs @ calleesaves @ [fp, sp, pc]
 
-(* allRegs    = ["r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10",lr,fp, sp, pc] *)
+(* allRegs    = ["r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10",ip,lr,fp,sp,pc] *)
 (* asignables = ["r4","r5","r6","r7","r8","r9","r10"] *)
 
 (*
@@ -148,18 +149,28 @@ fun seq [] = EXP (CONST 0)
   | seq (x::xs) = SEQ (x, seq xs)
 
 fun procEntryExit1 (fr: frame, body) = 
-  let val (entry,exit) = List.foldl
+  let val (entry,exit) = List.foldr
                           (fn (r,(ent,exi)) => let val nt = tigertemp.newtemp()
                                                in if r = lr
                                                   then (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP pc, TEMP nt)::exi) (*TERMINAR*)
                                                   else (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP r, TEMP nt)::exi)
                                                end ) ([],[]) calleesaves
       val acomodaArgs = recorreArgs (rev (!(#ftAccesos fr))) argregs
+      val a = [MOVE (TEMP fp, TEMP sp)]
       val acomoda =  acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
       val functionLabel = [LABEL (#name fr)]
-  in seq(functionLabel@(rev entry)@acomoda@[body]@exit) end
+  in seq(functionLabel@entry@acomoda@[body]@exit) end
 
 fun procEntryExit2(frame,body) = 
      body@[tigerassem.OPER {assem = "", src = [rv,sp]@calleesaves, dst = [], jump = NONE}]
-     
+
+fun procEntryExit3(fr: frame, body) =
+  let
+    val localSpace = wSz * (List.foldr (fn (b, r) => if b then r+1 else r) 0 (#locals fr))
+  in
+    { prolog = "push {fp}\nmov fp, sp\nsub sp, sp, #"^Int.toString localSpace^"\n"
+    , body = body
+    , epilog = "mov sp, fp\npop {fp}\n"}
+  end
+
 end

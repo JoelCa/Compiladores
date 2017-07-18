@@ -324,17 +324,17 @@ struct
 		
 
 		(* COMPLETAR: movaMem crea una instrucción que mueve un temporario a memoria. movaTemp, de memoria a un temporario.*)
-		fun movaMem(temp, mempos) =
+		fun movaMem(temp, mempos, dirTemp) =
 			let
-				val desp = if mempos<0 then " - " ^ Int.toString(~mempos) else if mempos>0 then " + " ^ Int.toString(mempos) else ""
+				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>0 then Int.toString(mempos) else ""
 			in
-				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "str `s0 [d0]", src=[temp], dst=[tigertemp.newtemp()], jump=NONE}
+				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "str 's0, ['d0]\n", src=[temp], dst=[dirTemp], jump=NONE}
 			end
-		fun movaTemp(mempos, temp) =
+		fun movaTemp(mempos, temp, dirTemp) =
 			let
-				val desp = if mempos<0 then " - " ^ Int.toString(~mempos) else if mempos>0 then " + " ^ Int.toString(mempos) else ""
+				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>0 then Int.toString(mempos) else ""
 			in
-				OPER {assem="mov M(a" ^ desp ^ ") `d0", src=[], dst=[temp], jump=NONE}
+				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "ldr 'd1, ['d0]\n", src=[], dst=[dirTemp, temp], jump=NONE}
 			end
 		
 		(* temps = {todos los temporarios de todas las instrucciones} / {temporarios precoloreados} *)
@@ -375,6 +375,7 @@ struct
 
 				val N = length(uncolored)
 				val tempcols = ListPair.zip(uncolored, List.take(colores, N))
+				val auxTemp = List.nth(colores, N)
 				fun getTempCol T =
 				let
 					fun gtc T [] = if Splayset.member(precoloredSet, T) then T else raise Fail("Temporario no encontrado: "^T)
@@ -385,19 +386,13 @@ struct
 
 				val (prevMovs, posMovs) =
 				let
-					fun mkgetMov T = movaTemp(getFramePos T, getTempCol T)
-					fun mksetMov T = movaMem(getTempCol T, getFramePos T)
+					fun mkgetMov T = movaTemp(getFramePos T, getTempCol T, auxTemp)
+					fun mksetMov T = movaMem(getTempCol T, getFramePos T, auxTemp)
 					fun filterPC T = not(Splayset.member(precoloredSet, T))
 				in
 					(map mkgetMov (List.filter filterPC src), map mksetMov (List.filter filterPC dst))
 				end
 				
-(*				OPER {assem="", src=[t1], dst=[t2], jump=NONE}
-				movaTemp t1 -----> "t1 :=  mempos"
-				movaMem t2  -----> "mempos :=  t2"
-
-				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "str `s0 [d0]", src=[temp], dst=[tigertemp.newtemp()], jump=NONE}
-				src=[t1,t]*)
 
 				val newdst = map getTempCol dst
 				val newsrc = map getTempCol src
@@ -406,20 +401,22 @@ struct
 				List.concat [prevMovs, [newinstr], posMovs]
 			end
 			| rewriteInstr (LABEL l) = [LABEL l]
-		  | rewriteInstr (MOVE {assem, dst, src}) =
-			let
-				val precoloredSet = Splayset.addList(Splayset.empty String.compare, precolored)
-			in
-			(*	if Splayset.member(precoloredSet, dst) andalso Splayset.member(precoloredSet, src) then [OPER {assem=assem, dst=[dst], src=[src], jump=NONE}]
-				else if Splayset.member(precoloredSet, dst) then [movaTemp(getFramePos src, dst)]
-				else if Splayset.member(precoloredSet, src) then [movaMem(src, getFramePos dst)]
-				else
-					let
-						val color = hd(asignables)
-					in
-						[movaTemp(getFramePos src, color), movaMem(color, getFramePos dst)]
-					end*) []
-			end
+		  | rewriteInstr (MOVE {assem, dst=[dst], src=[src]}) =
+			  let
+			  	val precoloredSet = Splayset.addList(Splayset.empty String.compare, precolored)
+			  	val auxTemp = hd(asignables)
+			  in
+			  	if Splayset.member(precoloredSet, dst) andalso Splayset.member(precoloredSet, src) then [OPER {assem=assem, dst=[dst], src=[src], jump=NONE}]
+			  	else if Splayset.member(precoloredSet, dst) then [movaTemp(getFramePos src, dst, auxTemp)]
+			  	else if Splayset.member(precoloredSet, src) then [movaMem(src, getFramePos dst, auxTemp)]
+			  	else
+			  		let
+			  			val color = List.nth(asignables, 1)
+			  		in
+			  			[movaTemp(getFramePos src, color, auxTemp), movaMem(color, getFramePos dst, auxTemp)]
+			  		end
+				end
+		  | rewriteInstr (MOVE _) = raise Fail("Move con más de un src o dst.")
 	in
 		List.concat (map rewriteInstr body)
 	end
