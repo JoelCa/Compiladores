@@ -328,13 +328,13 @@ struct
 			let
 				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>0 then Int.toString(mempos) else ""
 			in
-				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "str 's0, ['d0]\n", src=[temp], dst=[dirTemp], jump=NONE}
+				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "str 's0, [fp,'d0]\n", src=[temp], dst=[dirTemp], jump=NONE}
 			end
 		fun movaTemp(mempos, temp, dirTemp) =
 			let
 				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>0 then Int.toString(mempos) else ""
 			in
-				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "ldr 'd1, ['d0]\n", src=[], dst=[dirTemp, temp], jump=NONE}
+				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "ldr 'd1, [fp,'d0]\n", src=[], dst=[dirTemp, temp], jump=NONE}
 			end
 		
 		(* temps = {todos los temporarios de todas las instrucciones} / {temporarios precoloreados} *)

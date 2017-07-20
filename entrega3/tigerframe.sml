@@ -37,13 +37,12 @@ open tigertree
 
 type level = int
 
-val fp             = "r11"         (* frame pointer *)
-val ip             = "r12"         (* new-static base in inter-link-unit calls *)
-val sp             = "r13"         (* stack pointer *)
+val fp             = "fp"         (* frame pointer *)
+val ip             = "ip"         (* new-static base in inter-link-unit calls *)
+val sp             = "sp"         (* stack pointer *)
 val rv             = "r0"          (* return value  *)
-val lr             = "r14"         (* link register  *)
-val pc             = "r15"         (* program counter  *)
-(*val ov             = "OV"          (* overflow value (edx en el 386) *)*)
+val lr             = "lr"         (* link register  *)
+val pc             = "pc"         (* program counter  *)
 val wSz            = 4             (* word size in bytes *)
 val log2WSz        = 2             (* base two logarithm of word size in bytes *)
 val fpPrev         = 0             (* offset (bytes) *)
@@ -158,8 +157,7 @@ fun procEntryExit1 (fr: frame, body) =
       val acomodaArgs = recorreArgs (rev (!(#ftAccesos fr))) argregs
       val a = [MOVE (TEMP fp, TEMP sp)]
       val acomoda =  acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
-      val functionLabel = [LABEL (#name fr)]
-  in seq(functionLabel@entry@acomoda@[body]@exit) end
+in seq(entry@acomoda@[body]@exit) end
 
 fun procEntryExit2(frame,body) = 
      body@[tigerassem.OPER {assem = "", src = [rv,sp]@calleesaves, dst = [], jump = NONE}]
@@ -168,7 +166,7 @@ fun procEntryExit3(fr: frame, body) =
   let
     val localSpace = wSz * (List.foldr (fn (b, r) => if b then r+1 else r) 0 (#locals fr))
   in
-    { prolog = "push {fp}\nmov fp, sp\nsub sp, sp, #"^Int.toString localSpace^"\n"
+    { prolog = (#name fr)^":\npush {fp}\nmov fp, sp\nsub sp, sp, #"^Int.toString localSpace^"\n"
     , body = body
     , epilog = "mov sp, fp\npop {fp}\n"}
   end
