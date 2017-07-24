@@ -30,6 +30,15 @@
     |   local2   |  fp-12
     |    ...     |
     |   localn   |  fp-4*(n+1)
+    |  callee S1 |  fp-4*(n+2)
+    |  callee S2 |  fp-4*(n+3)
+    |  callee S3 |  fp-4*(n+4)
+    |  callee S4 |  fp-4*(n+5)
+    |  callee S5 |  fp-4*(n+6)
+    |    ...     |
+
+
+
 *)
 structure tigerframe :> tigerframe = struct
 
@@ -56,7 +65,7 @@ val calldefs       = [rv]
 val specialregs    = [rv, fp, sp, pc]
 val argregs        = ["r0","r1","r2","r3"]
 val callersaves    = []
-val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10",ip,lr]
+val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10",ip]
 val allRegs        = argregs @ calleesaves @ [fp, sp, pc]
 
 (* allRegs    = ["r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10",ip,lr,fp,sp,pc] *)
@@ -150,14 +159,12 @@ fun seq [] = EXP (CONST 0)
 fun procEntryExit1 (fr: frame, body) = 
   let val (entry,exit) = List.foldr
                           (fn (r,(ent,exi)) => let val nt = tigertemp.newtemp()
-                                               in if r = lr
-                                                  then (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP pc, TEMP nt)::exi) (*TERMINAR*)
-                                                  else (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP r, TEMP nt)::exi)
+                                               in (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP r, TEMP nt)::exi) (*TERMINAR*)
                                                end ) ([],[]) calleesaves
       val acomodaArgs = recorreArgs (rev (!(#ftAccesos fr))) argregs
       val a = [MOVE (TEMP fp, TEMP sp)]
       val acomoda =  acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
-in seq(entry@acomoda@[body]@exit) end
+  in  seq(entry@acomoda@[body]@exit) end(*seq(acomoda@[body]) end*)
 
 fun procEntryExit2(frame,body) = 
      body@[tigerassem.OPER {assem = "", src = [rv,sp]@calleesaves, dst = [], jump = NONE}]
@@ -166,9 +173,9 @@ fun procEntryExit3(fr: frame, body) =
   let
     val localSpace = wSz * (List.foldr (fn (b, r) => if b then r+1 else r) 0 (#locals fr))
   in
-    { prolog = (#name fr)^":\npush {fp}\nmov fp, sp\nsub sp, sp, #"^Int.toString localSpace^"\n"
+    { prolog = (#name fr)^":\npush {fp,lr}\nmov fp, sp\nsub sp, sp, #"^Int.toString localSpace^"\n"
     , body = body
-    , epilog = "mov sp, fp\npop {fp}\n"}
+    , epilog = "mov sp, fp\npop {fp,pc}\n"}
   end
 
 end

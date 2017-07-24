@@ -354,7 +354,8 @@ struct
 				Splayset.listItems(Splayset.difference(s, precoloredSet))
 			end
 
-		val accesses = map (fn T => let val frame.InFrame n = frame.allocLocal frm true in (T, n) end) temps
+		val accesses = map (fn T => let val frame.InFrame n = frame.allocLocal frm true
+		                                val _ =  print("Accesses: "^ T ^ " --- " ^ Int.toString(n) ^ "\n") in (T, n) end) temps
 		fun getFramePos T =
 			let
 				fun gfp T [] = raise Fail("Temporario no encontrado: "^T)
@@ -403,8 +404,13 @@ struct
 			| rewriteInstr (LABEL l) = [LABEL l]
 		  | rewriteInstr (MOVE {assem, dst=[dst], src=[src]}) =
 			  let
+			  	val eset = Splayset.empty String.compare
+					val asignablesSet = Splayset.addList(eset, asignables)
+					val dstset = Splayset.addList(eset, [dst])
+					val srcset = Splayset.addList(eset, [src])
+					val colores = Splayset.listItems(Splayset.difference(asignablesSet, Splayset.union(dstset, srcset)))
 			  	val precoloredSet = Splayset.addList(Splayset.empty String.compare, precolored)
-			  	val auxTemp = hd(asignables)
+			  	val auxTemp = hd(colores)
 			  in
 			  	if Splayset.member(precoloredSet, dst) andalso Splayset.member(precoloredSet, src) then [OPER {assem=assem, dst=[dst], src=[src], jump=NONE}]
 			  	else if Splayset.member(precoloredSet, dst) then [movaTemp(getFramePos src, dst, auxTemp)]

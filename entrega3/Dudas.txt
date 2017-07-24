@@ -224,6 +224,10 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
   Nosotros excluimos de los registros asignables aquellos que tienen un proposito especifico, por ejemplo r0 es el valor de retorno o el primer arg.
   En caso de no ser correcto el razonamiento anterior, ¿Qué razonamiento debemos seguir para encontrar los registros asignables?
 
+- Si ponemos al registro lr como callee save, en procEntryExit1 agregamos las instrucciones move tn lr y move pc tn, antes y después del cuerpo de la
+  función respectivamente, se genera un Segmentation Fault, lo cual se corrige si quitamos lo anterior y ponemos en el prólogo y epílogo push lr y pop pc.
+  ¿Por qué se da esta situación?
+
 
 
 LO ÚLTIMO:
