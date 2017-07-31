@@ -65,7 +65,7 @@ val calldefs       = [rv]
 val specialregs    = [rv, fp, sp, pc]
 val argregs        = ["r0","r1","r2","r3"]
 val callersaves    = []
-val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10",ip]
+val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10"]
 val allRegs        = argregs @ calleesaves @ [fp, sp, pc]
 
 (* allRegs    = ["r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10",ip,lr,fp,sp,pc] *)
@@ -159,7 +159,7 @@ fun seq [] = EXP (CONST 0)
 fun procEntryExit1 (fr: frame, body) = 
   let val (entry,exit) = List.foldr
                           (fn (r,(ent,exi)) => let val nt = tigertemp.newtemp()
-                                               in (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP r, TEMP nt)::exi) (*TERMINAR*)
+                                               in (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP r, TEMP nt)::exi)
                                                end ) ([],[]) calleesaves
       val acomodaArgs = recorreArgs (rev (!(#ftAccesos fr))) argregs
       val a = [MOVE (TEMP fp, TEMP sp)]
@@ -173,9 +173,9 @@ fun procEntryExit3(fr: frame, body) =
   let
     val localSpace = wSz * (List.foldr (fn (b, r) => if b then r+1 else r) 0 (#locals fr))
   in
-    { prolog = (#name fr)^":\npush {fp,lr}\nmov fp, sp\nsub sp, sp, #"^Int.toString localSpace^"\n"
+    { prolog = (#name fr)^":\npush {fp,ip,lr}\nmov fp, sp\nsub sp, sp, #"^Int.toString localSpace^"\n"
     , body = body
-    , epilog = "mov sp, fp\npop {fp,pc}\n"}
+    , epilog = "mov sp, fp\npop {fp,ip,pc}\n"}
   end
 
 end

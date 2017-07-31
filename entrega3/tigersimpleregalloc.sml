@@ -326,13 +326,13 @@ struct
 		(* COMPLETAR: movaMem crea una instrucción que mueve un temporario a memoria. movaTemp, de memoria a un temporario.*)
 		fun movaMem(temp, mempos, dirTemp) =
 			let
-				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>0 then Int.toString(mempos) else ""
+				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>=0 then Int.toString(mempos) else ""
 			in
 				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "str 's0, [fp,'d0]\n", src=[temp], dst=[dirTemp], jump=NONE}
 			end
 		fun movaTemp(mempos, temp, dirTemp) =
 			let
-				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>0 then Int.toString(mempos) else ""
+				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>=0 then Int.toString(mempos) else ""
 			in
 				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "ldr 'd1, [fp,'d0]\n", src=[], dst=[dirTemp, temp], jump=NONE}
 			end

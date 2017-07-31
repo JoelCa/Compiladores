@@ -231,6 +231,7 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
 
 
 LO ÚLTIMO:
+- Cuando se genera el código con "test123Modif.tig", se hace "ldr r10, = ". Controlar y arreglar
 - Chequear "ejemploFinal1.tig"
 - Hacer que las etiquetas de funciones esten antes de su preludio.
 - Arreglar "test01.tig"
