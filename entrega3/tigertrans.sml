@@ -91,15 +91,13 @@ fun Ir(e) =
 
 fun nombreFrame frame = print(".globl " ^ tigerframe.name frame ^ "\n")
 
+fun instrCode {prolog = p, body = b : tigerassem.instr list, epilog = e} = 
+  p ^ (foldr (fn (s, r) => (tigerassem.format tigertemp.makeString s) ^ r) "" b) ^ e
+  	
 fun procStringList g ((PROC {body = b, frame = f})::zs) =
-	let val (xs,ys) = procStringList g zs
-	in ((g b,f)::xs,ys)
-	end
-	| procStringList g ((STRING (l,s))::zs) =
-		let val (xs,ys) = procStringList g zs
-		in (xs,(l,s)::ys)
-		end
-	| procStringList _ [] = ([],[]) 
+	 instrCode (tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, tigersimpleregalloc.simpleregalloc f (tigercodegen.maximalMunch f (g b))))) :: procStringList g zs
+	| procStringList g ((STRING (l,s))::zs) = s :: procStringList g zs 
+	| procStringList _ [] = [] 
 
 fun procBody (PROC {body = b, frame = f}) = SOME (b,f)
 	| procBody _  = NONE
@@ -122,9 +120,9 @@ end
 val datosGlobs = ref ([]: frag list)
 
 fun procEntryExit{level: level, body} =
-		let val label = STRING(name(#frame level), "")
+		let val label = STRING(name(#frame level), name(#frame level)^":\n")
 				val body' = PROC{frame= #frame level, body=unNx body}
-				val final = STRING(";;-------", "")
+				val final = STRING("/*--------------*/", "/*--------------*/\n")
 		in  datosGlobs:=(!datosGlobs@[label, body', final])
 		end
 
@@ -142,9 +140,9 @@ fun stringLen s =
 (*     .string "hola" *)
 fun stringExp(s: string) =
 	let val l = newlabel()
-		val len = ".long "^makestring(stringLen s)
-		val str = ".string \""^s^"\""
-		val _ = datosGlobs:=(!datosGlobs @ [STRING(l, len), STRING("", str)])
+		(*val len = ".long "^makestring(stringLen s)^"\n"*)
+		val str = l ^ ": .asciz \""^s^"\"\n"
+		val _ = datosGlobs:=(!datosGlobs @ [STRING("", str)])
 	in  Ex(NAME l) end
 
 fun preFunctionDec() =

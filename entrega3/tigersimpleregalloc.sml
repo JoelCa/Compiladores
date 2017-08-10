@@ -355,7 +355,8 @@ struct
 			end
 
 		val accesses = map (fn T => let val frame.InFrame n = frame.allocLocal frm true
-		                                val _ =  print("Accesses: "^ T ^ " --- " ^ Int.toString(n) ^ "\n") in (T, n) end) temps
+		                                (*val _ =  print("Accesses: "^ T ^ " --- " ^ Int.toString(n) ^ "\n")*)
+		                            in (T, n) end) temps
 		fun getFramePos T =
 			let
 				fun gfp T [] = raise Fail("Temporario no encontrado: "^T)

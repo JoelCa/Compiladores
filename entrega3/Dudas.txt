@@ -228,13 +228,15 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
   función respectivamente, se genera un Segmentation Fault, lo cual se corrige si quitamos lo anterior y ponemos en el prólogo y epílogo push lr y pop pc.
   ¿Por qué se da esta situación?
 
+- ¿Mantenemos el nombre de "_tigermain" para la función principal?
 
 
 LO ÚLTIMO:
-- Cuando se genera el código con "test123Modif.tig", se hace "ldr r10, = ". Controlar y arreglar
+- Arreglar "ejemploFinal8.tig"
+- Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"
-- Hacer que las etiquetas de funciones esten antes de su preludio.
 - Arreglar "test01.tig"
+
 
 LO HECHO:
 - Funciona el intérprete agregandole el prefijo a los labels de funciones.
@@ -256,6 +258,9 @@ LO HECHO:
 - Haciendo del gráfico de interferencias.
 - Adaptar el coloreo echo por Guido.
 - Probar un ejemplo en la máquina virtualizada.
+- Hacer que las etiquetas de funciones esten antes de su preludio.
+- Cuando se genera el código con "test123Modif.tig", se hace "ldr r10, = ". Controlar y arreglar
+- Los frames colisionan (al menos con funciones recursivas). NO estamos "reservando" espacio para los locals.
 
 
 OBSERVACIÓN

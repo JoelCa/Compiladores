@@ -128,14 +128,12 @@ fun transExp(venv, tenv) =
       end
     | trexp(OpExp({left, oper=EqOp, right}, nl)) =
       let
-    val {exp=explCode, ty=tyl} = trexp left
-    val {exp=exprCode, ty=tyr} = trexp right
-                val _ = (printTab (venv); print("\n"))
-                val _ = print("izquierda "^(showT tyl)^" - derecha "^(showT tyr)^"\n")
+        val {exp=explCode, ty=tyl} = trexp left
+        val {exp=exprCode, ty=tyr} = trexp right
       in
-    if tiposIguales tyl tyr andalso not (tyl=TNil andalso tyr=TNil) andalso tyl<>TUnit then 
-        {exp=if tiposIguales tyl TString then binOpStrExp {left=explCode,oper=EqOp,right=exprCode} else binOpIntRelExp {left=explCode,oper=EqOp,right=exprCode}, ty=TInt}
-    else error("Tipos no comparables", nl)
+      if tiposIguales tyl tyr andalso not (tyl=TNil andalso tyr=TNil) andalso tyl<>TUnit then 
+          {exp=if tiposIguales tyl TString then binOpStrExp {left=explCode,oper=EqOp,right=exprCode} else binOpIntRelExp {left=explCode,oper=EqOp,right=exprCode}, ty=TInt}
+      else error("Tipos no comparables", nl)
       end
     | trexp(OpExp({left, oper=NeqOp, right}, nl)) = 
       let
@@ -312,18 +310,17 @@ fun transExp(venv, tenv) =
                 {exp = arrayExp{size = sizeCode, init = initCode}, ty = TArray(typeInit,u)}
             end
   and trvar(SimpleVar s, nl) =
-            (* NOSOTROS *)
-            let
-    val (varType,access,level) =
-        case tabBusca (s, venv) of
-      SOME (Var {ty = t, access=access, level=level}) => (t,access,level)
-                      | SOME (IntReadOnly {access=access, level=level}) => (TInt,access,level)
-                      | SOME _ => error (printRef s ^ " es de tipo inválido", nl)
-          | NONE => error(printRef s ^ " no fue declarada", nl)
-                val _ = print("tipo :"^(showT varType)^"\n")
-            in
-    {exp=simpleVar(access, level), ty=varType}
-            end
+        (* NOSOTROS *)
+        let
+          val (varType,access,level) =
+            case tabBusca (s, venv) of
+              SOME (Var {ty = t, access=access, level=level}) => (t,access,level)
+            | SOME (IntReadOnly {access=access, level=level}) => (TInt,access,level)
+            | SOME _ => error (printRef s ^ " es de tipo inválido", nl)
+            | NONE => error(printRef s ^ " no fue declarada", nl)          
+        in
+          {exp=simpleVar(access, level), ty=varType}
+        end
     | trvar(FieldVar(v, s), nl) =
             (* NOSOTROS *)
             let
@@ -615,30 +612,30 @@ fun transExp(venv, tenv) =
                     let
                         val pares = genPares batch
 
-                        val _ = (print("Pares: "); map (fn (s, s') => print ("("^s^","^s'^")" ^ " - ")) pares ; print("\n"))
+                        (*val _ = (print("Pares: "); map (fn (s, s') => print ("("^s^","^s'^")" ^ " - ")) pares ; print("\n"))*)
 
                         val ordered = topsort.topsort pares
 
-                        val _ = (print("Tipos ordenados por el topsort: "); map (fn s => print (s ^ " - ")) ordered ; print("\n"))
+                        (*val _ = (print("Tipos ordenados por el topsort: "); map (fn s => print (s ^ " - ")) ordered ; print("\n"))*)
 
                         val recs = buscaArrRecords batch
                         val env' = primeraPasada ordered batch recs env
 
-                        val _ = (print("Tabla en el 1º procesa: ") ; printTab (env'); print("\n"))
+                        (*val _ = (print("Tabla en el 1º procesa: ") ; printTab (env'); print("\n"))*)
 
                         val env'' = segundaPasada batch env'
 
-                        val _ = (print("Tabla en el 2º procesa: ") ; printTab (env''); print("\n"))
+                        (*val _ = (print("Tabla en el 2º procesa: ") ; printTab (env''); print("\n"))*)
 
-                        val _ = map (fn (s,t) => print(s^" "^(showT t)^" - ")) (tabAList env'')
+                        (*val _ = map (fn (s,t) => print(s^" "^(showT t)^" - ")) (tabAList env'')*)
 
-                        val _ = print("\n")
+                        (*val _ = print("\n")*)
 
                         val env''' =  fijaNONE (tabAList env'') env''
 
-                        val _ = map (fn (s,t) => print(s^" "^(showT t)^" - ")) (tabAList env''')
+                        (*val _ = map (fn (s,t) => print(s^" "^(showT t)^" - ")) (tabAList env''')*)
 
-                        val _ = print("\n")
+                        (*val _ = print("\n")*)
                     in env''' end
             in
                 let
@@ -650,11 +647,11 @@ fun transExp(venv, tenv) =
     in trexp end
 fun transProg ex =
   let val main =
-      LetExp({decs=[FunctionDec[({name="_tigermain", params=[],
+      LetExp({decs=[FunctionDec[({name="main", params=[],
           result=SOME "int", body=ex}, 0)]],
         body=UnitExp 0}, 0)
   val _ = transExp(tab_vars, tab_tipos) main
                         (*val _ = print (tigerit.tree (unNx exp))*)
-  in  print "bien!\n" end
+  in  () end
 end
     

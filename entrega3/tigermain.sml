@@ -36,16 +36,16 @@ fun main(args) =
     val _ = transProg(expr);
     val fragmentos = tigertrans.getResult()
     val fcCanon = (tigercanon.traceSchedule o tigercanon.basicBlocks o tigercanon.linearize)
-    val (procs,strings) = tigertrans.procStringList fcCanon fragmentos
+    val finalStrCode = tigertrans.procStringList fcCanon fragmentos
     
-    val functionInstrCode = map (fn (b,f) => (f, tigercodegen.maximalMunch f b)) procs
-    val coloredInstr = map (fn (f, is) => tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, tigersimpleregalloc.simpleregalloc f is))) functionInstrCode
+    (*val functionInstrCode = map (fn (b,f) => (f, tigercodegen.maximalMunch f b)) procs*)
+    (*val coloredInstr = map (fn (f, is) => tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, tigersimpleregalloc.simpleregalloc f is))) functionInstrCode*)
     val _ = if ir then print(tigertrans.Ir(fragmentos)) else ()
-		val _ = if canon then List.app (fn (b,f) => (print((tigerframe.name f)^":\n"); List.app (print o tigerit.tree) b)) procs else ()
-    val _ = if code then map (print o instrCode) coloredInstr else [()]
-    val _ = if inter then tigerinterp.inter true procs strings else ()
+		(*val _ = if canon then List.app (fn (b,f) => (print((tigerframe.name f)^":\n"); List.app (print o tigerit.tree) b)) procs else ()*)
+    val _ = if code then map print finalStrCode else [()]
+    (*val _ = if inter then tigerinterp.inter true procs strings else ()*)
 	in
-		print "yes!!\n"
+		(*print "yes!!\n"*) ()
 	end	handle Fail s => print("Fail: "^s^"\n")
 
 

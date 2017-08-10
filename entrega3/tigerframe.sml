@@ -82,7 +82,7 @@ datatype access = InFrame of int | InReg of tigertemp.label
 type frame = {
     name: string,
     formals: bool list,
-    locals: bool list,
+    locals: bool list ref,
     actualArg: int ref,
     actualLocal: int ref,
     actualReg: int ref,
@@ -96,7 +96,7 @@ datatype frag = PROC of {body: tigertree.stm, frame: frame}
 fun newFrame{name, formals} = {
     name        = name,
     formals     = true::formals,
-    locals      = [],
+    locals      = ref [],
     actualArg   = ref argsInicial,
     actualLocal = ref localsInicial,
     actualReg   = ref ((length argregs) - 1),           (* con la sugerencia de Guillermo *)
@@ -137,11 +137,14 @@ fun allocArg (f: frame) b =
       in acc end
 
 fun allocLocal (f: frame) b =
-  case b of
-    true =>
-      let val ret = InFrame(localsGap + (!(#actualLocal f)*wSz))
-      in  #actualLocal f:=(!(#actualLocal f)-1); ret end
-  | false => InReg(tigertemp.newtemp())
+  let val _ =(#locals f) := b::(!(#locals f))
+  in
+    case b of
+      true =>
+        let val ret = InFrame(localsGap + (!(#actualLocal f)*wSz))
+        in  #actualLocal f:=(!(#actualLocal f)-1); ret end
+    | false => InReg(tigertemp.newtemp())
+  end
 
 fun exp(InFrame k) _ = MEM(BINOP(PLUS, TEMP(fp), CONST k))
   | exp(InReg l)   _ = TEMP l
@@ -164,18 +167,18 @@ fun procEntryExit1 (fr: frame, body) =
       val acomodaArgs = recorreArgs (rev (!(#ftAccesos fr))) argregs
       val a = [MOVE (TEMP fp, TEMP sp)]
       val acomoda =  acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
-  in  seq(entry@acomoda@[body]@exit) end(*seq(acomoda@[body]) end*)
+  in  seq(acomoda@[body]) end(*seq(entry@acomoda@[body]@exit) end*)
 
 fun procEntryExit2(frame,body) = 
      body@[tigerassem.OPER {assem = "", src = [rv,sp]@calleesaves, dst = [], jump = NONE}]
 
 fun procEntryExit3(fr: frame, body) =
   let
-    val localSpace = wSz * (List.foldr (fn (b, r) => if b then r+1 else r) 0 (#locals fr))
+    val localSpace = wSz * (List.foldr (fn (b, r) => if b then r+1 else r) 0 (!(#locals fr)))
   in
-    { prolog = (#name fr)^":\npush {fp,ip,lr}\nmov fp, sp\nsub sp, sp, #"^Int.toString localSpace^"\n"
+    { prolog = "push {fp,ip,lr}\nmov fp, sp\nsub sp, sp, #"^Int.toString localSpace^"\n"
     , body = body
-    , epilog = "mov sp, fp\npop {fp,ip,pc}\n"}
+    , epilog = "\npush {r0,r1}\nmov r1, r0\nldr r0, =string1\nbl printf\npop {r0,r1}\n\nmov sp, fp\npop {fp,ip,pc}\n"}
   end
 
 end
