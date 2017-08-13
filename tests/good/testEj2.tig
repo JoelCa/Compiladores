@@ -1,0 +1,6 @@
+let
+  function f (n : int) : int =
+    (if n > 11 then n+78 else n-78)
+in
+  f(10)
+end

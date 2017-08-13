@@ -1,0 +1,14 @@
+/* variables escapadas */
+let
+  var i := -78
+  function f(a:int):int =
+  let
+    var j := i
+    function g(b:int):int =
+      j
+  in
+    g(i)
+  end
+in
+  f(99)
+end

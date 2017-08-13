@@ -1,0 +1,10 @@
+/* valid for and let */
+
+let
+  function fact(m : int) : int =
+    if m = 0 then 1 else m * fact(m-1)
+  function sum(n : int) : int =
+    fact(n) + 13
+in 
+  sum(5)
+end

@@ -1,0 +1,13 @@
+let
+  var c := getchar()
+in
+/*
+  while 1
+    do ( if c = "w" then break;
+         c := getchar()
+       );
+*/
+  if ord(c) = ord("w") then print("yes") else print(c);
+  print ("\n");
+  0
+end

@@ -1,0 +1,5 @@
+let
+  var a:int := 7
+in 
+  157 + 99 - 89
+end

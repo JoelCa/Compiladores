@@ -1,0 +1,10 @@
+.text
+.global main
+.extern printf
+.text
+.global main
+.extern printf
+main
+HOLA MUNDO
+string1: .asciz "Result: %d"
+string1: .asciz "Result: %d"
