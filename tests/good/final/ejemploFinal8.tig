@@ -1,8 +1,12 @@
 /* define valid mutually recursive procedures */
 let
 
-function do_nothing1 (a : int, b : string): int=
-    a+46
+function do_nothing1 (a : int, b : string) : int=
+    if a = 3 then a else do_nothing2 (a+1)
+
+function do_nothing2 (d : int) : int=
+    do_nothing1 (d, "str")
+
 in
   do_nothing1 (0, "str2"); 0
 end

@@ -25,16 +25,15 @@
     |    arg4    |  fp+4
     --------------
     |   fp ant   |  fp
-    |  fp level  |  fp-4   static link
-    |   local1   |  fp-8
-    |   local2   |  fp-12
+    |   ip       |  fp-4
+    |   lr       |  fp-8
+    |  fp level  |  fp-12   static link
+    |   local1   |  fp-16
+    |   local2   |  fp-20
     |    ...     |
-    |   localn   |  fp-4*(n+1)
-    |  callee S1 |  fp-4*(n+2)
-    |  callee S2 |  fp-4*(n+3)
-    |  callee S3 |  fp-4*(n+4)
-    |  callee S4 |  fp-4*(n+5)
-    |  callee S5 |  fp-4*(n+6)
+    |   localn   |  fp-4*(n+4)
+    |  callee S1 |  fp-4*(n+5)
+    |  callee S2 |  fp-4*(n+6)
     |    ...     |
 
 
@@ -57,7 +56,7 @@ val log2WSz        = 2             (* base two logarithm of word size in bytes *
 val fpPrev         = 0             (* offset (bytes) *)
 val fpPrevLev      = ~4            (* offset (bytes) *)
 val argsInicial    = 1             
-val argsOffInicial = 0             (* words *)
+val argsOffInicial = 2             (* words *)
 val argsGap        = wSz           (* bytes *)
 val localsInicial  = 0             (* words *)
 val localsGap      = ~8            (* bytes que indican el espacio entre el fp y el 1º local *)
@@ -176,7 +175,7 @@ fun procEntryExit3(fr: frame, body) =
   let
     val localSpace = wSz * (List.foldr (fn (b, r) => if b then r+1 else r) 0 (!(#locals fr)))
   in
-    { prolog = "push {fp,ip,lr}\nmov fp, sp\nsub sp, sp, #"^Int.toString localSpace^"\n"
+    { prolog = "push {fp,ip,lr}\nmov fp, sp, #12\nsub sp, sp, #"^Int.toString localSpace^"\n"
     , body = body
     , epilog = "\npush {r0,r1}\nmov r1, r0\nldr r0, =string1\nbl printf\npop {r0,r1}\n\nmov sp, fp\npop {fp,ip,pc}\n"}
   end

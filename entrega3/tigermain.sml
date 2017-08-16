@@ -28,7 +28,7 @@ fun main(args) =
 			[n] => ((open_in n)
 					handle _ => raise Fail (n^" no existe!"))
 			| [] => std_in
-			| _ => raise Fail "opcio'n dsconocida!"
+			| _ => raise Fail "opcio'n desconocida!"
 		val lexbuf = lexstream entrada
 		val expr = prog Tok lexbuf handle _ => errParsing lexbuf
 		val _ = findEscape(expr)

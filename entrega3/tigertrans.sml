@@ -114,19 +114,22 @@ fun popSalida() = tigerpila.popPila salidas
 fun topSalida() =
 	case tigerpila.topPila salidas of
 		SOME l => l
-	| NONE => raise Fail "break incorrecto!"      
+	| NONE => raise Fail "break incorrecto!"
 end
 
-val datosGlobs = ref ([]: frag list)
+val procsGlobs = ref ([]: frag list)
+val stringsGlobs = ref ([]: frag list)
 
 fun procEntryExit{level: level, body} =
 		let val label = STRING(name(#frame level), name(#frame level)^":\n")
 				val body' = PROC{frame= #frame level, body=unNx body}
 				val final = STRING("/*--------------*/", "/*--------------*/\n")
-		in  datosGlobs:=(!datosGlobs@[label, body', final])
+		in  procsGlobs:=(!procsGlobs@[label, body', final])
 		end
 
-fun getResult() = !datosGlobs
+
+fun getResult() = !stringsGlobs @ !procsGlobs
+
 
 fun stringLen s =
 		let fun aux [] = 0
@@ -141,8 +144,8 @@ fun stringLen s =
 fun stringExp(s: string) =
 	let val l = newlabel()
 		(*val len = ".long "^makestring(stringLen s)^"\n"*)
-		val str = l ^ ": .asciz \""^s^"\"\n"
-		val _ = datosGlobs:=(!datosGlobs @ [STRING("", str)])
+		val str = l ^ ": .asciz \""^s^"\"\n" ^ ".align\n"
+		val _ = stringsGlobs:=(!stringsGlobs @ [STRING("", str)])
 	in  Ex(NAME l) end
 
 fun preFunctionDec() =

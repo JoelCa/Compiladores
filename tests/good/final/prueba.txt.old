@@ -1,6 +1,0 @@
-.text
-.global main
-.extern printf
-L0_main
-HOLA MUNDO
-string1: .asciz "Result: %d"

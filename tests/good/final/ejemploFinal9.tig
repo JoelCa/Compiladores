@@ -1,0 +1,7 @@
+let
+  function f (n : int, m : int, b : int, v : int, c : int) : int =
+    (if n > 11 then n+78+v else n-78+c)
+in
+  f(10+500,16,17,18,19) + 1546856
+end
+
