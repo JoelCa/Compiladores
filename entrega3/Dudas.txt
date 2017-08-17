@@ -273,13 +273,28 @@ t0 <- 10 (donde t0 puede ser coloreado con r9)
 t1 <- r9 <------------- ¿Qué valor tiene r9? ¿r9 == 4 ó r9 == 10?
 Pues nosotros NO "usamos" a r9.
 
+- Por alguna razón el código:
+
+push {r0,r2}
+mov r0, r2
+bl printf
+pop {r0,r2}
+
+Modifica el registro r1, en el archivo "ejemploFinal8.s".
+Se arregla haciendo en su lugar:
+
+push {r0,r1,r2}
+mov r0, r2
+bl printf
+pop {r0,r1,r2}
+
 
 
 -------------
 fp *****
 ip
 lr
-****** fp0
+****** fp
 sl
 locals fp-8
 
