@@ -1,0 +1,18 @@
+let
+  function f (a:int) : int =
+    a+1
+  function g (a:int) : int =
+    a+2
+  var x := f(g(3))
+in
+  x * 4
+end
+
+/*let
+  function f (a:int) : int =
+    a+1
+  var x := f(3)
+in
+  x * 4
+end*/
+
