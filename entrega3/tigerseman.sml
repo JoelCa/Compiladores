@@ -647,7 +647,7 @@ fun transExp(venv, tenv) =
     in trexp end
 fun transProg ex =
   let val main =
-      LetExp({decs=[FunctionDec[({name="main", params=[],
+      LetExp({decs=[FunctionDec[({name="_tigermain", params=[],
           result=SOME "int", body=ex}, 0)]],
         body=UnitExp 0}, 0)
   val _ = transExp(tab_vars, tab_tipos) main

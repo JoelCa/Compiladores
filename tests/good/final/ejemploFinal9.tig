@@ -1,6 +1,9 @@
 let
   function f (n : int, m : int, b : int, v : int, c : int) : int =
-    (if n > 11 then n+78+v else n-78+c)
+  let var a := 10
+      function g (w : int) : int =
+        (if n > 11 then n+w+a else 3214)
+  in g(344) end
 in
   f(10+500,16,17,18,19) + 1546856
 end
