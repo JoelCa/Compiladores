@@ -3,7 +3,7 @@
 let
     var N := 10
     function printboard () =
-       (for i := 0 to N-1
+       (for i := 0 to N
 	 do (
          print ("\n")))
 

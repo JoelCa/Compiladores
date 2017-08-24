@@ -402,7 +402,9 @@ struct
 			in
 				List.concat [prevMovs, [newinstr], posMovs]
 			end
-			| rewriteInstr (LABEL l) = [LABEL l]
+			| rewriteInstr (LABEL l) = let val _ = print ("AAAA " ^ (#assem l) ^ "\n")
+                                 in [LABEL l] (*[LABEL {assem="hola\n", lab="hola"}]*)
+                                 end
 		  | rewriteInstr (MOVE {assem, dst=[dst], src=[src]}) =
 			  let
 			  	val eset = Splayset.empty String.compare

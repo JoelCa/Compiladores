@@ -36,12 +36,15 @@ fun main(args) =
     val _ = transProg(expr);
     val fragmentos = tigertrans.getResult()
     val fcCanon = (tigercanon.traceSchedule o tigercanon.basicBlocks o tigercanon.linearize)
-    val finalStrCode = tigertrans.procStringList fcCanon fragmentos
+    fun aux (x, SOME y) = (fcCanon x, SOME y)
+      | aux (x, y) = ([x], y)
+    val canonCode = map aux (tigertrans.getStms (tigertrans.getResult()))
+    val finalStrCode = tigertrans.procStringList canonCode
     
     (*val functionInstrCode = map (fn (b,f) => (f, tigercodegen.maximalMunch f b)) procs*)
     (*val coloredInstr = map (fn (f, is) => tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, tigersimpleregalloc.simpleregalloc f is))) functionInstrCode*)
     val _ = if ir then print(tigertrans.Ir(fragmentos)) else ()
-		(*val _ = if canon then List.app (fn (b,f) => (print((tigerframe.name f)^":\n"); List.app (print o tigerit.tree) b)) procs else ()*)
+		val _ = if canon then List.app (fn (xs,_) => List.app (fn x => (print o tigerit.tree) x) xs) canonCode else ()
     val _ = if code then map print finalStrCode else [()]
     (*val _ = if inter then tigerinterp.inter true procs strings else ()*)
 	in

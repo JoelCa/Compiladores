@@ -94,10 +94,10 @@ fun nombreFrame frame = print(".globl " ^ tigerframe.name frame ^ "\n")
 fun instrCode {prolog = p, body = b : tigerassem.instr list, epilog = e} = 
   p ^ (foldr (fn (s, r) => (tigerassem.format tigertemp.makeString s) ^ r) "" b) ^ e
   	
-fun procStringList g ((PROC {body = b, frame = f})::zs) =
-	 instrCode (tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, tigersimpleregalloc.simpleregalloc f (tigercodegen.maximalMunch f (g b))))) :: procStringList g zs
-	| procStringList g ((STRING (l,s))::zs) = s :: procStringList g zs 
-	| procStringList _ [] = [] 
+fun procStringList ((ss, SOME f)::zs) =
+	 instrCode (tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, tigersimpleregalloc.simpleregalloc f (tigercodegen.maximalMunch f ss)))) :: procStringList zs
+	| procStringList (([LABEL s], NONE)::zs) = s :: procStringList zs 
+	| procStringList [] = [] 
 
 fun procBody (PROC {body = b, frame = f}) = SOME (b,f)
 	| procBody _  = NONE
@@ -130,7 +130,6 @@ fun procEntryExit{level: level, body} =
 
 fun getResult() = !stringsGlobs @ !procsGlobs
 
-
 fun stringLen s =
 		let fun aux [] = 0
 		| aux (#"\\":: #"x"::_::_::t) = 1+aux(t)
@@ -145,7 +144,7 @@ fun stringExp(s: string) =
 	let val l = newlabel()
 		(*val len = ".long "^makestring(stringLen s)^"\n"*)
 		val str = l ^ ": .asciz \""^s^"\"\n" ^ ".align\n"
-		val _ = stringsGlobs:=(!stringsGlobs @ [STRING("", str)])
+		val _ = stringsGlobs:=(!stringsGlobs @ [STRING(s, str)])
 	in  Ex(NAME l) end
 
 fun preFunctionDec() =
@@ -497,4 +496,10 @@ fun binOpStrExp {left,oper,right} =
 				| GeOp  => Cx (subst GE)
 				| _     => raise Fail ("Error: se esperaba operador de comparación de strings") 
 		end
+
+
+fun getStms []                           = []
+	| getStms ((PROC {body = b, frame = f})::zs) = (b, SOME f) :: (getStms zs)
+  | getStms ((STRING (l,_))::zs)         = (LABEL l, NONE) :: (getStms zs)
+
 end                                      
