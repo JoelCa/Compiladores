@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <header.h>
 
 typedef struct {
     long length;
@@ -216,14 +217,16 @@ string *getstr()
     else
 		return (string*)(consts + i);
 }
+
+
 int main()
 {
-    int i;
+   int i;
 	/*
     for (i = 0; i < 256; i++) {
 		consts[i].length = 1;
 		consts[i].chars[0] = i;
     }
 	*/
-    return _tigermain(0 /* static link!? */ );
+    return _tigermain();
 }

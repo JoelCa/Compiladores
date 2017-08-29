@@ -55,9 +55,7 @@ fun codegen (frame) (stm) =
                                                            src = [],
                                                            dst = [],
                                                            jump = SOME [s]})
-        | munchStm (T.LABEL lab) =  let val _ = print ("EEEE" ^ lab ^ "\n")
-                                    in emit (A.LABEL { assem = lab^":\n", lab = lab} )
-                                    end
+        | munchStm (T.LABEL lab) =  emit (A.LABEL { assem = lab^":\n", lab = lab} )
         | munchStm (T.EXP (T.CALL (T.NAME name,args))) =  let val (rList, mList) = munchArgs (0,args)
                                                           in emit (A.OPER { assem = "bl " ^ name ^ "\n",
                                                                             src = rList,

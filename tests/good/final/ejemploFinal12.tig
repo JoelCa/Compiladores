@@ -5,8 +5,8 @@ let
     function printboard () =
        (for i := 0 to N
 	 do (
-         print ("\n")))
+         print ("hola\n")))
 
-in  0
+in  print("hola");0
 
 end

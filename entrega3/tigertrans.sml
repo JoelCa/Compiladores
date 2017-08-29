@@ -500,6 +500,6 @@ fun binOpStrExp {left,oper,right} =
 
 fun getStms []                           = []
 	| getStms ((PROC {body = b, frame = f})::zs) = (b, SOME f) :: (getStms zs)
-  | getStms ((STRING (l,_))::zs)         = (LABEL l, NONE) :: (getStms zs)
+  | getStms ((STRING (_,l))::zs)         = (LABEL l, NONE) :: (getStms zs)
 
 end                                      
