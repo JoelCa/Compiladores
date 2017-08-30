@@ -142,9 +142,9 @@ fun stringLen s =
 (*     .string "hola" *)
 fun stringExp(s: string) =
 	let val l = newlabel()
-		(*val len = ".long "^makestring(stringLen s)^"\n"*)
-		val str = l ^ ": .asciz \""^s^"\"\n" ^ ".align\n"
-		val _ = stringsGlobs:=(!stringsGlobs @ [STRING(s, str)])
+		  val len = l ^":\n.long "^makestring(stringLen s)^"\n"
+		  val str = ".asciz \""^s^"\"\n" ^ ".align\n"
+		  val _ = stringsGlobs:=(!stringsGlobs @ [STRING(l, len), STRING("",str)])
 	in  Ex(NAME l) end
 
 fun preFunctionDec() =

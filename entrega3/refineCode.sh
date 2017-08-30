@@ -2,7 +2,7 @@
 
 ./tiger "$1" -code > CODE.s
 
-X=".text\\n.global main\\n.extern printf\\n"
+X=".syntax unified\\n.thumb\\n\\n.text\\n.global _tigermain\\n.extern printf\\n"
 
 Y='string1: .asciz \"Result: %d\\n\"\n.align'
 

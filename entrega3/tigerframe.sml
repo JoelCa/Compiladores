@@ -45,21 +45,21 @@ open tigertree
 
 type level = int
 
-val fp             = "fp"         (* frame pointer *)
-val ip             = "ip"         (* new-static base in inter-link-unit calls *)
-val sp             = "sp"         (* stack pointer *)
-val rv             = "r0"         (* return value  *)
-val lr             = "lr"         (* link register  *)
-val pc             = "pc"         (* program counter  *)
-val wSz            = 4            (* word size in bytes *)
-val log2WSz        = 2            (* base two logarithm of word size in bytes *)
-val fpPrev         = 0            (* offset (bytes) *)
-val fpPrevLev      = ~12          (* offset (bytes) *)
+val fp             = "fp"         (* frame pointer:                            r11 *)
+val ip             = "ip"         (* new-static base in inter-link-unit calls: r12 *)
+val sp             = "sp"         (* stack pointer:                            r13 *)
+val rv             = "r0"         (* return value                                  *)
+val lr             = "lr"         (* link register:                            r14 *)
+val pc             = "pc"         (* program counter:                          r15 *)
+val wSz            = 4            (* word size in bytes                            *)
+val log2WSz        = 2            (* base two logarithm of word size in bytes      *)
+val fpPrev         = 0            (* offset (bytes)                                *)
+val fpPrevLev      = ~12          (* offset (bytes)                                *)
 val argsInicial    = 1             
-val argsOffInicial = 0            (* words *)
-val argsGap        = wSz          (* bytes *)
-val localsInicial  = 0            (* words *)
-val localsGap      = ~16            (* bytes que indican el espacio entre el fp y el 1º local *)
+val argsOffInicial = 0            (* words                                         *)
+val argsGap        = wSz          (* bytes                                         *)
+val localsInicial  = 0            (* words                                         *)
+val localsGap      = ~16          (* bytes que indican el espacio entre el fp y el 1º local *)
 val calldefs       = [rv]
 val specialregs    = [rv, fp, sp, pc]
 val argregs        = ["r0","r1","r2","r3"]
@@ -177,6 +177,6 @@ fun procEntryExit3(fr: frame, body) =
   in
     { prolog = "push {fp,ip,lr}\nadd fp, sp, #12\nsub sp, sp, #"^Int.toString localSpace^"\n"
     , body = body
-    , epilog = "\npush {r0,r1}\nmov r1, r0\nldr r0, =string1\nbl printf\npop {r0,r1}\n\nsub sp, fp, #12\npop {fp,ip,pc}\n"}
+    , epilog = "\npush {r0,r1}\nmov r1, r0\nldr r0, =string1\nbl printf\npop {r0,r1}\n\nmov sp, fp\nsub sp, sp, #12\npop {fp,ip,pc}\n"}
   end
 end

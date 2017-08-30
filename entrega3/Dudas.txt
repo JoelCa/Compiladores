@@ -232,7 +232,8 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
 
 
 LO ÚLTIMO:
-- Arreglar "ejemploFinal9.tig"
+- ¿Por qué aparece "Result: 10" en ejemploFinal12.tig?
+- Arreglar "ejemploFinal9.tig" 
 - Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"
 - Arreglar "test01.tig"

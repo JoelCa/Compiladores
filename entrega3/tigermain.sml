@@ -38,7 +38,7 @@ fun main(args) =
     val fcCanon = (tigercanon.traceSchedule o tigercanon.basicBlocks o tigercanon.linearize)
     fun aux (x, SOME y) = (fcCanon x, SOME y)
       | aux (x, y) = ([x], y)
-    val canonCode = map aux (tigertrans.getStms (tigertrans.getResult()))
+    val canonCode = map aux (tigertrans.getStms fragmentos)
     val finalStrCode = tigertrans.procStringList canonCode
     
     (*val functionInstrCode = map (fn (b,f) => (f, tigercodegen.maximalMunch f b)) procs*)

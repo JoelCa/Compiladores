@@ -7,6 +7,6 @@ let
 	 do (
          print ("hola\n")))
 
-in  print("hola");0
+in  printboard();0
 
 end
