@@ -1,0 +1,12 @@
+/* valid rec comparisons */
+let 
+	type rectype = {name : string, id : int}
+	var b : rectype := rectype {name = "Juan", id = 94} 
+in
+	(if b = nil
+  then
+    print ("Nada\n")
+  else
+    print (concat(concat(b.name," Perez\n"),"Tiene ID: ")));
+  b.id
+end

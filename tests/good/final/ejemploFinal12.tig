@@ -1,7 +1,7 @@
 /* A program to solve the 8-queens problem */
 
 let
-    var N := 10
+    var N := 15
     function printboard () =
        (for i := 0 to N
 	 do (

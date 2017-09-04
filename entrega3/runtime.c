@@ -218,6 +218,10 @@ string *getstr()
 		return (string*)(consts + i);
 }
 
+int divide (int a, int b)
+{
+  return a/b;
+}
 
 int main()
 {

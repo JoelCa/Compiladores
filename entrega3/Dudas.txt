@@ -232,7 +232,7 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
 
 
 LO ÚLTIMO:
-- ¿Por qué aparece "Result: 10" en ejemploFinal12.tig?
+- Implementar la división.
 - Arreglar "ejemploFinal9.tig" 
 - Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"
@@ -263,6 +263,7 @@ LO HECHO:
 - Cuando se genera el código con "test123Modif.tig", se hace "ldr r10, = ". Controlar y arreglar
 - Los frames colisionan (al menos con funciones recursivas). NO estamos "reservando" espacio para los locals.
 - Arreglar "ejemploFinal8.tig"
+- ¿Por qué aparece "Result: 10" en ejemploFinal12.tig?. Por que "print" retorna el valor cero.
 
 
 OBSERVACIÓN
