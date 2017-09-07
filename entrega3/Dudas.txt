@@ -230,9 +230,11 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
 
 - ¿Mantenemos el nombre de "_tigermain" para la función principal?
 
+- ¿Es correcto que el usuario pueda definir una función F con el mismo nombre que una función de librería?. En este caso, F "pisa" a la función de la librería.
+Ver ejemploFinal16.tig
 
 LO ÚLTIMO:
-- Implementar la división.
+- Lograr que funcione la división para números negativos.
 - Arreglar "ejemploFinal9.tig" 
 - Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"
@@ -264,6 +266,7 @@ LO HECHO:
 - Los frames colisionan (al menos con funciones recursivas). NO estamos "reservando" espacio para los locals.
 - Arreglar "ejemploFinal8.tig"
 - ¿Por qué aparece "Result: 10" en ejemploFinal12.tig?. Por que "print" retorna el valor cero.
+- Implementar la división.
 
 
 OBSERVACIÓN

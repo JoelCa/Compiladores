@@ -85,12 +85,13 @@ fun codegen (frame) (stm) =
                                                                src = [munchExp e1],
                                                                dst = [r],
                                                                jump = NONE }))
+        | munchExp (T.BINOP (DIV, e1, e2)) = result (fn r => munchStm(T.SEQ (T.EXP (T.CALL (T.NAME "divide",[e1,e2])), T.MOVE (T.TEMP r, T.TEMP rv))))
         | munchExp (T.BINOP (oper, e1, e2)) = let fun toAssemOper operation =
                                                     case operation of
                                                         T.PLUS  => "add"
                                                       | T.MINUS => "sub"
                                                       | T.MUL   => "mul"
-                                                      | T.DIV   => "sdiv"
+                                                      | T.DIV   => raise Fail "No debería pasar! (munchExp2)\n"
                                                       | T.AND   => "and"
                                                       | T.OR    => "orr"
                                                       | T.XOR   => "eor"
@@ -106,7 +107,8 @@ fun codegen (frame) (stm) =
                                                                                 dst = [r],
                                                                                 jump = NONE }))
                                               end
-        | munchExp (T.CONST i) = result (fn r => emit (A.OPER { assem = "ldr 'd0, = " ^ intToString(i) ^ "\n",
+(*        | munchExp (T.CALL f) = result (fn r => munchStm (T.EXP (T.CALL f)))
+*)        | munchExp (T.CONST i) = result (fn r => emit (A.OPER { assem = "ldr 'd0, = " ^ intToString(i) ^ "\n",
                                                                 src = [],
                                                                 dst = [r],
                                                                 jump = NONE }))
