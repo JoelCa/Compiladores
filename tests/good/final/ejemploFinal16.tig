@@ -1,0 +1,16 @@
+/* A program to solve the 8-queens problem */
+
+let
+   var N := 15
+   var stop := 0
+
+   function print (a:string) : int =
+   if stop = 3
+    then 4
+    else
+      ((stop := stop + 1); 
+       print("hola\n"))
+
+in  print("a");0
+
+end

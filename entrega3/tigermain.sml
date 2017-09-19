@@ -38,14 +38,15 @@ fun main(args) =
     val fcCanon = (tigercanon.traceSchedule o tigercanon.basicBlocks o tigercanon.linearize)
     fun aux (x, SOME y) = (fcCanon x, SOME y)
       | aux (x, y) = ([x], y)
-    val canonCode = map aux (tigertrans.getStms fragmentos)
-    val finalStrCode = tigertrans.procStringList canonCode
     
     (*val functionInstrCode = map (fn (b,f) => (f, tigercodegen.maximalMunch f b)) procs*)
     (*val coloredInstr = map (fn (f, is) => tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, tigersimpleregalloc.simpleregalloc f is))) functionInstrCode*)
     val _ = if ir then print(tigertrans.Ir(fragmentos)) else ()
-		val _ = if canon then List.app (fn (xs,_) => List.app (fn x => (print o tigerit.tree) x) xs) canonCode else ()
+    val canonCode = map aux (tigertrans.getStms fragmentos)
+    val finalStrCode = tigertrans.procStringList canonCode
+    val _ = if canon then List.app (fn (xs,_) => List.app (fn x => (print o tigerit.tree) x) xs) canonCode else ()
     val _ = if code then map print finalStrCode else [()]
+    val _ = print ("MAX INT: " ^ Int.toString(valOf Int.maxInt) ^ "\n")
     (*val _ = if inter then tigerinterp.inter true procs strings else ()*)
 	in
 		(*print "yes!!\n"*) ()

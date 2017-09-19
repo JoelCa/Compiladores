@@ -10,5 +10,5 @@ let
   var t : tree := tree {key = -34, children = treelist {hd = hoja1, tl = treelist {hd = hoja2, tl = nil}}}
 
 in
- (t.children.hd.key/33 + t.children.tl.hd.key*5)/4
+ (t.children.hd.key/-33 + t.children.tl.hd.key*-5)/4
 end

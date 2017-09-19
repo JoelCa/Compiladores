@@ -1,0 +1,12 @@
+let
+  type rectype1 = {name : string}
+  type arrtype2 = array of rectype1
+
+  var arr2 := arrtype2 [1] of
+    rectype1 {name="aname"}
+in
+  arr2[0].name := "kati";
+  print (arr2[0].name);
+  7777
+end
+

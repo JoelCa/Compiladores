@@ -233,8 +233,9 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
 - ¿Es correcto que el usuario pueda definir una función F con el mismo nombre que una función de librería?. En este caso, F "pisa" a la función de la librería.
 Ver ejemploFinal16.tig
 
+
 LO ÚLTIMO:
-- Lograr que funcione la división para números negativos.
+- Ver ejemploFinal20.tig y ejemploFinal21.tig.
 - Arreglar "ejemploFinal9.tig" 
 - Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"
@@ -267,6 +268,7 @@ LO HECHO:
 - Arreglar "ejemploFinal8.tig"
 - ¿Por qué aparece "Result: 10" en ejemploFinal12.tig?. Por que "print" retorna el valor cero.
 - Implementar la división.
+- Lograr que funcione la división para números negativos.
 
 
 OBSERVACIÓN

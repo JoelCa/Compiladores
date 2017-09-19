@@ -195,17 +195,16 @@ fun varDec(acc,initCode) = assignExp{var = simpleVar(acc,getActualLev()), exp = 
 la posición del miembro, dado por el TRecord correspondiente *)
 fun fieldVar(var, field) =
 		(* NOSOTROS *) 
-		let
-	val a = unEx var
-	val ra = newtemp()
-		in
-	Ex( ESEQ(seq[MOVE(TEMP ra, a),
-										 EXP(externalCall("_checkNil", [TEMP ra]))  (*no retorna nada *)
-										],
-		 MEM(BINOP(PLUS, TEMP ra, BINOP(LSHIFT, CONST field, CONST tigerframe.log2WSz))) (* MEM (ra + field * wsz) *)
-								)
-					)
-		end
+	let val a = unEx var
+		  val ra = newtemp()
+	in
+		Ex( ESEQ(seq[MOVE(TEMP ra, a),
+								 EXP(externalCall("_checkNil", [TEMP ra]))  (*no retorna nada *)
+								],
+		         MEM(BINOP(PLUS, TEMP ra, BINOP(LSHIFT, CONST field, CONST tigerframe.log2WSz))) (* MEM (ra + field * wsz) *)
+						)
+			)
+	end
 
 (* arr es el código que "apunta" al inicio del arreglo, e ind es el código
 de una expresión entera, que indica la posición que se quiere indexar*)

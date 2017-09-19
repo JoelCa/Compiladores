@@ -5,6 +5,7 @@ structure A = tigerassem
 structure T = tigertree
 
 open tigerframe
+open tigerconstants
 
 (* T.MOVE (a, b)  <-----> a := b *)
 
@@ -22,10 +23,11 @@ fun codegen (frame) (stm) =
                                                                                            src = [munchExp e2, munchExp e1, munchExp (T.CONST i)],
                                                                                            dst = [],
                                                                                            jump = NONE } )
+        (* Este caso esta MAL. NO guarda en la posición de memoria e1 la etiqueta l.
         | munchStm (T.MOVE (T.MEM e1, T.NAME l)) = emit (A.OPER { assem = "ldr 's0, =" ^ l ^ "\n",
                                                                   src = [munchExp e1],
                                                                   dst = [],
-                                                                  jump = NONE })
+                                                                  jump = NONE })  *)        
         | munchStm (T.MOVE (T.MEM e1, e2)) = emit (A.OPER { assem = "str 's0, ['s1]\n",
                                                             src = [munchExp e2, munchExp e1],
                                                             dst = [],
@@ -85,7 +87,7 @@ fun codegen (frame) (stm) =
                                                                src = [munchExp e1],
                                                                dst = [r],
                                                                jump = NONE }))
-        | munchExp (T.BINOP (DIV, e1, e2)) = result (fn r => munchStm(T.SEQ (T.EXP (T.CALL (T.NAME "divide",[e1,e2])), T.MOVE (T.TEMP r, T.TEMP rv))))
+        | munchExp (T.BINOP (T.DIV, e1, e2)) = munchExp (T.CALL (T.NAME "divide", [e1,e2]))
         | munchExp (T.BINOP (oper, e1, e2)) = let fun toAssemOper operation =
                                                     case operation of
                                                         T.PLUS  => "add"
@@ -107,8 +109,11 @@ fun codegen (frame) (stm) =
                                                                                 dst = [r],
                                                                                 jump = NONE }))
                                               end
-(*        | munchExp (T.CALL f) = result (fn r => munchStm (T.EXP (T.CALL f)))
-*)        | munchExp (T.CONST i) = result (fn r => emit (A.OPER { assem = "ldr 'd0, = " ^ intToString(i) ^ "\n",
+        | munchExp (T.CALL f) = result (fn r => munchStm (T.SEQ (T.EXP (T.CALL f), T.MOVE (T.TEMP r, T.TEMP rv))))
+        | munchExp (T.CONST i) = let fun checkInt n =
+                                       if n <= right16
+                                       then "movw 'd0, #" ^ intToString(n)
+                                 in result (fn r => emit (A.OPER { assem = "ldr 'd0, = " ^ intToString(i) ^ "\n",
                                                                 src = [],
                                                                 dst = [r],
                                                                 jump = NONE }))
@@ -117,7 +122,9 @@ fun codegen (frame) (stm) =
                                                                dst = [r],
                                                                jump = NONE }))
         | munchExp (T.TEMP t) = t
-        | munchExp _ = raise Fail "No debería llegar! (munchExp2)"
+        | munchExp e = let val _ = print (tigerit.tree (T.EXP e))
+                       in raise Fail "No debería llegar! (munchExp2)"
+                       end
 
       and munchArgs (_,[])     = ([], [])
         | munchArgs (n, x::xs) = if n < 4 then let val y = List.nth (tigerframe.argregs, n)

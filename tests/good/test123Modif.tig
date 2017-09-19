@@ -1,8 +1,0 @@
-let
-  type a = array of int
-  var x := 0
-  type a = {i:int,j:int}
-  var y:a := a{i=10,j = 20}
-in
- y.j
-end

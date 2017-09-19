@@ -1,0 +1,7 @@
+/* define valid recursive types */
+
+let
+  var a := 47778
+in
+  a/741
+end
