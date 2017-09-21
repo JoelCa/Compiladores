@@ -13,7 +13,8 @@ fun codegen (frame) (stm) =
   let val ilist = ref (nil : A.instr list)
       fun emit x = ilist := x :: !ilist
       fun result (gen) = let val t = tigertemp.newtemp() in gen t; t end
-      fun intToString n = if n<0 then "-" ^ Int.toString(~n) else if n>=0 then Int.toString(n) else ""
+      (* No es necesario *)
+      fun intToString n = if n<0 then "-" ^ Int.toString(~n) else if n>=0 then Int.toString(n) else "" 
       fun munchStm (T.SEQ (a,b)) = (munchStm a; munchStm b)
         | munchStm (T.MOVE (T.MEM (T.BINOP (T.PLUS, e1, T.CONST i)), e2)) = emit (A.OPER { assem = "str 's0, ['s1,'s2]\n",
                                                                                            src = [munchExp e2, munchExp e1, munchExp (T.CONST i)],
@@ -110,14 +111,18 @@ fun codegen (frame) (stm) =
                                                                                 jump = NONE }))
                                               end
         | munchExp (T.CALL f) = result (fn r => munchStm (T.SEQ (T.EXP (T.CALL f), T.MOVE (T.TEMP r, T.TEMP rv))))
-        | munchExp (T.CONST i) = let fun checkInt n =
-                                       if n <= right16
-                                       then "movw 'd0, #" ^ intToString(n)
-                                 in result (fn r => emit (A.OPER { assem = "ldr 'd0, = " ^ intToString(i) ^ "\n",
-                                                                src = [],
-                                                                dst = [r],
-                                                                jump = NONE }))
-        | munchExp (T.NAME l) = result (fn r => emit (A.OPER { assem = "ldr 'd0, =" ^ l ^ "\n",
+        | munchExp (T.CONST i) = let fun loadConstant n =
+                                       if n >= 0 andalso n <= right16
+                                       then "movw 'd0, #" ^ Int.toString(n) ^ "\n"
+                                       else let val (u,l) = upper_lower(n)
+                                            in "movw 'd0, #" ^ Int.toString(l) ^ "\nmovt 'd0, #" ^ Int.toString(u) ^ "\n"
+                                            end
+                                 in result (fn r => emit (A.OPER { assem = "ldr 'd0, =" ^ intToString(i) ^ "\n"(*loadConstant(i)*),
+                                                                   src = [],
+                                                                   dst = [r],
+                                                                   jump = NONE }))
+                                 end
+        | munchExp (T.NAME l) = result (fn r => emit (A.OPER { assem = "movw 'd0, #:lower16:" ^ l ^ "\nmovt 'd0, #:upper16:" ^ l ^ "\n",
                                                                src = [],
                                                                dst = [r],
                                                                jump = NONE }))

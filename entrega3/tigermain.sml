@@ -46,7 +46,6 @@ fun main(args) =
     val finalStrCode = tigertrans.procStringList canonCode
     val _ = if canon then List.app (fn (xs,_) => List.app (fn x => (print o tigerit.tree) x) xs) canonCode else ()
     val _ = if code then map print finalStrCode else [()]
-    val _ = print ("MAX INT: " ^ Int.toString(valOf Int.maxInt) ^ "\n")
     (*val _ = if inter then tigerinterp.inter true procs strings else ()*)
 	in
 		(*print "yes!!\n"*) ()

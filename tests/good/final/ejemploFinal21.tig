@@ -2,11 +2,12 @@ let
   type rectype1 = {name : string}
   type arrtype2 = array of rectype1
 
-  var arr2 := arrtype2 [1] of
+  var arr2 := arrtype2 [2] of
     rectype1 {name="aname"}
 in
   arr2[0].name := "kati";
   print (arr2[0].name);
+  print (arr2[1].name);
   7777
 end
 

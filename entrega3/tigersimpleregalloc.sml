@@ -4,7 +4,8 @@ struct
 	open tigerassem
   open tigergraph
   open tigerliveness
-  
+  open tigerconstants  
+
   structure Table = Splaymap
   structure Set = Splayset
 	
@@ -321,21 +322,19 @@ struct
 		val precolored = tigerframe.allRegs
 		(* COMPLETAR: Temporarios que se pueden usar (p.ej, el temporario que representa a rax. Diferencia con precolored: el temporario que representa a rbp no se puede usar) *)
 		val asignables = ["r4","r5","r6","r7","r8","r9","r10"]
-		
+
+		fun loadConstant n =
+    	if n >= 0 andalso n <= right16
+    	then "movw 'd0, #" ^ Int.toString(n) ^ "\n"
+    	else let val (u,l) = upper_lower(n)
+    	     in "movw 'd0, #" ^ Int.toString(l) ^ "\nmovt 'd0, #" ^ Int.toString(u) ^ "\n"
+    	     end		
 
 		(* COMPLETAR: movaMem crea una instrucción que mueve un temporario a memoria. movaTemp, de memoria a un temporario.*)
 		fun movaMem(temp, mempos, dirTemp) =
-			let
-				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>=0 then Int.toString(mempos) else ""
-			in
-				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "str 's0, [fp,'d0]\n", src=[temp], dst=[dirTemp], jump=NONE}
-			end
+			OPER {assem= loadConstant(mempos) ^ "str 's0, [fp,'d0]\n", src=[temp], dst=[dirTemp], jump=NONE}
 		fun movaTemp(mempos, temp, dirTemp) =
-			let
-				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>=0 then Int.toString(mempos) else ""
-			in
-				OPER {assem="ldr 'd0, =" ^ desp ^ "\n" ^ "ldr 'd1, [fp,'d0]\n", src=[], dst=[dirTemp, temp], jump=NONE}
-			end
+			OPER {assem= loadConstant(mempos) ^ "ldr 'd1, [fp,'d0]\n", src=[], dst=[dirTemp, temp], jump=NONE}
 		
 		(* temps = {todos los temporarios de todas las instrucciones} / {temporarios precoloreados} *)
 		val temps =

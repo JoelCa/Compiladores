@@ -53,7 +53,7 @@ GRALOBJS= tigerabs.uo tigergrm.uo tigerlex.uo tigermain.uo \
 	  tigernlin.uo tigerpp.uo tigerescap.uo tigertab.uo tigerseman.uo tigertemp.uo topsort.uo tigertree.uo \
 	  tigerframe.uo tigertrans.uo tigerit.uo tigerpila.uo tigercanon.uo \
 	  tigerassem.uo tigercodegen.uo tigergraph.uo tigerflow.uo tigermg.uo tigerliveness.uo tigercolor.uo \
-	  tigersimpleregalloc.uo
+	  tigersimpleregalloc.uo tigerconstants.uo
 
 
 all: tiger
@@ -123,7 +123,7 @@ tigermain.uo: tigerseman.ui tigerescap.ui tigergrm.ui tigerlex.uo \
     tigerpp.uo tigertrans.uo tigercodegen.ui tigercanon.ui tigerinterp.uo \
     tigersimpleregalloc.ui
 tigerframe.uo: tigerframe.ui tigertree.uo tigertemp.ui
-tigercodegen.uo: tigercodegen.ui tigertemp.ui
+tigercodegen.uo: tigercodegen.ui tigertemp.ui tigerconstants.ui
 tigercodegen.ui: tigerframe.ui tigerassem.uo tigertree.uo
 tigerassem.uo: tigertemp.ui
 tigergraph.uo: tigertemp.ui tigergraph.ui
@@ -136,3 +136,4 @@ tigercolor.ui: tigerframe.ui tigertemp.ui tigerliveness.ui tigergraph.ui
 tigercolor.uo: tigercolor.ui
 tigersimpleregalloc.ui: tigerframe.ui tigerassem.ui
 tigersimpleregalloc.uo: tigersimpleregalloc.ui tigerframe.ui tigerassem.ui tigerflow.ui
+tigerconstants.uo: tigerconstants.ui

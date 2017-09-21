@@ -24,14 +24,14 @@ in
   rec2.dates[0] := 2323;
   rec2.dates[2] := 2323;
 
-  print(concat(arr3[34],"\n"));
+  /*print(concat(arr3[34],"\n"));
   print(concat(concat("Nombre Rec1: ",rec1.name),"\n"));
   print(concat(concat("Dirección Rec1: ",rec1.address),"\n"));
-  print(concat(concat("Nombre Rec2: ",rec2.name),"\n"));
+  print(concat(concat("Nombre Rec2: ",rec2.name),"\n"));*/
   print(concat(arr2[0].name,"\n"));
   print(concat(arr2[1].name,"\n"));
   print(concat(arr2[2].name,"\n"));
-  /*print(concat(arr2[3].name,"\n"));*/
+  print(concat(arr2[3].name,"\n"));
   rec1.id - rec2.dates[0]
 end
 
