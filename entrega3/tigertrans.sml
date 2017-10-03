@@ -216,14 +216,6 @@ fun subscriptVar(arr, ind) =
 		val i = unEx ind
 		val ra = newtemp()
 		val ri = newtemp()
-		fun aux(Ex e) = tigerit.tree(EXP e)
-		| aux(Nx s) = tigerit.tree(s)
-		| aux _ = raise Fail "bueno, a completar!"
-		val _ = print((aux ind) ^ "\n")
-		val _ = print("ACAAA: " ^ (aux (Ex i)) ^ "\n")
-		val _ = case i of
-							CONST k => print("hola111111" ^ Int.toString(k) ^ "\n")
-							| _ => print("hola22\n")
 	in
 		Ex( ESEQ(seq[ MOVE(TEMP ra, a),
 									MOVE(TEMP ri, i),

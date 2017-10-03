@@ -323,12 +323,14 @@ struct
 		(* COMPLETAR: Temporarios que se pueden usar (p.ej, el temporario que representa a rax. Diferencia con precolored: el temporario que representa a rbp no se puede usar) *)
 		val asignables = ["r4","r5","r6","r7","r8","r9","r10"]
 
+		fun intToString n = if n<0 then "-" ^ Int.toString(~n) else if n>=0 then Int.toString(n) else ""
+
 		fun loadConstant n =
-    	if n >= 0 andalso n <= right16
-    	then "movw 'd0, #" ^ Int.toString(n) ^ "\n"
-    	else let val (u,l) = upper_lower(n)
-    	     in "movw 'd0, #" ^ Int.toString(l) ^ "\nmovt 'd0, #" ^ Int.toString(u) ^ "\n"
-    	     end		
+      let val const = intToString(n)
+      in if n >= 0 andalso n <= right16
+         then "movw 'd0, #:lower16:" ^ const ^ "\n"
+         else "movw 'd0, #:lower16:" ^ const ^ "\nmovt 'd0, #:upper16:" ^ const ^ "\n"
+      end
 
 		(* COMPLETAR: movaMem crea una instrucción que mueve un temporario a memoria. movaTemp, de memoria a un temporario.*)
 		fun movaMem(temp, mempos, dirTemp) =

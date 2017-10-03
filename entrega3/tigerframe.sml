@@ -19,21 +19,24 @@
 (*
   Frame de ARM V7
 
-    |    argn    |  fp+4*(n-3)
+    |    argn    |  fp+4*(n-1)
     |    ...     |
-    |    arg5    |  fp+8
-    |    arg4    |  fp+4
+    |    arg5    |  fp+16
+    |    arg4    |  fp+12
     --------------
+    |   lr       |  fp+8
+    |   ip       |  fp+4
     |   fp ant   |  fp
-    |   ip       |  fp-4
-    |   lr       |  fp-8
-    |  fp level  |  fp-12   static link
-    |   local1   |  fp-16
-    |   local2   |  fp-20
+    |  fp level  |  fp-4   static link
+    |   local1   |  fp-8
+    |   local2   |  fp-12
+    |   local3   |  fp-16
+    |   local4   |  fp-20
+    |   local5   |  fp-24
     |    ...     |
-    |   localn   |  fp-4*(n+4)
-    |  callee S1 |  fp-4*(n+5)
-    |  callee S2 |  fp-4*(n+6)
+    |   localn   |  fp-4*(n+1)
+    |  callee S1 |  fp-4*(n+2)
+    |  callee S2 |  fp-4*(n+3)
     |    ...     |
 
 
@@ -54,12 +57,12 @@ val pc             = "pc"         (* program counter:                          r
 val wSz            = 4            (* word size in bytes                            *)
 val log2WSz        = 2            (* base two logarithm of word size in bytes      *)
 val fpPrev         = 0            (* offset (bytes)                                *)
-val fpPrevLev      = ~12          (* offset (bytes)                                *)
+val fpPrevLev      = ~4           (* offset (bytes)                                *)
 val argsInicial    = 1             
-val argsOffInicial = 0            (* words                                         *)
+val argsOffInicial = 2            (* words                                         *)
 val argsGap        = wSz          (* bytes                                         *)
 val localsInicial  = 0            (* words                                         *)
-val localsGap      = ~16          (* bytes que indican el espacio entre el fp y el 1º local *)
+val localsGap      = ~8           (* bytes que indican el espacio entre el fp y el 1º local *)
 val calldefs       = [rv]
 val specialregs    = [rv, fp, sp, pc]
 val argregs        = ["r0","r1","r2","r3"]
@@ -173,10 +176,11 @@ fun procEntryExit2(frame,body) =
 
 fun procEntryExit3(fr: frame, body) =
   let
-    val localSpace = wSz * (List.foldr (fn (b, r) => if b then r+1 else r) 0 (!(#locals fr)))
+    (* space es el espacio que ocupan todos los locales, más el static link. *)
+    val space = wSz * (List.foldr (fn (b, r) => if b then r+1 else r) 1 (!(#locals fr)))
   in
-    { prolog = "push {fp,ip,lr}\nadd fp, sp, #12\nsub sp, sp, #"^Int.toString localSpace^"\n"
+    { prolog = "push {fp,ip,lr}\nmov fp, sp\nsub sp, sp, #"^Int.toString space^"\n"
     , body = body
-    , epilog = "\npush {r0,r1}\nmov r1, r0\nldr r0, =string1\nbl printf\npop {r0,r1}\n\nmov sp, fp\nsub sp, sp, #12\npop {fp,ip,pc}\n"}
+    , epilog = "mov sp, fp\npop {fp,ip,pc}\n"}
   end
 end

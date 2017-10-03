@@ -233,9 +233,11 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
 - ¿Es correcto que el usuario pueda definir una función F con el mismo nombre que una función de librería?. En este caso, F "pisa" a la función de la librería.
 Ver ejemploFinal16.tig
 
+- Si creamos un array de records, lo inicializamos con un record determinado y luego modificamos algún elemento
+  del array, vemos que todos sus elementos reflejan esta modificación. ¿Es correcto este funcionamiento?.
+  Creemos que sí, por que el array es inicializado con una referencia a un record. Ver ejemploFinal22.tig.
 
 LO ÚLTIMO:
-- Ver ejemploFinal20.tig y ejemploFinal21.tig.
 - Arreglar "ejemploFinal9.tig" 
 - Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"
@@ -269,6 +271,8 @@ LO HECHO:
 - ¿Por qué aparece "Result: 10" en ejemploFinal12.tig?. Por que "print" retorna el valor cero.
 - Implementar la división.
 - Lograr que funcione la división para números negativos.
+- Ver ejemploFinal20.tig y ejemploFinal21.tig.
+- Ver ejemploFinal26.tig
 
 
 OBSERVACIÓN
@@ -294,16 +298,3 @@ push {r0,r1,r2}
 mov r0, r2
 bl printf
 pop {r0,r1,r2}
-
-
-
--------------
-fp *****
-ip
-lr
-****** fp
-sl
-locals fp-8
-
-fp <- sp + 12
-------------
