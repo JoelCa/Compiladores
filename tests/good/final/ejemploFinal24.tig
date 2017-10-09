@@ -7,6 +7,5 @@ in
          c := getchar()
        );
   if ord(c) = ord("w") then print("yes") else print(c);
-  print ("\n");
-  0
+  print ("\n")
 end

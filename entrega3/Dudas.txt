@@ -237,8 +237,11 @@ Ver ejemploFinal16.tig
   del array, vemos que todos sus elementos reflejan esta modificación. ¿Es correcto este funcionamiento?.
   Creemos que sí, por que el array es inicializado con una referencia a un record. Ver ejemploFinal22.tig.
 
+- ¿Para que está la función "exit" de tiger?. ¿Podemos saber cual es el código exit de una función?
+
+
 LO ÚLTIMO:
-- Arreglar "ejemploFinal9.tig" 
+- Arreglar el entero máximo y mínimo. Ver línea 347 de tigertrans.sml.
 - Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"
 - Arreglar "test01.tig"

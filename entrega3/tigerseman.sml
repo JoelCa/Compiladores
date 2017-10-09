@@ -648,7 +648,7 @@ fun transExp(venv, tenv) =
 fun transProg ex =
   let val main =
       LetExp({decs=[FunctionDec[({name="_tigermain", params=[],
-          result=SOME "int", body=ex}, 0)]],
+          result=NONE, body=ex}, 0)]],
         body=UnitExp 0}, 0)
   val _ = transExp(tab_vars, tab_tipos) main
                         (*val _ = print (tigerit.tree (unNx exp))*)

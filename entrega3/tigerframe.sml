@@ -169,7 +169,7 @@ fun procEntryExit1 (fr: frame, body) =
       val acomodaArgs = recorreArgs (rev (!(#ftAccesos fr))) argregs
       val a = [MOVE (TEMP fp, TEMP sp)]
       val acomoda =  acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
-  in  seq(acomoda@[body]) end(*seq(entry@acomoda@[body]@exit) end*)
+  in seq(entry@acomoda@[body]@exit) end (* seq(acomoda@[body]) end *)
 
 fun procEntryExit2(frame,body) = 
      body@[tigerassem.OPER {assem = "", src = [rv,sp]@calleesaves, dst = [], jump = NONE}]

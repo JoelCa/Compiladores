@@ -1,0 +1,21 @@
+let
+  var s := "Juancito"
+  var tam := size(s)
+  var sub := substring(s,4,4) 
+
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in if i < 0 then (print ("-"); f (-i))
+      else if i>0 then f (i)
+           else print ("0")
+   end
+
+in
+  (if tam = 7 then print(concat(s,"\n")) else print("No es de ese tamaño\n"));
+  (if not(sub = "cito") then print(concat("Alooo","\n")) else print(concat(sub,"\n")));
+  printint(-10);
+  print("\n");
+  exit(0)
+end
