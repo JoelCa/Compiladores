@@ -46,6 +46,8 @@ structure tigerframe :> tigerframe = struct
 
 open tigertree
 
+structure Table = Splaymap
+
 type level = int
 
 val fp             = "fp"         (* frame pointer:                            r11 *)
@@ -68,7 +70,7 @@ val specialregs    = [rv, fp, sp, pc]
 val argregs        = ["r0","r1","r2","r3"]
 val callersaves    = []
 val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10"]
-val allRegs        = argregs @ calleesaves @ [fp, sp, pc]
+val allRegs        = argregs @ calleesaves @ [fp, ip, sp, lr, pc]
 
 (* allRegs    = ["r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10",ip,lr,fp,sp,pc] *)
 (* asignables = ["r4","r5","r6","r7","r8","r9","r10"] *)
@@ -117,6 +119,7 @@ fun formals({formals=f,...}:frame) = let fun armaAccesos [] _ _            = []
                                      in armaAccesos f argregs argsOffInicial end
 
 fun maxRegFrame(f: frame) = !(#actualReg f)
+
 
 (* Modificación, sugerencia Guillermo *)
 fun allocArg (f: frame) b =  

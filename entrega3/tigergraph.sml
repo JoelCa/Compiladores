@@ -13,6 +13,8 @@ datatype node =
 
 type graph = node list ref
 
+fun printNode (Node n) = print (#name (!n))
+
 fun nodes g = !g
 
 fun succ (Node n) = listItems (#successors (!n))

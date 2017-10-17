@@ -4,6 +4,7 @@ open tigerframe
 open tigertree
 open tigertemp
 open tigerabs
+open tigercolor
 
 exception breakexc
 exception divCero
@@ -91,11 +92,16 @@ fun Ir(e) =
 
 fun nombreFrame frame = print(".globl " ^ tigerframe.name frame ^ "\n")
 
-fun instrCode {prolog = p, body = b : tigerassem.instr list, epilog = e} = 
-  p ^ (foldr (fn (s, r) => (tigerassem.format tigertemp.makeString s) ^ r) "" b) ^ e
-  	
+fun coloreo table = fn x => findAll (table, x)
+
+fun instrCode table {prolog = p, body = b : tigerassem.instr list, epilog = e} = 
+  p ^ (foldr (fn (s, r) => (tigerassem.format (coloreo table) s) ^ r) "" b) ^ e
+
 fun procStringList ((ss, SOME f)::zs) =
-	 instrCode (tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, tigersimpleregalloc.simpleregalloc f (tigercodegen.maximalMunch f ss)))) :: procStringList zs
+	let
+		val (all, colTable)  = tigerregalloc.alloc (tigercodegen.maximalMunch f ss, f)
+	in (instrCode colTable (tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, all)))) :: procStringList zs
+	end
 	| procStringList (([LABEL s], NONE)::zs) = s :: procStringList zs 
 	| procStringList [] = [] 
 

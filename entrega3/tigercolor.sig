@@ -1,14 +1,17 @@
 signature tigercolor =
 sig
+  structure Table : Splaymap
+  type allocation = (tigertemp.temp, tigerframe.register) Table.dict
 
-  structure T : Splaymap
+  val coloring : { code: tigerassem.instr list,
+                   initial: allocation,
+                   spillCost: tigergraph.node -> int,
+                   registers: tigerframe.register list
+                 }
+                -> allocation * tigertemp.temp list
 
-  type allocation
+  val emptyAll : allocation
+  val insertAll : allocation * tigertemp.temp * tigerframe.register -> allocation
+  val findAll : allocation * tigertemp.temp -> tigerframe.register
 
-  val color : { interference: tigerliveness.igraph,
-                initial: allocation,
-                spillCost: tigergraph.node -> int,
-                registers: tigerframe.register list
-              } 
-              -> allocation * tigertemp.temp list
 end

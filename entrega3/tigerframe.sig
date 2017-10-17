@@ -1,6 +1,8 @@
 signature tigerframe =
 sig
 
+structure Table : Splaymap
+
 type frame
 type register = string
 val rv : tigertemp.temp

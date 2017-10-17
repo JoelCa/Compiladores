@@ -5,6 +5,7 @@ open tigerseman
 open tigercanon
 open BasicIO Nonstdio
 open tigerinterp
+open tigerregalloc
 
 fun lexstream(is: instream) =
 	Lexing.createLexer(fn b => fn n => buff_input is b 0 n);

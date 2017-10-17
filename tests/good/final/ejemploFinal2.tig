@@ -1,5 +1,6 @@
 let
   var a := 44
 in
-  777
+  777;
+  exit(0)
 end
