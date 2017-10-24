@@ -23,21 +23,21 @@ struct
 
   fun liveOutsAux ({control = fg, use = u, def = d, ismove = m}) flag = 
     let val ns = nodes fg
-        val _ = 
+        (*val _ = List.app (fn k => ((print "lista de nodos"); (printNode k); (print "\n"))) ns
+        *)val _ = 
           if flag
           then List.app (fn x => (insertTable (inTemps, x, (empty String.compare))
                                 ; insertTable (outTemps, x, (empty String.compare)))) ns
           else ()
         fun body (n:node) = 
-          let val _ = T.app (fn (k,x) => ((printNode k); (print "\n"))) (!inTemps)
+          let (* val _ = T.app (fn (k,x) => ((printNode k); (print "\n"))) (!inTemps) *)
               val _ = insertTable (inResults, n, T.find (!inTemps, n))
-              val _ = print "DEAD 777111"
               val _ = insertTable (outResults, n, T.find (!outTemps, n))
-              val _ = print "DEAD 777"
+              (*val _ = T.app (fn (k,x) => ((printNode k); (print "\n"))) (u)*)
+              (*val _ = T.app (fn (k,x) => ((printNode k); (print "\n"))) (d)*)
+              (*val _ = printNode n*)
               val _ = insertTable (inTemps, n, union (T.find (u, n), difference (T.find (!outTemps, n), T.find (d, n))))
-              val _ = print "DEAD 777123"
               val _ = insertTable (outTemps, n, List.foldl (fn (s,r) => union (T.find (!inTemps, s), r)) (empty String.compare) (succ(n)))
-              val _ = print "DEAD 77722"
           in 
             ()
           end

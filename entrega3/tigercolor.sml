@@ -38,13 +38,18 @@ struct
   val spilledNodes : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
   
 
+  fun peekTableValue(t,x) = Table.peek(!t, x)
+  
   fun getTableValue(t,x) = Table.find(!t, x)
   
   fun updateTable(t,n,f) =
-    t := Table.insert(!t, n, f (getTableValue(t, n)))
+    t := Table.insert(!t, n, f (peekTableValue(t, n)))
 
   fun updateSetTable(t,n,x) =
-    updateTable(t,n, fn y => Set.add(y, x))
+    updateTable(t,n, fn opt => 
+                       case opt of
+                         SOME y => Set.union(y, x)
+                       | NONE   => x) 
     
   fun updateSet(s,x) =
     s := Set.add(!s, x)
@@ -72,19 +77,28 @@ struct
 
   fun takeElem(s) = Set.find (fn _ => true) (!s)
 
+  fun singleTempSet(x) = Set.singleton String.compare x
+
+  fun singleNodeSet(x) = Set.singleton tigergraph.compareNodes x
 
   fun addEdge (u,v) =
     if not(inSet((u,v), adjSet)) andalso not(u = v)
     then
       let val _ = adjSet := Set.add (Set.add (!adjSet, (u,v)), (v,u))
           val _ = if not(inSetNoRef(u, precolored))
-                  then (updateSetTable(adjList,u,v);                      
-                        updateTable (degree, u, fn x => x+1);
+                  then (updateSetTable(adjList,u, singleTempSet(v));                      
+                        updateTable (degree, u, fn opt =>
+                                                  case opt of
+                                                    SOME x => x+1
+                                                  | NONE   => 1);
                         updateSet(initial, u))
                   else ()
           val _ = if not(inSetNoRef(v, precolored))
-                  then (updateSetTable(adjList,v,u);
-                        updateTable (degree, u, fn x => x+1);
+                  then (updateSetTable(adjList,v, singleTempSet u);
+                        updateTable (degree, u, fn opt =>
+                                                  case opt of
+                                                    SOME x => x+1
+                                                  | NONE   => 1);
                         updateSet(initial, v))
                   else ()
       in () end
@@ -92,34 +106,36 @@ struct
 
 
   fun livenessAnalysis (body : instr list) = 
-    let val _ = print "DEAD 0"
-        val x = #1 (tigermg.instr2graph body)
-        val _ = print "DEAD 222"
-    in x  end
+    #1 (tigermg.instr2graph body)
 
   fun build (flowg : tigerflow.flowgraph) =
     let val g      = #control flowg
         val moves  = #ismove flowg
         val instrs = tigergraph.nodes g
-        val _ = print "DEAD 999"
         val louts  = tigerliveness.liveOuts flowg
         val _ = print "DEAD 988"
         fun buildAux i = 
           let val live = ref (T.find (louts, i))
               val useSet = T.find (#use flowg, i)
+              val _ = print "DEAD 111"
               val defSet = T.find (#def flowg, i)
+              val _ = print "DEAD 112"
               val _ = if T.find (moves, i)
                       then
                         let
                           val _ = live := Set.difference (!live, useSet)
                           val _ = Set.app (fn d => Set.app (fn u => movesPair := Table.insert(!movesPair, i, (d,u))) useSet) defSet
+                          val _ = print "DEAD 113"
                         in
-                          Set.app (fn x => updateSetTable(moveList, x, i)) (Set.union (defSet,useSet));
+                          print "DEAD 114";
+                          Set.app (fn x => updateSetTable(moveList, x, singleNodeSet(i))) (Set.union (defSet,useSet));
+                          print "DEAD 115";
                           updateSet(worklistMoves, i)
                         end
                       else
                         ()
               val _ = live := Set.union (!live, defSet)
+              
 
           in
             Set.app (fn a =>
@@ -138,6 +154,7 @@ struct
 
   fun makeWorkList () =
     let
+      val _ = print "DEAD 119"
       fun makeWorkL x =
         let
           val _ = removeElemTempSet(initial, x)
@@ -228,8 +245,8 @@ struct
                   removeElemTempSet(spillWorklist, v)
         val _ = updateSet(coalescedNodes, v)
         val _ = updateTable(alias, v, fn _ => u)
-        val _ = updateTable(moveList, u, fn x => Set.union(x, getTableValue(moveList, v)))
-        val _ = enableMoves(Set.singleton String.compare v)
+        val _ = updateSetTable(moveList, u, getTableValue(moveList, v))
+        val _ = enableMoves(singleTempSet v)
         val _ = Set.app (fn t => (addEdge(t,u); decrementDegree(t))) (adjacent(v))
     in
       if getTableValue(degree, u) >= colorCount andalso inSet(u, freezeWorklist)

@@ -94,7 +94,7 @@ fun nombreFrame frame = print(".globl " ^ tigerframe.name frame ^ "\n")
 
 fun coloreo table = fn x => findAll (table, x)
 
-fun instrCode table {prolog = p, body = b : tigerassem.instr list, epilog = e} = 
+fun instrCode (table : allocation) {prolog = p, body = b : tigerassem.instr list, epilog = e} = 
   p ^ (foldr (fn (s, r) => (tigerassem.format (coloreo table) s) ^ r) "" b) ^ e
 
 fun procStringList ((ss, SOME f)::zs) =

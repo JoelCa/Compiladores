@@ -241,6 +241,7 @@ Ver ejemploFinal16.tig
 
 
 LO ÚLTIMO:
+- Debugear el coloreo.
 - Arreglar el entero máximo y mínimo. Ver línea 347 de tigertrans.sml.
 - Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"
