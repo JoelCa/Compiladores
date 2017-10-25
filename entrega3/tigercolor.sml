@@ -13,6 +13,7 @@ struct
   val emptyAll = Table.mkDict String.compare
   fun insertAll x = Table.insert x
   fun findAll x = Table.find x
+  fun printAll t = Table.app (fn (k,x) => ((print "coloreo final"); (print ("("^k^","^x^")")); (print "\n"))) t
 
   val moveList : (tigertemp.temp, tigergraph.node Set.set) Table.dict ref = ref (Table.mkDict String.compare)
   val worklistMoves : tigergraph.node Set.set ref = ref (Set.empty compareNodes)
@@ -34,7 +35,8 @@ struct
   val alias : (tigertemp.temp, tigertemp.temp) Table.dict ref = ref (Table.mkDict String.compare)
   val frozenMoves : tigergraph.node Set.set ref = ref (Set.empty compareNodes)
   val coloredNodes : tigerframe.register Set.set ref = ref (Set.empty String.compare)
-  val color : (tigertemp.temp, int) Table.dict ref = ref (Table.mkDict String.compare)
+  val color : (tigertemp.temp, int) Table.dict ref = 
+    ref (#1 (List.foldl (fn (r, (res,n)) => (Table.insert (res, r, n),n+1)) (Table.mkDict String.compare, 0) tigerframe.allRegs))
   val spilledNodes : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
   
 
@@ -66,10 +68,14 @@ struct
   fun listToSet(l) =
     Set.addList(Set.empty String.compare, !l)
 
-  fun push(x,xs) = x::(!xs)
+  fun push(x,xs) = xs := x::(!xs)
   
   (*FALTA TRATAR EL TEMA DE CUANDO XS ES VACIO*)
-  fun pop(xs) = hd(!xs)
+  fun pop (ref []) = raise Fail "Error Pop lista vacia\n"
+    | pop xs = 
+        let val x = hd(!xs)
+        in (xs := tl(!xs); x)
+        end
 
   fun inSet(x,s) = Set.member(!s, x)
 
@@ -81,10 +87,16 @@ struct
 
   fun singleNodeSet(x) = Set.singleton tigergraph.compareNodes x
 
+  fun getDegree(x) =
+    case peekTableValue(degree,x) of
+      SOME d => d
+    | NONE   => 0
+
   fun addEdge (u,v) =
     if not(inSet((u,v), adjSet)) andalso not(u = v)
     then
       let val _ = adjSet := Set.add (Set.add (!adjSet, (u,v)), (v,u))
+          (*val _ = (print (u^","^v^"   <----->   "^Bool.toString(inSetNoRef(u, precolored))^","^Bool.toString(inSetNoRef(v, precolored))); print "\n")*)
           val _ = if not(inSetNoRef(u, precolored))
                   then (updateSetTable(adjList,u, singleTempSet(v));                      
                         updateTable (degree, u, fn opt =>
@@ -95,7 +107,7 @@ struct
                   else ()
           val _ = if not(inSetNoRef(v, precolored))
                   then (updateSetTable(adjList,v, singleTempSet u);
-                        updateTable (degree, u, fn opt =>
+                        updateTable (degree, v, fn opt =>
                                                   case opt of
                                                     SOME x => x+1
                                                   | NONE   => 1);
@@ -113,23 +125,17 @@ struct
         val moves  = #ismove flowg
         val instrs = tigergraph.nodes g
         val louts  = tigerliveness.liveOuts flowg
-        val _ = print "DEAD 988"
         fun buildAux i = 
           let val live = ref (T.find (louts, i))
               val useSet = T.find (#use flowg, i)
-              val _ = print "DEAD 111"
               val defSet = T.find (#def flowg, i)
-              val _ = print "DEAD 112"
               val _ = if T.find (moves, i)
                       then
                         let
                           val _ = live := Set.difference (!live, useSet)
                           val _ = Set.app (fn d => Set.app (fn u => movesPair := Table.insert(!movesPair, i, (d,u))) useSet) defSet
-                          val _ = print "DEAD 113"
                         in
-                          print "DEAD 114";
                           Set.app (fn x => updateSetTable(moveList, x, singleNodeSet(i))) (Set.union (defSet,useSet));
-                          print "DEAD 115";
                           updateSet(worklistMoves, i)
                         end
                       else
@@ -147,19 +153,22 @@ struct
     end
 
   fun nodeMoves(n) =
-    Set.intersection(getTableValue(moveList, n), Set.union(!activeMoves, !worklistMoves))
+    case peekTableValue(moveList, n) of
+      SOME ms => Set.intersection(ms, Set.union(!activeMoves, !worklistMoves))
+    | NONE    => Set.empty compareNodes
   
   fun moveRelated(n) =
     not(Set.isEmpty(nodeMoves(n)))
 
   fun makeWorkList () =
     let
-      val _ = print "DEAD 119"
+      (*val _ = Table.app (fn (k,x) => ((print "lista de nodos"); (print ("("^k^","^Int.toString x^")")); (print "\n"))) (!degree)
+      val _ = Set.app (fn k => ((print "nodos precolorados"); (print ("("^k^")")); (print "\n"))) (precolored)*)
       fun makeWorkL x =
         let
           val _ = removeElemTempSet(initial, x)
         in
-          if getTableValue(degree, x) >= colorCount
+          if getDegree(x) >= colorCount
           then
             updateSet(spillWorklist, x)
           else 
@@ -187,7 +196,7 @@ struct
     end 
 
   fun decrementDegree(m) =
-    let val d = getTableValue(degree, m)
+    let val d = getDegree(m)
         val _ = updateTable(degree, m, fn _ => d-1)
     in
       if d = colorCount
@@ -208,13 +217,14 @@ struct
       SOME s => 
       let val _ = removeElemTempSet(simplifyWorklist, s)
           val _ = push(s,selectStack)
+          val _ = print "DEAD 123132123\n"
       in
         Set.app decrementDegree (adjacent(s))
       end
     | NONE => ()
 
   fun addWorkList(u) =
-    if not(inSetNoRef(u, precolored)) andalso not(moveRelated(u)) andalso (getTableValue(degree, u) < colorCount)
+    if not(inSetNoRef(u, precolored)) andalso not(moveRelated(u)) andalso (getDegree(u) < colorCount)
     then
       (removeElemTempSet(freezeWorklist, u);
        updateSet(simplifyWorklist, u))
@@ -222,11 +232,11 @@ struct
       ()
 
   fun ok(t,r) =
-    getTableValue(degree, t) < colorCount orelse inSetNoRef(t, precolored) orelse inSet((t,r), adjSet)
+    getDegree(t) < colorCount orelse inSetNoRef(t, precolored) orelse inSet((t,r), adjSet)
 
   fun conservative(nodes) =
     let val k = ref 0
-        val _ = Set.app (fn n => if getTableValue(degree, n) >= colorCount then k := !k + 1 else ()) nodes
+        val _ = Set.app (fn n => if getDegree(n) >= colorCount then k := !k + 1 else ()) nodes
     in !k < colorCount
     end
 
@@ -249,7 +259,7 @@ struct
         val _ = enableMoves(singleTempSet v)
         val _ = Set.app (fn t => (addEdge(t,u); decrementDegree(t))) (adjacent(v))
     in
-      if getTableValue(degree, u) >= colorCount andalso inSet(u, freezeWorklist)
+      if getDegree(u) >= colorCount andalso inSet(u, freezeWorklist)
       then
         (removeElemTempSet(freezeWorklist, u);
          updateSet(spillWorklist, u))
@@ -260,41 +270,52 @@ struct
   fun coalesce() =
     case takeElem(worklistMoves) of
       SOME m =>  
-        let val (x,y) = getTableValue(movesPair, m)
+        let val _ = (printNode m; print "\n")
+            val (x,y) = getTableValue(movesPair, m)
+            val _ = print "DEAD 124\n"
             val (x,y) = (getAlias(x), getAlias(y))
             val (u,v) = if inSetNoRef(y, precolored) then (y,x) else (x,y)
             val _ = removeElemNodeSet(worklistMoves,m)
+            val _ = print "DEAD 125\n"
         in
           if u = v
           then
-            (updateSet(coalescedMoves, m);
-             addWorkList(u))
+            (print "DEAD 132\n";
+              updateSet(coalescedMoves, m);
+             addWorkList(u);
+             print "DEAD 128\n")
           else
-            if inSetNoRef(v, precolored) orelse inSet((u,v), adjSet)
-            then
-              (updateSet(constrainedMoves, m);
-               addWorkList(u);
-               addWorkList(v))
-            else
-              if (inSetNoRef(u, precolored) andalso (Set.foldl (fn (x,r) => ok(x,u) andalso r) true (adjacent(v))))
-                 orelse (not(inSetNoRef(u, precolored)) andalso conservative(Set.union(adjacent(u), adjacent(v))))
-              then
-                (updateSet(coalescedMoves, m);
-                 combine(u, v);
-                 addWorkList(u))
-              else
-                updateSet(activeMoves, m)
+            (print "DEAD 135\n";if inSetNoRef(v, precolored) orelse inSet((u,v), adjSet)
+                        then
+                          (print "DEAD 133\n";
+                            updateSet(constrainedMoves, m);
+                           addWorkList(u);
+                           addWorkList(v);
+                           print "DEAD 129\n")
+                        else
+                          (print "DEAD 136\n";if (inSetNoRef(u, precolored) andalso (Set.foldl (fn (x,r) => ok(x,u) andalso r) true (adjacent(v))))
+                                                       orelse (not(inSetNoRef(u, precolored)) andalso conservative(Set.union(adjacent(u), adjacent(v))))
+                                                    then
+                                                      (print "DEAD 134\n";
+                                                        updateSet(coalescedMoves, m);
+                                                       combine(u, v);
+                                                       addWorkList(u);
+                                                       print "DEAD 130\n")
+                                                    else
+                                                      (print "DEAD 131\n";updateSet(activeMoves, m))))
         end
     | NONE => ()
 
   fun freezeMoves(u) =
     let fun aux(m) =
       let val (x,y) = getTableValue(movesPair, m)
+          val _ = print "DEAD 333333333333333\n"
           val v = if getAlias(y) = getAlias(u) then getAlias(x) else getAlias(y)
           val _ = removeElemNodeSet(activeMoves, m)
           val _ = updateSet(frozenMoves, m)
+          val _ = print "DEAD 444444444444444\n"
       in 
-        if Set.isEmpty(nodeMoves(v)) andalso getTableValue(degree, v) < colorCount
+        if Set.isEmpty(nodeMoves(v)) andalso getDegree(v) < colorCount
         then
           (removeElemTempSet(freezeWorklist, v);
            updateSet(simplifyWorklist, u))
@@ -320,44 +341,66 @@ struct
 
   fun assignColors() =
     ((while not(null(!selectStack)) do
-              let val n = pop(selectStack)
-                  fun createList(0) = []
-                    | createList(k) = (colorCount - k)::(createList(k-1))
-                  val okColors = ref (Set.addList((Set.empty Int.compare), createList(colorCount)))
-                  fun aux(w) =
-                    if Set.member(Set.union(!coloredNodes, precolored), getAlias(w))
-                    then
-                      removeElemIntSet(okColors, getTableValue(color, getAlias(w)))
-                    else
-                      ()
-                  val _ = Set.app aux (getTableValue(adjList, n))
-              in
-                if Set.isEmpty(!okColors)
-                then
-                  updateSet(spilledNodes, n)
-                else
-                  (updateSet(coloredNodes, n);
-                   case takeElem(okColors) of
-                     SOME c => updateTable(color, n, fn _ => c)
-                   | NONE => ())
-              end);
-        Set.app (fn n => updateTable(color, n, fn _ => getTableValue(color, getAlias(n)))) (!coalescedNodes))
+        let val _ = print "DEAD 333 \n"
+            val _ = List.app (fn x => ((print "---------> Select "); (print ("("^x^")")); (print "\n"))) (!selectStack)
+            val n = pop(selectStack)
+            val _ = List.app (fn x => ((print "---------> Select "); (print ("("^x^")")); (print "\n"))) (!selectStack)
+            val _ = print "DEAD 444 \n"
+            fun createList(0) = []
+              | createList(k) = (colorCount - k)::(createList(k-1))
+            val okColors = ref (Set.addList((Set.empty Int.compare), createList(colorCount)))
+            val _ = print "DEAD 555 \n"; 
+            fun aux(w) =
+              if Set.member(Set.union(!coloredNodes, precolored), getAlias(w))
+              then
+                removeElemIntSet(okColors, getTableValue(color, getAlias(w)))
+              else
+                ()
+            val _ = Set.app aux (getTableValue(adjList, n))
+        in
+          if Set.isEmpty(!okColors)
+          then
+            updateSet(spilledNodes, n)
+          else
+            (updateSet(coloredNodes, n);
+             case takeElem(okColors) of
+               SOME c => updateTable(color, n, fn _ => c)
+             | NONE => ())
+        end);
+        Table.app (fn (k,x) => ((print "Colores"); (print ("("^k^","^Int.toString x^")")); (print "\n"))) (!color);
+        (print "DEAD 666 \n";Set.app (fn n => (print (n^"   "^getAlias(n)^" \n");updateTable(color, n, fn _ => getTableValue(color, getAlias(n))))) (!coalescedNodes)))
+
+
+  fun printInterferenceGraph() =
+    let
+      val _ = Set.app (fn x => print("\""^x^"\" ")) (!initial)
+      val _ = print "\n"
+      val _ = Set.app (fn (x,y) => print ("\""^x^"\"--\""^y^"\"\n")) (!adjSet)
+    in
+      ()
+    end
+
+    val adjSet : (tigertemp.temp * tigertemp.temp) Set.set ref = ref (Set.empty (fn ((a,b),(c,d))  => if (a,b) = (c,d) then EQUAL else String.compare (a,c)))
 
 
   fun coloring {code = code, initial = init, spillCost = cost, registers = regs } =
     let val flowGraph = livenessAnalysis(code)
         val _ = build(flowGraph)
+        val _ = printInterferenceGraph()
         val _ = makeWorkList()
+        val _ = print "DEAD 222222222222222"
+        fun printSelect () =
+          List.app (fn x => ((print "---------> Select "); (print ("("^x^")")); (print "\n"))) (!selectStack)
         fun iterationBody() =
           if not(Set.isEmpty(!simplifyWorklist))
-          then simplify()
+          then (simplify(); printSelect(); print "DEAD 656757575\n")
           else if not(Set.isEmpty(!worklistMoves))
-               then coalesce()
+               then (print "DEAD 4141511 \n"; coalesce())
                else if not(Set.isEmpty(!freezeWorklist))
-                    then freeze()
+                    then (print "DEAD 44444444 \n"; freeze())
                     else if not(Set.isEmpty(!spillWorklist))
-                         then selectSpill()
-                         else ()
+                         then (print "DEAD 55555555 \n"; selectSpill())
+                         else ((print "DEAD 66666666 \n") )
         fun iteration() =
           (iterationBody();
            if (Set.isEmpty(!simplifyWorklist) andalso
@@ -367,7 +410,9 @@ struct
            then ()
            else iteration())
         val _ = iteration()
+        val _ = print "Fin iteración \n"; 
         val _ = assignColors()
+        val _ = print "Fin de assignColors \n"; 
         fun intToReg (n) =
           if (n >= 0) andalso (n < colorCount)
           then List.nth(tigerframe.allRegs, n)

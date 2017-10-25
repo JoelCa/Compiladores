@@ -15,5 +15,6 @@ sig
   val emptyAll : allocation
   val insertAll : allocation * tigertemp.temp * tigerframe.register -> allocation
   val findAll : allocation * tigertemp.temp -> tigerframe.register
+  val printAll : allocation -> unit
 
 end

@@ -44,8 +44,9 @@ fun main(args) =
     (*val coloredInstr = map (fn (f, is) => tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, tigersimpleregalloc.simpleregalloc f is))) functionInstrCode*)
     val _ = if ir then print(tigertrans.Ir(fragmentos)) else ()
     val canonCode = map aux (tigertrans.getStms fragmentos)
-    val finalStrCode = tigertrans.procStringList canonCode
     val _ = if canon then List.app (fn (xs,_) => List.app (fn x => (print o tigerit.tree) x) xs) canonCode else ()
+    val _ = print "termina procStringList\n"
+    val finalStrCode = tigertrans.procStringList canonCode
     val _ = if code then map print finalStrCode else [()]
     (*val _ = if inter then tigerinterp.inter true procs strings else ()*)
 	in

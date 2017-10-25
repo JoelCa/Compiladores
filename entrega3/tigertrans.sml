@@ -95,11 +95,15 @@ fun nombreFrame frame = print(".globl " ^ tigerframe.name frame ^ "\n")
 fun coloreo table = fn x => findAll (table, x)
 
 fun instrCode (table : allocation) {prolog = p, body = b : tigerassem.instr list, epilog = e} = 
-  p ^ (foldr (fn (s, r) => (tigerassem.format (coloreo table) s) ^ r) "" b) ^ e
+  let val _ = printAll table
+  		val str = p ^ (foldr (fn (s, r) => (tigerassem.format (coloreo table) s) ^ r) "" b) ^ e
+  	  val _ = print "Termina Format\n"
+  in str end
 
 fun procStringList ((ss, SOME f)::zs) =
 	let
 		val (all, colTable)  = tigerregalloc.alloc (tigercodegen.maximalMunch f ss, f)
+		val _ = print "Termino alloc\n"
 	in (instrCode colTable (tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, all)))) :: procStringList zs
 	end
 	| procStringList (([LABEL s], NONE)::zs) = s :: procStringList zs 
