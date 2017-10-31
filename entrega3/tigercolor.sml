@@ -23,7 +23,7 @@ struct
   val precolored : tigerframe.register Set.set = Set.addList((Set.empty String.compare), tigerframe.allRegs)
   val initial : tigertemp.temp Set.set ref = ref  (Set.empty String.compare)
   val spillWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
-  val colorCount = length tigerframe.allRegs
+  val colorCount = (length tigerframe.allRegs) - 3
   val activeMoves : tigergraph.node Set.set ref = ref (Set.empty compareNodes)
   val freezeWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
   val simplifyWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
@@ -346,9 +346,8 @@ struct
             val n = pop(selectStack)
             val _ = List.app (fn x => ((print "---------> Select "); (print ("("^x^")")); (print "\n"))) (!selectStack)
             val _ = print "DEAD 444 \n"
-            fun createList(0) = []
-              | createList(k) = (colorCount - k)::(createList(k-1))
-            val okColors = ref (Set.addList((Set.empty Int.compare), createList(colorCount)))
+            val okColorList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14]
+            val okColors = ref (Set.addList((Set.empty Int.compare), okColorList))
             val _ = print "DEAD 555 \n"; 
             fun aux(w) =
               if Set.member(Set.union(!coloredNodes, precolored), getAlias(w))
@@ -414,7 +413,7 @@ struct
         val _ = assignColors()
         val _ = print "Fin de assignColors \n"; 
         fun intToReg (n) =
-          if (n >= 0) andalso (n < colorCount)
+          if (n >= 0) andalso (n < colorCount+3)
           then List.nth(tigerframe.allRegs, n)
           else raise Fail "error: coloreo"
     in (Table.map (fn (r,n) => intToReg(n)) (!color), Set.listItems (!spilledNodes)) end

@@ -37,7 +37,8 @@ struct
         end
     | replaceTemps src dst (other::xs) = other :: (replaceTemps src dst xs)      
 
-  fun format (coloreo : temp -> string) (OPER {assem = s, dst = dst, src = src, ...}) = implode (replaceTemps (map coloreo src) (map coloreo dst) (explode s))
+  fun format (coloreo : temp -> string) (OPER {assem = s, dst = dst, src = src, ...}) = 
+        implode (replaceTemps (map coloreo src) (map coloreo dst) (explode s))
     | format _ (LABEL {assem = s, ...}) = s
     | format coloreo (MOVE {assem = s, dst = dst, src = src}) =
       let val regSource = map coloreo src

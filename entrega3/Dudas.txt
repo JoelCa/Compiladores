@@ -239,9 +239,12 @@ Ver ejemploFinal16.tig
 
 - ¿Para que está la función "exit" de tiger?. ¿Podemos saber cual es el código exit de una función?
 
+- Hay que definir lr como un source para la instrucción que se genera a partir del CALL?
+  Esto lo haríamos para que cuando se genere el grafo de interferencia sea tenido en cuenta.
+
 
 LO ÚLTIMO:
-- Debugeando el coloreo. Ver ejemploFinal2.tig.
+- Debugeando el coloreo, chequear la construcción del grafo de flujo e interferencia.
 - Arreglar el entero máximo y mínimo. Ver línea 347 de tigertrans.sml.
 - Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"

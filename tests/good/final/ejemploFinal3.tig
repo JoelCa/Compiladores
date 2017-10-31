@@ -2,5 +2,5 @@ let
   type a = {i:int}
   var y:a := a{i=99999}
 in
- y.i
+ exit(y.i)
 end
