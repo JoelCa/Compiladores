@@ -20,6 +20,31 @@ struct
     else
       raise Fail "No debería pasar! (charToInt)"
 
+  fun printInstr (OPER {assem = a, dst = d, src = s, ...}) =
+        let val _ = print ("OPER\n")
+            val _ = print (a^"\n")
+            val _ = print ("DST: ")
+            val _ = List.app (fn e => print (e^" ")) d
+            val _ = print "\n"
+            val _ = print ("SRC: ")
+            val _ = List.app (fn e => print (e^" ")) s
+            val _ = print "\n-------------------\n\n"
+        in () end
+    | printInstr (MOVE {assem = a, dst = d, src = s}) =
+        let val _ = print ("MOVE\n")
+            val _ = print (a^"\n")
+            val _ = print ("DST: ")
+            val _ = List.app (fn e => print (e^" ")) d
+            val _ = print "\n"
+            val _ = print ("SRC: ")
+            val _ = List.app (fn e => print (e^" ")) s
+            val _ = print "\n-------------------\n\n"
+        in () end
+    | printInstr (LABEL {assem = a, ...}) =
+        print ("LABEL\n"^a^"\n-------------------\n\n")
+        
+
+
   fun replaceTemps _ _ [] = []
     | replaceTemps (src:string list) (dst:string list) (#"'"::(#"s"::(n::xs))) = 
         let

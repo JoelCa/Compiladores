@@ -12,6 +12,7 @@ sig
   val newNode : graph -> node
   val compareNodes : node * node -> order
   val printNode : node -> unit
+  val printNodeExt : node -> unit
   
   exception GraphEdge
   

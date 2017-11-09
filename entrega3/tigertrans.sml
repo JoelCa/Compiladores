@@ -96,7 +96,7 @@ fun coloreo table = fn x => findAll (table, x)
 
 fun instrCode (table : allocation) {prolog = p, body = b : tigerassem.instr list, epilog = e} = 
   let val _ = printAll table
-  		val str = p ^ (foldr (fn (s, r) => (tigerassem.format (fn x => x) s) ^ r) "" b) ^ e
+  		val str = p ^ (foldr (fn (s, r) => (tigerassem.format (coloreo table) s) ^ r) "" b) ^ e
   	  val _ = print "Termina Format\n"
   in str end
 

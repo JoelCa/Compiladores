@@ -7,7 +7,8 @@ struct
   val instrNodes : instr table ref = ref (T.mkDict compareNodes)
   val labelProcesados : (string, node) T.dict ref = ref (T.mkDict String.compare)
   val jumpProcesados : (string, node list) T.dict ref = ref (T.mkDict String.compare)
-  val labels : string list ref = ref []
+  (*val labels : string list ref = ref []*)
+  val lastNode : node option ref = ref NONE
 
   fun listToSet l = Splayset.addList (Splayset.empty String.compare, l)
 
@@ -24,17 +25,21 @@ struct
           (* (que no es label) y es el posible destino de un jump cuyo label este en "labels". *)
           (* Para cada label en "labels", agregamos el nodo a labelProcesados, recorremos los jumpProcesados en busca de alguno *)
           (* que lo tenga como destino y para los que coinciden, creamos la arista correspondiente. *)
+          val _ = case optNode of
+                    SOME n => (printNode n; print "\n")
+                  | NONE   => ()
+          val _ = printInstr x
           val _ =
-            case optNode of
-              SOME n => 
-                if null (!labels)
-                  then ()
-                  else (app (fn x => (T.insert (!labelProcesados, x, n);
-                                      case T.peek (!jumpProcesados, x) of 
-                                          SOME ns => app (fn n' => mk_edge (n', n)) ns
-                                        | NONE    => () ))
-                        (!labels) ; labels := [])
-              | NONE => ()
+            case x of (* REVISAR *)
+              (LABEL {lab = l, ...}) => 
+                (case !lastNode of
+                  SOME ln =>
+                    (labelProcesados := T.insert (!labelProcesados, l, ln);
+                            case T.peek (!jumpProcesados, l) of 
+                                SOME ns => app (fn n' => mk_edge (n', ln)) ns
+                              | NONE    => () )
+                | _ => ())
+            | _ => lastNode := optNode
           val is_jump = ref false
           (* A medida que se generan los nodos del grafo, se utilizan para armar el grafo de flujo (flowG) *)
           val f =
@@ -58,9 +63,7 @@ struct
               | NONE => 
                 case x of
                   LABEL {lab = l, ...} =>
-                    let val _ = labels := l :: (!labels)
-                    in flowG
-                    end
+                    flowG
                 | _ => raise Fail "error: en instr2graph, no debería pasar 2."
           (* Si la instrucción es un jump común, entonces NO creamos una arista a la próxima instrucción. *)
           val _ =

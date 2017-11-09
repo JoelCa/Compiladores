@@ -15,6 +15,9 @@ type graph = node list ref
 
 fun printNode (Node n) = print (#name (!n))
 
+fun printNodeExt (Node n) =
+  Splayset.app (fn s => (printNode (Node n); print " -> "; printNode s; print "\n")) (#successors (!n))
+
 fun nodes g = !g
 
 fun succ (Node n) = listItems (#successors (!n))

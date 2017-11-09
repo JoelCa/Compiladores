@@ -305,3 +305,12 @@ push {r0,r1,r2}
 mov r0, r2
 bl printf
 pop {r0,r1,r2}
+
+
+- Código del build:
+  - En primer lugar aclaramos que no se sigue al pie de la letra el pseudocódigo del libro ya que
+    al realizar de distinta manera el cálculo de los liveOuts (básicamente calcularlos previamente
+    y no al mismo tiempo que se arma el grafo de interferencia) hay ciertas partes que no son tenidas
+    en cuenta.
+  - Por otro lado, si en la instrucción actual i se define un temporario t que luego no es utilizado
+    aún así interfiere con sus temporarios liveOuts (ver último párrafo de la página 225
