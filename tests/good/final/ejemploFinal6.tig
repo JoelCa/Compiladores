@@ -6,5 +6,6 @@ let
   function sum(n : int) : int =
     fact(n) + 13
 in 
-  sum(5)
+  sum(5);
+  exit(0)
 end

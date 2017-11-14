@@ -102,7 +102,7 @@ fun instrCode (table : allocation) {prolog = p, body = b : tigerassem.instr list
 
 fun procStringList ((ss, SOME f)::zs) =
 	let
-		val (all, colTable)  = tigerregalloc.alloc (tigercodegen.maximalMunch f ss, f)
+		val (all, colTable) = tigerregalloc.alloc (tigercodegen.maximalMunch f ss, f)
 		val _ = print "Termino alloc\n"
 	in (instrCode colTable (tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, all)))) :: procStringList zs
 	end

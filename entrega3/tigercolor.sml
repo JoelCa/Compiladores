@@ -353,7 +353,7 @@ struct
       end
     in Set.app aux (nodeMoves(u))
     end
-(*aaa*)
+
   fun freeze() =
     case takeElem(freezeWorklist) of
       SOME u => (removeElemTempSet(freezeWorklist, u);

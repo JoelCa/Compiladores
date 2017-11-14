@@ -244,6 +244,7 @@ Ver ejemploFinal16.tig
 
 
 LO ÚLTIMO:
+- Chequear el ejemploFinal6.tig, problemas en la función factorial.
 - Debugeando el coloreo, chequear la construcción del grafo de flujo e interferencia.
 - Arreglar el entero máximo y mínimo. Ver línea 347 de tigertrans.sml.
 - Arreglar flag "canon" e "inter", en tigermain.

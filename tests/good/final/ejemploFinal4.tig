@@ -6,5 +6,6 @@ let
     if n = 0 then -9999 else n+90
 in 
 	for i :=0 to 100 do (a :=a+1; ());
-  f(a-101)
+  f(a-101);
+  exit(0)
 end
