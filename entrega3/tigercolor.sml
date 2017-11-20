@@ -102,9 +102,9 @@ struct
 
   fun addEdge (u,v) =
     let
-      val _ = (print ("\n"^Bool.toString(inSet((u,v), adjSet))^u^","^v^"   <----->   "^Bool.toString(inSetNoRef(u, precolored))^","^Bool.toString(inSetNoRef(v, precolored))); print "\n")
+      (*val _ = (print ("\n"^Bool.toString(inSet((u,v), adjSet))^u^","^v^"   <----->   "^Bool.toString(inSetNoRef(u, precolored))^","^Bool.toString(inSetNoRef(v, precolored))); print "\n")
       val _ = print "Conjunto de adjacencia\n"
-      val _ = Set.app (fn (x,y) => print (x ^ "," ^ y ^ " - ")) (!adjSet)
+      val _ = Set.app (fn (x,y) => print (x ^ "," ^ y ^ " - ")) (!adjSet)*)
     in
       if not(inSet((u,v), adjSet)) andalso not(u = v)
       then
@@ -166,6 +166,7 @@ struct
               val _ = live := Set.union (!live, defSet)
               val _ = (print ("\nlive outs unidos con defs "); printNode i; print "\n")
               val _ = Set.app (fn y => print (y ^ " - ")) (!live)
+              val _ = print "\n"
           in
             Set.app (fn a =>
                       Set.app (fn b => addEdge (a,b)) (!live)
@@ -205,9 +206,14 @@ struct
 
   fun adjacent(n) =
     let val optAdj = peekTableValue(adjList, n)
+        val _ = print "########### Calculando adjacencias ########### \nSelectStack:"
+        val _ = List.app (fn s => print (s ^ " - ")) (!selectStack)
+        val _ = print "\ncoalescedNodes:"
+        val _ = Set.app (fn c => print (c ^ " - ")) (!coalescedNodes)
+        val _ = print "\nAdjacencias: "
     in case optAdj of
-         SOME adj => Set.difference(adj, Set.union(listToSet(selectStack), !coalescedNodes))
-       | NONE     => Set.empty String.compare
+         SOME adj => (Set.app (fn a => print (a ^ " - ")) adj; print "\n"; Set.difference(adj, Set.union(listToSet(selectStack), !coalescedNodes)))
+       | NONE     => (print "\n"; Set.empty String.compare)
     end
 
   fun enableMoves(nodes) =
@@ -284,7 +290,8 @@ struct
         val _ = updateTable(alias, v, fn _ => u)
         val _ = updateSetTable(moveList, u, getTableValue(moveList, v))
         val _ = enableMoves(singleTempSet v)
-        val _ = Set.app (fn t => (addEdge(t,u); decrementDegree(t))) (adjacent(v))
+        val _ = print ("Combinando " ^ u ^ " <---> " ^ v ^ "\n")
+        val _ = Set.app (fn t => (addEdge(t,u); decrementDegree(t); print ("Adjacencia: "^ t ^ " ----- "^ u ^ "\n"))) (adjacent(v))
     in
       if getDegree(u) >= colorCount andalso inSet(u, freezeWorklist)
       then
@@ -299,13 +306,13 @@ struct
       SOME m =>  
         let val _ = (printNode m; print "\n")
             val (x,y) = getTableValue(movesPair, m)
-            val _ = print "DEAD 124\n"
+            val _ = print ("DEAD 124\n("^ x ^","^y^")")
             val (x,y) = (getAlias(x), getAlias(y))
             val (u,v) = if inSetNoRef(y, precolored) then (y,x) else (x,y)
             val _ = removeElemNodeSet(worklistMoves,m)
-            val _ = print "DEAD 125\n"
-            val _ = print "Lista de adjacencia:\n"
-            val _ = Table.app (fn (t,s) => (print ("temporario: "^t^"\nconj. de adjacencia: "); Set.app (fn x => print (x ^ " - ")) s; print "\n")) (!adjList)
+            val _ = print ("DEAD 125\n("^ x ^","^y^")")
+            (*val _ = print "Lista de adjacencia:\n"
+            val _ = Table.app (fn (t,s) => (print ("temporario: "^t^"\nconj. de adjacencia: "); Set.app (fn x => print (x ^ " - ")) s; print "\n")) (!adjList)*)
         in
           if u = v
           then
@@ -326,7 +333,8 @@ struct
                                                        orelse (print "DEAD 1363\n"; not(inSetNoRef(u, precolored)) andalso conservative(Set.union(adjacent(u), adjacent(v))))
                                                     then
                                                       (print "DEAD 134\n";
-                                                        updateSet(coalescedMoves, m);
+                                                       updateSet(coalescedMoves, m);
+                                                       print("Nodos coalescidos: " ^ u ^ " --- " ^ v ^ "\n");
                                                        combine(u, v);
                                                        addWorkList(u);
                                                        print "DEAD 130\n")
@@ -404,9 +412,13 @@ struct
 
   fun printInterferenceGraph() =
     let
+      val _ = print "\n\n\n############### Inicio grafo interferencia ###############\n"
       val _ = Set.app (fn x => print("\""^x^"\" ")) (!initial)
       val _ = print "\n"
       val _ = Set.app (fn (x,y) => print ("\""^x^"\"--\""^y^"\"\n")) (!adjSet)
+      val _ = print "edge [style=dashed]\n"
+      val _ = Set.app (fn x => let val (a,b) = getTableValue(movesPair, x) in print("\""^a^"\"--\""^b^"\"[color=red]\n") end) (!worklistMoves)
+      val _ = print "############### Fin grafo interferencia ###############\n\n\n"
     in
       ()
     end
@@ -429,7 +441,7 @@ struct
           if not(Set.isEmpty(!simplifyWorklist))
           then (simplify(); printSelect(); print "DEAD 656757575\n")
           else if not(Set.isEmpty(!worklistMoves))
-               then (print "DEAD 4141511 \n"; coalesce())
+               then (print "DEAD 4141511 \n"; coalesce(); printInterferenceGraph())
                else if not(Set.isEmpty(!freezeWorklist))
                     then (print "DEAD 44444444 \n"; freeze())
                     else if not(Set.isEmpty(!spillWorklist))
