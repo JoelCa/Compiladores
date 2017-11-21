@@ -459,7 +459,7 @@ struct
                else if not(Set.isEmpty(!freezeWorklist))
                     then (print "DEAD 44444444 \n"; freeze())
                     else if not(Set.isEmpty(!spillWorklist))
-                         then (print "DEAD 55555555 \n"; selectSpill(); spillWorklist := Set.empty String.compare)
+                         then (print "DEAD 55555555 \n"; selectSpill())
                          else ((print "DEAD 66666666 \n") )
         fun iteration() =
           (iterationBody();
