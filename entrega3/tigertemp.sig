@@ -6,4 +6,5 @@ signature tigertemp = sig
 	val newtemp: unit -> temp
 	val newlabel: unit -> label
   val newNodeName : unit -> nodeName
+  val compare : (temp * temp) -> order
 end

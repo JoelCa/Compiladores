@@ -315,3 +315,6 @@ pop {r0,r1,r2}
     en cuenta.
   - Por otro lado, si en la instrucción actual i se define un temporario t que luego no es utilizado
     aún así interfiere con sus temporarios liveOuts (ver último párrafo de la página 225
+
+- Consideramos que los regístros r0, r1, r2 y r3 NO son registros asignables para el coloreo, pues NO se guarda
+  su valor como los callee saves al entrar en una función, dando lugar a que al salir de la misma cambien su valor.

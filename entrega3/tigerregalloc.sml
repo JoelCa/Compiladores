@@ -5,7 +5,7 @@ struct
   open tigerassem
 
   structure Table = Splaymap
-  
+  structure Set = Splayset
 
   val tempMap =
     foldr (fn (r, res) => insertAll (res, r, r)) emptyAll allRegs
@@ -13,6 +13,8 @@ struct
   val accesses : (tigertemp.temp, int) Table.dict ref = ref (Table.mkDict String.compare)
 
   val stackInstrs : instr list ref = ref []
+
+  val newTemps : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
 
   fun intToString n = if n<0 then "-" ^ Int.toString(~n) else if n>=0 then Int.toString(n) else ""
 
@@ -26,23 +28,40 @@ struct
     (* COMPLETAR: movaMem crea una instrucción que mueve un temporario a memoria. movaTemp, de memoria a un temporario.*)
     fun movaMem(temp, mempos) =
       let val dirTemp = tigertemp.newtemp()
-      in OPER {assem = loadConstant(mempos) ^ "str 's0, [fp,'d0]\n", src=[temp], dst=[dirTemp], jump=NONE}
+          val _ = newTemps := Set.add (!newTemps, dirTemp)
+      in (OPER { assem = loadConstant(mempos),
+                 src = [],
+                 dst = [dirTemp],
+                 jump = NONE }) ::
+         [OPER { assem = "str 's0, [fp,'s1]\n", 
+                 src=[temp, dirTemp], 
+                 dst=[], 
+                 jump=NONE}]
       end
     fun movaTemp(mempos, temp) =
       let val dirTemp = tigertemp.newtemp()
-      in OPER {assem= loadConstant(mempos) ^ "ldr 'd1, [fp,'d0]\n", src=[], dst=[dirTemp, temp], jump=NONE}
+          val _ = newTemps := Set.add (!newTemps, dirTemp)
+      in (OPER { assem = loadConstant(mempos),
+                 src = [],
+                 dst = [dirTemp],
+                 jump = NONE }) ::
+         [OPER { assem = "ldr 'd0, [fp,'s0]\n", 
+                 src = [dirTemp], 
+                 dst = [temp], 
+                 jump=NONE}]
       end
     
 
   fun makeStore(t:tigertemp.temp, f:frame):tigertemp.temp =
     let
       val t' = tigertemp.newtemp()
+      val _ = print ("makeStore: " ^ t ^ "," ^ t' ^ "\n")
       val _ = case Table.peek (!accesses, t) of
-                SOME n => stackInstrs := movaMem(t', n) :: !stackInstrs
+                SOME n => stackInstrs := movaMem(t', n) @ !stackInstrs
               | NONE   => let val InFrame m = tigerframe.allocLocal f true
                               val _ = accesses := Table.insert (!accesses, t, m)
                           in
-                            stackInstrs := movaMem(t', m) :: !stackInstrs
+                            stackInstrs := movaMem(t', m) @ !stackInstrs
                           end
     in
       t'
@@ -51,21 +70,27 @@ struct
   fun makeLoad(t:tigertemp.temp, f:frame):tigertemp.temp =
     let
       val t' = tigertemp.newtemp()
+      val _ = (print ("accesses: \n") ; Table.app (fn (k,v) => print (k ^ " -- ")) (!accesses) ; print "\n")
+      val _ = print ("Se busca: " ^ t ^ "\n")
       val _ = case Table.peek (!accesses, t) of
-                SOME n => stackInstrs := movaTemp(n, t') :: !stackInstrs
+                SOME n => stackInstrs := movaTemp(n, t')  @ !stackInstrs
               | NONE   => raise Fail "makeLoad: Quiere usar temporario que nunca definió."
     in
       t'
     end
 
-  fun rewriteProgram([], frame, spilled) = 
+  fun rewriteProgram([], frame, spilled) =
       ([],frame)
     | rewriteProgram((OPER {assem = a, src = s, dst = d, jump = j})::instrs, frame, spilled) =
       let 
-        val d' = map (fn t => if List.exists (fn x => x = t) spilled then makeStore (t,frame) else t) d
+        val d' = map (fn t => if List.exists (fn x => x = t) spilled
+                              then let val tt = makeStore (t,frame) in newTemps := Set.add (!newTemps, tt); tt end
+                              else t) d
         val defInstrs = rev (!stackInstrs)
         val _ = stackInstrs := []
-        val s' = map (fn t => if List.exists (fn x => x = t) spilled then makeLoad (t,frame) else t) s
+        val s' = map (fn t => if List.exists (fn x => x = t) spilled
+                              then let val tt = makeLoad (t,frame) in newTemps := Set.add (!newTemps, tt); tt end
+                              else t) s
         val useInstrs = rev (!stackInstrs)
         val _ = stackInstrs := []
         val instr' = OPER {assem = a, src = s', dst = d', jump = j}
@@ -101,7 +126,11 @@ struct
             (body, color))
       else
         let val (body', frame') = rewriteProgram(body,frame,spilled)
-            val _ = print "Reescrituraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+            val _ = initializeColoring(!newTemps)
+            val _ = newTemps := Set.empty String.compare
+            val _ = print "Reescrituraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nEspileados:\n"
+            val _ = List.app (fn x => print (x ^ " - ")) spilled
+            val _ = print "\n"
         in alloc(body', frame')
         end
     end

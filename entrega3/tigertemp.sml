@@ -30,6 +30,9 @@ in
 			s
 		end
 
+	fun compare(a,b) = 
+		String.compare(a,b)
+
 end
 
 end

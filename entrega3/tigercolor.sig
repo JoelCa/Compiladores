@@ -12,6 +12,7 @@ sig
                  }
                 -> allocation * tigertemp.temp list
 
+  val initializeColoring : tigertemp.temp Splayset.set -> unit
   val emptyAll : allocation
   val insertAll : allocation * tigertemp.temp * tigerframe.register -> allocation
   val findAll : allocation * tigertemp.temp -> tigerframe.register

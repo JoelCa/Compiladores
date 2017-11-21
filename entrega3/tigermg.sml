@@ -25,10 +25,10 @@ struct
           (* (que no es label) y es el posible destino de un jump cuyo label este en "labels". *)
           (* Para cada label en "labels", agregamos el nodo a labelProcesados, recorremos los jumpProcesados en busca de alguno *)
           (* que lo tenga como destino y para los que coinciden, creamos la arista correspondiente. *)
-          val _ = case optNode of
+          (*val _ = case optNode of
                     SOME n => (printNode n; print "\n")
                   | NONE   => ()
-          val _ = printInstr x
+          val _ = printInstr x*)
           val _ =
             case x of (* REVISAR *)
               (LABEL {lab = l, ...}) => 
