@@ -230,8 +230,9 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
 
 - ¿Mantenemos el nombre de "_tigermain" para la función principal?
 
-- ¿Es correcto que el usuario pueda definir una función F con el mismo nombre que una función de librería?. En este caso, F "pisa" a la función de la librería.
-Ver ejemploFinal16.tig
+- ¿Es correcto que el usuario pueda definir una función F con el mismo nombre que una función de librería?. En este caso, F "pisa" a la función de la
+  librería.
+  Ver ejemploFinal16.tig
 
 - Si creamos un array de records, lo inicializamos con un record determinado y luego modificamos algún elemento
   del array, vemos que todos sus elementos reflejan esta modificación. ¿Es correcto este funcionamiento?.
@@ -242,10 +243,29 @@ Ver ejemploFinal16.tig
 - Hay que definir lr como un source para la instrucción que se genera a partir del CALL?
   Esto lo haríamos para que cuando se genere el grafo de interferencia sea tenido en cuenta.
 
+- Si c es spileado, el siguiente código
+    c <- r3
+    .
+    .
+    .
+    r4 <- c
+  se reescribe como
+    c1 <- r3
+    str c1, [fp,offset]
+    .
+    .
+    .
+    ldr c2, [fp,offset]
+    r4 <- c2
+  ¿Es necesario crear c1 y c2? ¿No se puede reescribir usando solo un temporario nuevo o mejor aún, usando c?
 
-LO ÚLTIMO:
-- Chequear el ejemploFinal6.tig, problemas en la función factorial.
-- Debugeando el coloreo, chequear la construcción del grafo de flujo e interferencia.
+- ¿Es necesario, luego de finalizar la etapa de reescritura, volver todas las estructuras que utiliza el coloreo
+  a su estado original?
+
+
+HACER:
+- Llegamos a testear hasta el "ejemploFinal14.tig"
+- Hacer una función heuristica para el spileo.
 - Arreglar el entero máximo y mínimo. Ver línea 347 de tigertrans.sml.
 - Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"
@@ -281,6 +301,8 @@ LO HECHO:
 - Lograr que funcione la división para números negativos.
 - Ver ejemploFinal20.tig y ejemploFinal21.tig.
 - Ver ejemploFinal26.tig
+- Chequear el ejemploFinal6.tig, problemas en la función factorial.
+- Debugeando el coloreo, chequear la construcción del grafo de flujo e interferencia.
 
 
 OBSERVACIÓN

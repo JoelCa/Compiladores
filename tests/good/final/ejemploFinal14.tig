@@ -4,10 +4,19 @@ let
   /* define a list */
   type intlist = {hd : int, tl : intlist, name: string}
 
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in if i < 0 then (print ("-"); f (-i))
+      else if i>0 then f (i)
+           else print ("0")
+   end
+
   var lis : intlist := intlist { hd = 45698, tl = intlist { hd = 50000, tl = nil, name = "cito\n"}, name = "Jose" }
   var lis2 := intlist { hd = lis.tl.hd - 5, tl = lis.tl, name = "Pedro\n" }
 in
   print(concat(lis.name,lis.tl.name));
-  print(lis2.name);
-  lis2.hd + lis2.tl.hd
+  print(lis2.tl.name);
+  printint(lis2.hd + lis2.tl.hd)
 end

@@ -2,11 +2,21 @@
 let 
 	type rectype = {name : string, id : int}
 	var b : rectype := rectype {name = "Juan", id = 94} 
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in if i < 0 then (print ("-"); f (-i))
+      else if i>0 then f (i)
+           else print ("0")
+   end
+
 in
 	(if b = nil
   then
     print ("Nada\n")
   else
     print (concat(concat(b.name," Perez\n"),"Tiene ID: ")));
-  b.id
+    printint(b.id);
+    exit(0)
 end

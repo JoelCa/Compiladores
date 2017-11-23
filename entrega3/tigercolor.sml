@@ -32,7 +32,7 @@ struct
   val precolored : tigerframe.register Set.set = Set.addList((Set.empty String.compare), tigerframe.allRegs)
   val initial : tigertemp.temp Set.set ref = ref  (Set.empty String.compare)
   val spillWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
-  val colorCount = (length tigerframe.allRegs) - 7
+  val colorCount = (length tigerframe.allRegs) - 8
   val activeMoves : tigergraph.node Set.set ref = ref (Set.empty compareNodes)
   val freezeWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
   val simplifyWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
@@ -390,7 +390,7 @@ struct
             val n = pop(selectStack)
             (*val _ = List.app (fn x => ((print "---------> Select "); (print ("("^x^")")); (print "\n"))) (!selectStack)*)
             val _ = print "DEAD 444 \n"
-            val okColorList = [4, 5, 6, 7, 8, 9, 10, 12, 14]
+            val okColorList = [4, 5, 6, 7, 8, 9, 10, 12]
             val okColors = ref (Set.addList((Set.empty Int.compare), okColorList))
             val _ = print "DEAD 555 \n"; 
             fun aux(w) =
@@ -446,7 +446,7 @@ struct
         val _ = List.app (fn n => printNodeExt n) (nodes (#control flowGraph))
         val _ = print "Termina el grafo de flujo\n\n\n"*)
         val _ = build(flowGraph)
-        val _ = printInterferenceGraph()
+        (*val _ = printInterferenceGraph()*)
         val _ = makeWorkList()
         val _ = print "DEAD 222222222222222"
         fun printSelect () =
@@ -459,7 +459,7 @@ struct
                else if not(Set.isEmpty(!freezeWorklist))
                     then (print "DEAD 44444444 \n"; freeze())
                     else if not(Set.isEmpty(!spillWorklist))
-                         then (print "DEAD 55555555 \n"; selectSpill())
+                         then (print "DEAD 55555555 \n"; selectSpill()) (*spillWorklist := (Set.empty String.compare))*)
                          else ((print "DEAD 66666666 \n") )
         fun iteration() =
           (iterationBody();
@@ -474,7 +474,7 @@ struct
         val _ = assignColors()
         val _ = print "Fin de assignColors \n"; 
         fun intToReg (n) =
-          if (n >= 0) andalso (n < colorCount+7)
+          if (n >= 0) andalso (n < colorCount+8)
           then List.nth(tigerframe.allRegs, n)
           else raise Fail "error: coloreo"
     in (Table.map (fn (r,n) => intToReg(n)) (!color), Set.listItems (!spilledNodes)) end

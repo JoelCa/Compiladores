@@ -10,5 +10,6 @@ let
     g(i)
   end
 in
-  f(99)
+  f(99);
+  exit(0)
 end

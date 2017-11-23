@@ -29,33 +29,35 @@ struct
     fun movaMem(temp, mempos) =
       let val dirTemp = tigertemp.newtemp()
           val _ = newTemps := Set.add (!newTemps, dirTemp)
-      in (OPER { assem = loadConstant(mempos),
-                 src = [],
-                 dst = [dirTemp],
-                 jump = NONE }) ::
-         [OPER { assem = "str 's0, [fp,'s1]\n", 
+      in (OPER { assem = "str 's0, [fp,'s1]\n", 
                  src=[temp, dirTemp], 
                  dst=[], 
-                 jump=NONE}]
+                 jump=NONE}) ::
+         [OPER { assem = loadConstant(mempos),
+                 src = [],
+                 dst = [dirTemp],
+                 jump = NONE }]
       end
     fun movaTemp(mempos, temp) =
       let val dirTemp = tigertemp.newtemp()
           val _ = newTemps := Set.add (!newTemps, dirTemp)
-      in (OPER { assem = loadConstant(mempos),
-                 src = [],
-                 dst = [dirTemp],
-                 jump = NONE }) ::
-         [OPER { assem = "ldr 'd0, [fp,'s0]\n", 
+      in (OPER { assem = "ldr 'd0, [fp,'s0]\n", 
                  src = [dirTemp], 
                  dst = [temp], 
-                 jump=NONE}]
+                 jump=NONE}) ::
+         [OPER { assem = loadConstant(mempos),
+                 src = [],
+                 dst = [dirTemp],
+                 jump = NONE }]
       end
     
 
   fun makeStore(t:tigertemp.temp, f:frame):tigertemp.temp =
     let
       val t' = tigertemp.newtemp()
-      val _ = print ("makeStore: " ^ t ^ "," ^ t' ^ "\n")
+(*      val _ = print ("makeStore: " ^ t ^ "," ^ t' ^ "\n") *)
+      val _ = (print ("accesses en makeStore:\n") ; Table.app (fn (k,v) => print (k ^ " -- ")) (!accesses) ; print "\n")
+      val _ = print ("Se busca en makeStore: " ^ t ^ "\n")
       val _ = case Table.peek (!accesses, t) of
                 SOME n => stackInstrs := movaMem(t', n) @ !stackInstrs
               | NONE   => let val InFrame m = tigerframe.allocLocal f true
@@ -70,8 +72,8 @@ struct
   fun makeLoad(t:tigertemp.temp, f:frame):tigertemp.temp =
     let
       val t' = tigertemp.newtemp()
-      val _ = (print ("accesses: \n") ; Table.app (fn (k,v) => print (k ^ " -- ")) (!accesses) ; print "\n")
-      val _ = print ("Se busca: " ^ t ^ "\n")
+      val _ = (print ("accesses en makeLoad:\n") ; Table.app (fn (k,v) => print (k ^ " -- ")) (!accesses) ; print "\n")
+      val _ = print ("Se busca en makeLoad: " ^ t ^ "\n")
       val _ = case Table.peek (!accesses, t) of
                 SOME n => stackInstrs := movaTemp(n, t')  @ !stackInstrs
               | NONE   => raise Fail "makeLoad: Quiere usar temporario que nunca definió."
@@ -83,13 +85,15 @@ struct
       ([],frame)
     | rewriteProgram((OPER {assem = a, src = s, dst = d, jump = j})::instrs, frame, spilled) =
       let 
+        val _ = (print "##### instrucción: #####\n"; printInstr (OPER {assem = a, src = s, dst = d, jump = j}); print "########################\n")
         val d' = map (fn t => if List.exists (fn x => x = t) spilled
                               then let val tt = makeStore (t,frame) in newTemps := Set.add (!newTemps, tt); tt end
                               else t) d
         val defInstrs = rev (!stackInstrs)
         val _ = stackInstrs := []
         val s' = map (fn t => if List.exists (fn x => x = t) spilled
-                              then let val tt = makeLoad (t,frame) in newTemps := Set.add (!newTemps, tt); tt end
+                              then let val tt = makeLoad (t,frame)
+                                   in newTemps := Set.add (!newTemps, tt); tt end
                               else t) s
         val useInstrs = rev (!stackInstrs)
         val _ = stackInstrs := []
@@ -101,16 +105,22 @@ struct
 
     | rewriteProgram((MOVE {assem = a, src = s, dst = d})::instrs, frame, spilled) =
       let 
-        val d' = map (fn t => if List.exists (fn x => x = t) spilled then makeStore (t,frame) else t) d
+        val _ = (print "##### instrucción: #####\n"; printInstr (MOVE {assem = a, src = s, dst = d}); print "########################\n")        
+        val d' = map (fn t => if List.exists (fn x => x = t) spilled
+                              then let val tt = makeStore (t,frame) in newTemps := Set.add (!newTemps, tt); tt end
+                              else t) d
         val defInstrs = rev (!stackInstrs)
         val _ = stackInstrs := []
-        val s' = map (fn t => if List.exists (fn x => x = t) spilled then makeLoad (t,frame) else t) s
+        val s' = map (fn t => if List.exists (fn x => x = t) spilled
+                              then let val tt = makeLoad (t,frame)
+                                   in newTemps := Set.add (!newTemps, tt); tt end
+                              else t) s
         val useInstrs = rev (!stackInstrs)
         val _ = stackInstrs := []
         val instr' = MOVE {assem = a, src = s', dst = d'}
         val (body',frame') = rewriteProgram(instrs, frame, spilled)
       in
-        (useInstrs@[instr']@defInstrs@body', frame')
+        (useInstrs@(instr'::(defInstrs@body')), frame')
       end
     | rewriteProgram(i::instrs, frame, spilled) =
       let val (body',frame') = rewriteProgram(instrs, frame, spilled)
@@ -118,19 +128,23 @@ struct
       end
 
   fun alloc(body, frame) =
-    let val (color, spilled) = coloring({ code = body, initial = tempMap, spillCost = fn _ => 1, registers = allRegs })
-        
+    let 
+      val (color, spilled) = coloring({ code = body, initial = tempMap, spillCost = fn _ => 1, registers = allRegs })        
     in 
       if spilled = []
       then (print "Fin del coloreo\n";
             (body, color))
       else
-        let val (body', frame') = rewriteProgram(body,frame,spilled)
-            val _ = initializeColoring(!newTemps)
-            val _ = newTemps := Set.empty String.compare
-            val _ = print "Reescrituraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nEspileados:\n"
+        let val _ = print "-------------------->Inicio Reescritura<---------------------\nEspileados:\n"
             val _ = List.app (fn x => print (x ^ " - ")) spilled
             val _ = print "\n"
+            val _ = (print ("accesses antes de reescritura:\n") ; Table.app (fn (k,v) => print (k ^ " -- ")) (!accesses) ; print "\n")
+            val (body', frame') = rewriteProgram(body,frame,spilled)
+            val _ = initializeColoring(!newTemps)
+            val _ = accesses := Table.mkDict String.compare
+            val _ = newTemps := Set.empty String.compare
+            val _ = print "-------------------->Fin Reescritura<---------------------\nCódigo:\n"
+            val _ = print (foldr (fn (s, r) => (tigerassem.format (fn x => x) s) ^ r) "" body')
         in alloc(body', frame')
         end
     end
