@@ -262,10 +262,53 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
 - ¿Es necesario, luego de finalizar la etapa de reescritura, volver todas las estructuras que utiliza el coloreo
   a su estado original?
 
+- Nos topamos con un problema: asegurarnos de que ciertos registros mantendran su valor luego de una llamada a función.
+  Sea C el conjunto de registros de nuestra arquitectura (ARM). 
+  Si C = A union B, donde B es el conjunto de registros callee saves,
+  y A es el conjunto de registros que NO son callee saves.
+  Consideremos el siguiente escenario.
+
+  add r3, r3, r4         <----- Supongamos r3 = 10
+  .
+  .
+  bl f
+  mov r5, r3
+
+  Pueden pasar varias cosas:
+  1. Si la función f NO es una función de runtime (la definimos nosotros), y r3 es un registro en A,
+     entonces NO podemos asegurar que r5 valga 10
+  2. Si la función f NO es una función de runtime, y r3 es un registro en B,
+     entonces podemos asegurar que r5 vale 10
+  3. Si la función f es una función de runtime, y r3 es un registro cualquiera,
+     entonces NO podemos asegurar que r5 valga 10.
+
+  ¿Como podemos asegurarnos que r3 no cambie luego de que se llama a una función?.
+  Una opción es poner a todo el conjunto C como callee save, pero las funciones del runtime no van a respetar esta convención.
+  Otra, es poner el mayor numero posible de registros en la lista "calldef" (nosotros solo tenemos "calldef = [rv]").
+  Es decir que, se puede hacer practicamente todo C como componente destino de una instrucción Call, así el coloreo resolvería el problema.
+
+
+
+
+  Cuando se hace una llamada a una función de runtime notamos que si previamente se seteó algún registro, luego
+  de la llamada, el mismo puede haberse modificado. Por ejemplo:
+
+  add r3, r3, r4         <----- Supongamos r3 = 10
+  .
+  .
+  .
+  bl _checkNil
+  .
+  .
+  .
+  mov r5, r3            <----- En este punto a r5 se le puede asignar un valor distinto a 10
+
+
+
 
 HACER:
 - Llegamos a testear hasta el "ejemploFinal14.tig"
-- Hacer una función heuristica para el spileo.
+- Arreglar la heurística de los nodos espileados.
 - Arreglar el entero máximo y mínimo. Ver línea 347 de tigertrans.sml.
 - Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"
@@ -303,6 +346,7 @@ LO HECHO:
 - Ver ejemploFinal26.tig
 - Chequear el ejemploFinal6.tig, problemas en la función factorial.
 - Debugeando el coloreo, chequear la construcción del grafo de flujo e interferencia.
+- Hacer una función heuristica para el spileo.
 
 
 OBSERVACIÓN

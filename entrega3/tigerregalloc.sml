@@ -16,6 +16,8 @@ struct
 
   val newTemps : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
 
+  val spillHeuristic : (tigertemp.temp, int) Table.dict ref = ref (Table.mkDict String.compare)
+
   fun intToString n = if n<0 then "-" ^ Int.toString(~n) else if n>=0 then Int.toString(n) else ""
 
   fun loadConstant n =
@@ -127,9 +129,28 @@ struct
       in (i::body', frame')
       end
 
+  fun increaseSpillCost(t : tigertemp.temp) = 
+    case Table.peek(!spillHeuristic, t) of
+      SOME n => spillHeuristic := Table.insert(!spillHeuristic,t,n+1)
+    | NONE   => spillHeuristic := Table.insert(!spillHeuristic,t,1)
+
+  fun buildHeuristic [] = ()
+    | buildHeuristic ((OPER {src = s, dst = d, ...})::instrs) =
+      (List.app increaseSpillCost s;
+       List.app increaseSpillCost d;
+       buildHeuristic instrs)
+    | buildHeuristic ((MOVE {src = s, dst = d, ...})::instrs) = 
+      (List.app increaseSpillCost s;
+       List.app increaseSpillCost d;
+       buildHeuristic instrs)
+    | buildHeuristic (_::instrs) = buildHeuristic instrs
+
+
   fun alloc(body, frame) =
     let 
-      val (color, spilled) = coloring({ code = body, initial = tempMap, spillCost = fn _ => 1, registers = allRegs })        
+      val _ = buildHeuristic(body)
+      val (color, spilled) = coloring({ code = body, initial = tempMap, spillCost = spillHeuristic, registers = allRegs })
+      val _ = spillHeuristic := Table.mkDict String.compare
     in 
       if spilled = []
       then (print "Fin del coloreo\n";

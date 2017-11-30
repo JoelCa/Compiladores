@@ -7,7 +7,7 @@ sig
   
   val coloring : { code: tigerassem.instr list,
                    initial: allocation,
-                   spillCost: tigergraph.node -> int,
+                   spillCost: (tigertemp.temp, int) Splaymap.dict ref,
                    registers: tigerframe.register list
                  }
                 -> allocation * tigertemp.temp list
