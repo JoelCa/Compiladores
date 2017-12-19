@@ -58,12 +58,13 @@ fun codegen (frame) (stm) =
                                                            dst = [],
                                                            jump = SOME [s]})
         | munchStm (T.LABEL lab) =  emit (A.LABEL { assem = lab^":\n", lab = lab} )
-        | munchStm (T.EXP (T.CALL (T.NAME name,args))) =  let val (rList, mList) = munchArgs (0,args)
+        | munchStm (T.EXP (T.CALL (T.NAME name,args))) =  let val (rList, memList) = munchArgs (0,args)
+                                                              val _ = makePushs (rev memList)
                                                           in emit (A.OPER { assem = "bl " ^ name ^ "\n",
                                                                             src = rList,
                                                                             dst = calldefs,
                                                                             jump = SOME [name]}) 
-                                                            ; makePops mList
+                                                            ; makePops memList
                                                           end
         | munchStm (T.EXP e) = emit (A.OPER { assem = "",
                                               src = [munchExp e],
@@ -137,13 +138,19 @@ fun codegen (frame) (stm) =
                                                in (y :: r1, r2)
                                                end
                                  else let val z = munchExp x
-                                          val _ = emit (A.OPER { assem = "push {'s0}\n",
-                                                                 src = [z],
-                                                                 dst = [],
-                                                                 jump = NONE } )
                                           val (r1, r2) = munchArgs (n+1, xs)
                                       in (r1, z :: r2)
                                       end
+      and makePushs [] = ()
+        | makePushs (x::xs) =
+          let val _ = emit (A.OPER { assem = "push {'s0}\n",
+                                     src = [x],
+                                     dst = [],
+                                     jump = NONE } ) 
+          in
+            makePushs(xs)
+          end
+
       and makePops []      = ()
         | makePops (x::xs) =  let val _ = emit (A.OPER { assem = "pop {'s0}\n",
                                                          src = [x],

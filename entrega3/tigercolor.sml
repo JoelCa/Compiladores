@@ -31,7 +31,7 @@ struct
   val precolored : tigerframe.register Set.set = Set.addList((Set.empty String.compare), tigerframe.allRegs)
   val initial : tigertemp.temp Set.set ref = ref  (Set.empty String.compare)
   val spillWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
-  val colorCount = (length tigerframe.allRegs) - 4
+  val colorCount = (length tigerframe.allRegs) - 5
   val activeMoves : tigergraph.node Set.set ref = ref (Set.empty compareNodes)
   val freezeWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
   val simplifyWorklist : tigertemp.temp Set.set ref = ref (Set.empty String.compare)
@@ -44,10 +44,16 @@ struct
   val frozenMoves : tigergraph.node Set.set ref = ref (Set.empty compareNodes)
   val coloredNodes : tigerframe.register Set.set ref = ref (Set.empty String.compare)
   val color : (tigertemp.temp, int) Table.dict ref = 
-    ref (#1 (List.foldl (fn (r, (res,n)) => (Table.insert (res, r, n),n+1)) (Table.mkDict String.compare, 0) tigerframe.allRegs))
+    ref (Table.mkDict String.compare) (*(#1 (List.foldl (fn (r, (res,n)) => (Table.insert (res, r, n),n+1)) (Table.mkDict String.compare, 0) tigerframe.allRegs))*)
   val spilledNodes : tigertemp.temp Set.set ref = ref (Set.empty String.compare)  
-  
+  val colores = [("r0",0),("r1",1),("r2",2),("r3",3),("r4",4),("r5",5), 
+                 ("r6",6),  ("r7",7), ("r8",8),("r9",9),("r10",10),
+                 ("fp",11),("ip",12),("sp",13),("lr",14),("pc",15)]
 
+
+  fun initialColor() =
+    List.app (fn (x,y) => color := Table.insert (!color, x, y)) colores
+      
   (* ####################### Table and set functions ####################### *)
 
   fun peekTableValue(t,x) = Table.peek(!t, x)
@@ -136,7 +142,10 @@ struct
 
 
   fun livenessAnalysis (body : instr list) = 
-    #1 (tigermg.instr2graph body)
+    let val _   = tigermg.initialize()
+        val res = #1 (tigermg.instr2graph body)
+    in res end
+
 
   fun build (flowg : tigerflow.flowgraph) =
     let val g      = #control flowg
@@ -203,7 +212,7 @@ struct
           else 
             if moveRelated(x)
             then updateSet(freezeWorklist, x)
-            else updateSet(simplifyWorklist, x)
+            else (print ("Se agrega en 1: " ^ x ^ "\n"); updateSet(simplifyWorklist, x))
         end
     in
       Set.app makeWorkL (!initial)
@@ -245,7 +254,7 @@ struct
          then
            updateSet(freezeWorklist, m)
          else
-           updateSet(simplifyWorklist, m))
+           (print ("Se agrega en 2: " ^ m ^ "\n"); updateSet(simplifyWorklist, m)))
       else
         ()
     end
@@ -255,6 +264,9 @@ struct
       SOME s => 
       let val _ = removeElemTempSet(simplifyWorklist, s)
           val _ = push(s,selectStack)
+          val _ = print "Init adjacent to decrement 1\n\n"
+          val _ = Set.app (fn t => print (t ^ " - ")) (adjacent(s))
+          val _ = print "\n\nEnd adjacent to decrement 1\n\n"
       in
         Set.app decrementDegree (adjacent(s))
       end
@@ -264,6 +276,7 @@ struct
     if not(inSetNoRef(u, precolored)) andalso not(moveRelated(u)) andalso (getDegree(u) < colorCount)
     then
       (removeElemTempSet(freezeWorklist, u);
+       print ("Se agrega en 5: " ^ u ^ "\n");
        updateSet(simplifyWorklist, u))
     else
       ()
@@ -296,6 +309,9 @@ struct
         val _ = enableMoves(singleTempSet v)
         (*val _ = print ("Combinando " ^ u ^ " <---> " ^ v ^ "\n")*)
         val _ = Set.app (fn t => (addEdge(t,u); decrementDegree(t))) (adjacent(v))
+        val _ = print "Init adjacent to decrement 2\n\n"
+        val _ = Set.app (fn t => print (t ^ " - ")) (adjacent(v))
+        val _ = print "\n\nEnd adjacent to decrement 2\n\n"
     in
       if getDegree(u) >= colorCount andalso inSet(u, freezeWorklist)
       then
@@ -360,6 +376,7 @@ struct
         if Set.isEmpty(nodeMoves(v)) andalso getDegree(v) < colorCount
         then
           (removeElemTempSet(freezeWorklist, v);
+           print ("Se agrega en 3: " ^ u ^ "\n");
            updateSet(simplifyWorklist, u))
         else
           ()
@@ -374,17 +391,29 @@ struct
                  freezeMoves(u))
     | NONE => ()
 
-  (* ARREGLAR *)
   fun heuristicCost(t : tigertemp.temp, cost : (tigertemp.temp, int) Table.dict ref) =
     case Table.peek(!cost,t) of
+      SOME n => SOME (Real.fromInt(n)/Real.fromInt(getDegree(t)))
+    | NONE => NONE
+
+
+  fun compareSpillCost( a : real option, b : real option) : bool =
+    case (a,b) of
+      (SOME va, SOME vb) => va < vb
+    | (SOME va, NONE)    => true
+    | _                  => false
+
+
+  (*fun heuristicCost2(t : tigertemp.temp, cost : (tigertemp.temp, int) Table.dict ref) =
+    case Table.peek(!cost,t) of
       SOME n => Real.fromInt(n)/Real.fromInt(getDegree(t))
-    | NONE => 454654654.0
+    | NONE => 1000000.0*)
 
 
   fun selectSpill(cost: (tigertemp.temp, int) Table.dict ref) =
     let val min = Set.foldl (fn (x,r) => let val d = heuristicCost (x,cost)
                                          in case r of
-                                              SOME (y,c) => if d < c
+                                              SOME (y,c) => if compareSpillCost (d,c)
                                                             then SOME (x,d)
                                                             else SOME (y,c)
                                             | NONE => SOME (x,d)
@@ -394,6 +423,7 @@ struct
         SOME (m,_) => (print ("VALOR A ESPILAR " ^ m ^ "\n");
                       print(Bool.toString(inSet(m, spillWorklist))); print ("\n");
                       removeElemTempSet(spillWorklist, m);
+                      print ("Se agrega en 4: " ^ m ^ "\n");
                       updateSet(simplifyWorklist, m);
                       freezeMoves(m))
       | NONE => ()
@@ -406,31 +436,31 @@ struct
             val n = pop(selectStack)
             (*val _ = List.app (fn x => ((print "---------> Select "); (print ("("^x^")")); (print "\n"))) (!selectStack)*)
             (*val _ = print "DEAD 444 \n"*)
-            val okColorList = [0,1,2,3,4, 5, 6, 7, 8, 9, 10, 12]   (*[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]*)
+            val okColorList = [0,1,2,3,4,5,6,7,8,9,10]   (*[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]*)
             val okColors = ref (Set.addList((Set.empty Int.compare), okColorList))
             (*val _ = print "DEAD 555 \n"*)
             fun aux(w) =
               if Set.member(Set.union(!coloredNodes, precolored), getAlias(w))
               then
-                removeElemIntSet(okColors, getTableValue(color, getAlias(w)))
+                (removeElemIntSet(okColors, getTableValue(color, getAlias(w))))
               else
                 ()
             val nAdj = peekTableValue(adjList, n)
             val _ = case nAdj of
-                      SOME adj => Set.app aux adj
+                      SOME adj => (Set.app aux adj; print ("OK colors: \n"); Set.app (fn x => print ((Int.toString x) ^ " -- ")) (!okColors); print "\n")
                     | NONE     => ()
         in
           if Set.isEmpty(!okColors)
           then
-            updateSet(spilledNodes, n)
+            (print ("Posible spill: " ^ n ^ "\n"); updateSet(spilledNodes, n))
           else
             (updateSet(coloredNodes, n);
              case takeElem(okColors) of
-               SOME c => updateTable(color, n, fn _ => c)
+               SOME c => (print ("Se colorea a "^ n ^ " con " ^ (Int.toString c) ^"\n"); updateTable(color, n, fn _ => c))
              | NONE => ())
         end);
         Table.app (fn (k,x) => ((print "Colores"); (print ("("^k^","^Int.toString x^")")); (print "\n"))) (!color);
-        ((*print "DEAD 666 \n";*)Set.app (fn n => ((*print (n^"   "^getAlias(n)^" \n");*)updateTable(color, n, fn _ => getTableValue(color, getAlias(n))))) (!coalescedNodes)))
+        (Set.app (fn n => ((*print (n^"   "^getAlias(n)^" \n");*)updateTable(color, n, fn _ => getTableValue(color, getAlias(n))))) (!coalescedNodes)))
 
 
   fun printInterferenceGraph() =
@@ -452,6 +482,23 @@ struct
       val _ = initial := Set.union (Set.union(!coloredNodes, !coalescedNodes), newTemps)
       val _ = coalescedNodes := Set.empty String.compare
       val _ = coloredNodes := Set.empty String.compare
+      val _ = initialColor()
+      (*val _ = color := (#1 (List.foldl (fn (r, (res,n)) => (Table.insert (res, r, n),n+1)) (Table.mkDict String.compare, 0) tigerframe.allRegs))*)
+      val _ = alias := Table.mkDict String.compare
+      val _ = moveList := Table.mkDict String.compare
+      val _ = worklistMoves := Set.empty compareNodes
+      val _ = adjSet := Set.empty adjSetCompare
+      val _ = adjList := Table.mkDict String.compare
+      val _ = degree := Table.mkDict String.compare
+      val _ = spillWorklist := Set.empty String.compare
+      val _ = activeMoves := Set.empty compareNodes
+      val _ = freezeWorklist := Set.empty String.compare
+      val _ = simplifyWorklist := Set.empty String.compare
+      val _ = movesPair := Table.mkDict tigergraph.compareNodes
+      val _ = constrainedMoves := Set.empty compareNodes
+      val _ = frozenMoves := Set.empty compareNodes
+      val _ = selectStack := []
+      val _ = coalescedMoves := Set.empty compareNodes
     in
       ()
     end
@@ -461,15 +508,38 @@ struct
         (*val _ = print "Empieza el grafo de flujo\n\n\n"
         val _ = List.app (fn n => printNodeExt n) (nodes (#control flowGraph))
         val _ = print "Termina el grafo de flujo\n\n\n"*)
+        fun printSelect (s) =
+          let val _ = print ("\n\n\n-------------> Inicio SelectStack " ^ s ^ "<------------- \n\n" )
+              val _ = List.app (fn t => print (t ^ " - ")) (!selectStack)
+              val _ = print "\n\n-------------> Fin SelectStack <------------- \n\n\n"
+          in () end
+        fun printSimplify (s) =
+          let val _ = print ("\n\n\n-------------> Inicio simplifyWorklist " ^ s ^ "<------------- \n\n" )
+              val _ = Set.app (fn t => print (t ^ " - ")) (!simplifyWorklist)
+              val _ = print "\n\n-------------> Fin simplifyWorklist <------------- \n\n\n"
+          in () end
+        fun printAdjList (s) =
+          let val _ = print ("\n\n\n-------------> Inicio adjList " ^ s ^ "<------------- \n\n" )
+              val _ = Table.app (fn (t,s) => (print ("temporario: "^t^"\nconj. de adjacencia: "); Set.app (fn x => print (x ^ " - ")) s; print "\n")) (!adjList)
+              val _ = print "\n\n-------------> Fin adjList <------------- \n\n\n"
+          in () end
+        val _ = print "Inicia lista adjacencia 1\n"
+        val _ = printAdjList("")
+        val _ = print "Fin lista adjacencia 1\n"
         val _ = build(flowGraph)
         (*val _ = printInterferenceGraph()*)
         val _ = makeWorkList()
-        (*val _ = print "DEAD 222222222222222"*)
-        fun printSelect () =
-          List.app (fn x => ((print "---------> Select "); (print ("("^x^")")); (print "\n"))) (!selectStack)
+        val _ = print ("----------- DEAD 222222222222222" ^ Int.toString colorCount)
+        val _ = print "---------------------> Al inicio spilledNodes <---------------------\n"
+        (*val _ = printSelect()*)
+        val _ = (Set.app (fn sn => print (sn ^ " - ")) (!spilledNodes) ; print "\n")
+        val _ = initialColor()
+        val _ = print "Inicia lista adjacencia\n"
+        val _ = printAdjList("")
+        val _ = print "Fin lista adjacencia\n"
         fun iterationBody() =
           if not(Set.isEmpty(!simplifyWorklist))
-          then (simplify() (*printSelect(); print "DEAD 656757575\n"*))
+          then (simplify(); printSimplify(""); printSelect("Luego simplify"))
           else if not(Set.isEmpty(!worklistMoves))
                then ((*print "DEAD 4141511 \n";*) coalesce())
                else if not(Set.isEmpty(!freezeWorklist))
@@ -487,6 +557,9 @@ struct
            else iteration())
         val _ = iteration()
         val _ = print "Fin iteración \n"; 
+        (*val _ = color := (#1 (List.foldl (fn (r, (res,n)) => (Table.insert (res, r, n),n+1)) (Table.mkDict String.compare, 0) tigerframe.allRegs))*)
+        val _ = (print "Colores iniciales:" ; Table.app (fn (x,y) => print ("(" ^ x ^ ", " ^ Int.toString y ^ ")")) (!color))
+        val _ = printSelect("Antes assignColors")
         val _ = assignColors()
         val _ = print "Fin de assignColors \n"; 
         (*val _ = print "########### Calculando adjacencias ########### \nSelectStack:"
@@ -496,8 +569,14 @@ struct
         val _ = print "\nAdjacencias: "
         val _ = (Set.app (fn a => print (a ^ " - ")) (Table.find(!adjList, "T12")); print "\n")*)
         fun intToReg (n) =
-          if (n >= 0) andalso (n < colorCount+4)
+          case List.find (fn (_,y) => y = n) colores of
+            SOME (x,_) => x
+          | NONE => raise Fail ("error: coloreo " ^ Int.toString n)
+          (*if (n >= 0) andalso (n < colorCount+5)
           then List.nth(tigerframe.allRegs, n)
-          else raise Fail "error: coloreo"
-    in (Table.map (fn (r,n) => intToReg(n)) (!color), Set.listItems (!spilledNodes)) end
+          else raise Fail ("error: coloreo " ^ Int.toString n)*)
+       val coloreo = Table.map (fn (r,n) => intToReg(n)) (!color)
+       val _ = print "---------------------> Al final spilledNodes <---------------------\n"
+       val _ = (Set.app (fn sn => print (sn ^ " - ")) (!spilledNodes) ; print "\n")
+    in (coloreo, Set.listItems (!spilledNodes)) end
 end

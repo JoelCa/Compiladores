@@ -13,6 +13,16 @@ let
 
   var rec1 := rectype1 {name="Kapoios", address="Kapou", id=02432, age=44}
   var rec2 := rectype2 {name="Allos", dates=arrtype1 [3] of 1900}
+
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in if i < 0 then (print ("-"); f (-i))
+      else if i>0 then f (i)
+           else print ("0")
+  end
+
 in
   arr1[0] := 1;
   arr1[9] := 3;
@@ -32,6 +42,6 @@ in
   print(concat(arr2[1].name,"\n"));
   print(concat(arr2[2].name,"\n"));
   print(concat(arr2[3].name,"\n"));
-  rec1.id - rec2.dates[0]
+  printint(rec1.id - rec2.dates[0])
 end
 

@@ -2,11 +2,26 @@ let
   type b = array of a
   type a = c
   type c = {code : int, name : b}
+  
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in if i < 0 then (print ("-"); f (-i))
+      else if i>0 then f (i)
+           else print ("0")
+  end
+
   var x:b := b [2] of nil
   var z:b := b [44] of nil
   var y:c := c {code = 777, name = x}
 in
   x[0] := c{code = -66, name = z};
   x[1] := c{code = -99, name = z};
-  y.code + y.name[0].code
+  printint(x[0].code);
+  print("\n");
+  printint(x[1].code);
+  print("\n");
+  printint(y.code + y.name[0].code);
+  print("\n")
 end

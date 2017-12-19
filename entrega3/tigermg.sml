@@ -73,6 +73,12 @@ struct
       in
         (f, addOptToList optNode nodes)
       end
+  fun initialize() =
+    let val _ = instrNodes := T.mkDict compareNodes
+        val _ = labelProcesados := T.mkDict String.compare
+        val _ = jumpProcesados :=  T.mkDict String.compare
+        val _ = lastNode := NONE
+    in () end
 end
 
 (*

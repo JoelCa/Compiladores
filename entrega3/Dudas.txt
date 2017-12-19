@@ -290,25 +290,9 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
 
 
 
-  Cuando se hace una llamada a una función de runtime notamos que si previamente se seteó algún registro, luego
-  de la llamada, el mismo puede haberse modificado. Por ejemplo:
-
-  add r3, r3, r4         <----- Supongamos r3 = 10
-  .
-  .
-  .
-  bl _checkNil
-  .
-  .
-  .
-  mov r5, r3            <----- En este punto a r5 se le puede asignar un valor distinto a 10
-
-
-
-
 HACER:
-- Llegamos a testear hasta el "ejemploFinal14.tig"
-- Arreglar la heurística de los nodos espileados.
+- Llegamos a testear hasta el "ejemploFinal23.tig"
+- Chequear que calldefs este bien definido (solo deben ser los argregs?).
 - Arreglar el entero máximo y mínimo. Ver línea 347 de tigertrans.sml.
 - Arreglar flag "canon" e "inter", en tigermain.
 - Chequear "ejemploFinal1.tig"

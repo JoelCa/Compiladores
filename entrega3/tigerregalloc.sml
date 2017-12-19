@@ -87,7 +87,7 @@ struct
       ([],frame)
     | rewriteProgram((OPER {assem = a, src = s, dst = d, jump = j})::instrs, frame, spilled) =
       let 
-        val _ = (print "##### instrucción: #####\n"; printInstr (OPER {assem = a, src = s, dst = d, jump = j}); print "########################\n")
+        (*val _ = (print "##### instrucción: #####\n"; printInstr (OPER {assem = a, src = s, dst = d, jump = j}); print "########################\n")*)
         val d' = map (fn t => if List.exists (fn x => x = t) spilled
                               then let val tt = makeStore (t,frame) in newTemps := Set.add (!newTemps, tt); tt end
                               else t) d
@@ -106,8 +106,8 @@ struct
       end
 
     | rewriteProgram((MOVE {assem = a, src = s, dst = d})::instrs, frame, spilled) =
-      let 
-        val _ = (print "##### instrucción: #####\n"; printInstr (MOVE {assem = a, src = s, dst = d}); print "########################\n")        
+      let
+        (*val _ = (print "##### instrucción: #####\n"; printInstr (MOVE {assem = a, src = s, dst = d}); print "########################\n")        *)
         val d' = map (fn t => if List.exists (fn x => x = t) spilled
                               then let val tt = makeStore (t,frame) in newTemps := Set.add (!newTemps, tt); tt end
                               else t) d
@@ -153,20 +153,24 @@ struct
       val _ = spillHeuristic := Table.mkDict String.compare
     in 
       if spilled = []
-      then (print "Fin del coloreo\n";
+      then (print ("Fin del coloreo de una función\n");
             (body, color))
-      else
+      else 
         let val _ = print "-------------------->Inicio Reescritura<---------------------\nEspileados:\n"
             val _ = List.app (fn x => print (x ^ " - ")) spilled
             val _ = print "\n"
-            val _ = (print ("accesses antes de reescritura:\n") ; Table.app (fn (k,v) => print (k ^ " -- ")) (!accesses) ; print "\n")
+            (*val _ = (print ("accesses antes de reescritura:\n") ; Table.app (fn (k,v) => print (k ^ " -- ")) (!accesses) ; print "\n")*)
             val (body', frame') = rewriteProgram(body,frame,spilled)
             val _ = initializeColoring(!newTemps)
             val _ = accesses := Table.mkDict String.compare
             val _ = newTemps := Set.empty String.compare
             val _ = print "-------------------->Fin Reescritura<---------------------\nCódigo:\n"
+            val _ = print ("Antes de la reescritura:") 
+            val _ = print (foldr (fn (s, r) => (tigerassem.format (fn x => x) s) ^ r) "" body)
+            val _ = print ("Luego de la reescritura:") 
             val _ = print (foldr (fn (s, r) => (tigerassem.format (fn x => x) s) ^ r) "" body')
         in alloc(body', frame')
         end
     end
+
 end
