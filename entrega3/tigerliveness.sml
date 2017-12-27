@@ -21,13 +21,19 @@ struct
   fun insertTable(t,k,v) =
     t := T.insert(!t, k, v)
 
+  fun initialize() = 
+    let val _ = inTemps    := T.mkDict (compareNodes) (* in *)
+        val _ = outTemps   := T.mkDict (compareNodes) (* out *)
+        val _ = inResults  := T.mkDict (compareNodes) (* in' *)
+        val _ = outResults := T.mkDict (compareNodes) (* out' *)
+    in () end
+
   fun liveOutsAux ({control = fg, use = u, def = d, ismove = m}) flag = 
-    let val ns = nodes fg
-        (*val _ = List.app (fn k => ((print "lista de nodos"); (printNode k); (print "\n"))) ns
-        *)val _ = 
+    let val ns = rev (nodes fg)
+        val _ = 
           if flag
           then List.app (fn x => (insertTable (inTemps, x, (empty String.compare))
-                                ; insertTable (outTemps, x, (empty String.compare)))) ns
+                                  ; insertTable (outTemps, x, (empty String.compare)))) ns
           else ()
         fun body (n:node) = 
           let (* val _ = T.app (fn (k,x) => ((printNode k); (print "\n"))) (!inTemps) *)
@@ -52,7 +58,13 @@ struct
         liveOutsAux ({control = fg, use = u, def = d, ismove = m}) false
     end
 
-  fun liveOuts fg = liveOutsAux fg true
+  fun liveOuts ({control = fg, use = u, def = d, ismove = m}) = 
+    let
+      val _ = List.app (fn k => ((print "lista de nodos"); (printNode k); print "\n" ;
+                                  List.app (fn s => (print ("sucesor: ") ; printNode s)) (succ(k)); print ("\n"))) (nodes fg)
+        
+    in liveOutsAux ({control = fg, use = u, def = d, ismove = m}) true
+    end
 
   (*TERMINAR*)
   fun interferenceGraph ({control = fg, use = u, def = d, ismove = m}) =
@@ -94,4 +106,5 @@ struct
     in
       (IGraph {graph = ig, tnode = itn, gtemp = igt, moves = !moves}, T.map (fn (k,s) => Splayset.listItems s) lout)
     end
+
 end

@@ -12,6 +12,8 @@ sig
 
   val liveOuts : tigerflow.flowgraph -> liveMap
 
+  val initialize : unit -> unit
+
   (*val interferenceGraph : tigerflow.flowgraph -> igraph * ((tigertemp.temp list) tigergraph.table)*)
 
   (*val show : outstream * igraph -> unit*)

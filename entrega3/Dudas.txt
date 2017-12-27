@@ -287,6 +287,49 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
   Otra, es poner el mayor numero posible de registros en la lista "calldef" (nosotros solo tenemos "calldef = [rv]").
   Es decir que, se puede hacer practicamente todo C como componente destino de una instrucción Call, así el coloreo resolvería el problema.
 
+- Hola Guillermo, descubrimos que es lo que nos está trabando en el coloreo.
+El libro nos recomienda que para los registros callee saves, creemos MOVs a temporarios frescos en el código intermedio,
+así el coloreo se encargaría de mandarlos o no a memoria.
+Lo hacemos, y pasa lo siguiente:
+Supongamos que r4 y r5 son los registros callee saves. Y los registros disponibles para el coloreo son [r0 .. r5]
+
+Reescritura 0:
+
+t10 <- r4
+t11 <- r5
+.
+.
+.
+r4 <- t10
+r5 <- t11
+
+Se espilea t10.
+
+Reescritura 1:
+
+t20 <- r4
+M[dir] <- t20
+t11 <- r5
+.
+.
+.
+t21 <- M[dir]
+t4 <- t21
+r5 <- t11
+
+Se espilea t20.
+
+Y en cada iteración se va espileando el temporario que se creo en la etapa anterior para la reescritura.
+El coloreo no avanza, se queda atascado en el principio.
+No sabemos como solucionarlo.
+Sabemos que estamos haciendo bien el cálculo de los live out. La elección de los registros a espilear tiene sentido.
+En la "Reescritura 0", t10 interfiere con todos los registros coloreables salvo r4, pero cuando se le quiere asignar un color,
+uno de sus vecinos en el grafo de interferencia ya está coloreado con r4, asi que se lo espilea.
+¿Qué estamos haciendo mal?. Nos parecio raro que t10 interfiera con r5, pero sabemos que está bien.
+Se nos ocurrio que podriamos hacer un coloreo en dos etapas, en una coloreamos el código sin el prologo y epilogo
+de los callee saves, y en la otra coloreamos el resultado de la etapa anterior con el prologo y epilogo de los
+callee saves, ¿funcionara?.
+
 
 
 
@@ -368,3 +411,34 @@ pop {r0,r1,r2}
 
 - Consideramos que los regístros r0, r1, r2 y r3 NO son registros asignables para el coloreo, pues NO se guarda
   su valor como los callee saves al entrar en una función, dando lugar a que al salir de la misma cambien su valor.
+
+- Para la parte de coloreo tuvimos que buscar una forma para tener uno de los registros callee save "disponible".
+  Elegimos a r4. En ejemploFinal23.tig, sucedia lo siguiente:
+
+  Reescritura 0:
+
+  mov t10, r4
+  mov t9, r5
+  ...
+
+  Se espilea t10.
+  
+  Reescritura 1:
+
+  mov T63, r4
+  movw T64, #:lower16:-8
+  movt T64, #:upper16:-8
+  str T63, [fp,T64]
+  mov T9, r5
+  ...
+
+  Antes de esta modificación, t64 se espileaba en la Reescritura 1, pues no habia temporarios disponibles
+  para colorearlo. Con lo cual se entraba en un ciclo, donde siempre se espileaba el temporario generado por la
+  reescritura de la iteración anterior. Pero con esta modificación, esto se soluciona, t64 puede colorearse con r4.
+
+  Ésto es necesario para ARM ya que cada vez que se espilea un temporario, en la reescritura, se crean 2 nuevos temporarios.
+  Es posible colorear el 1º (T63) pero el problema persiste con el 2º (T64).
+  Para lograr ésto lo que se hizo fue agregar a la parte del preludio y epilogo (mediante push y pop) el registro r4 
+  y se dejó de hacer el move correspondiente en la parte de los callee save. 
+  Hay que tener en cuenta que al agregar r4 como un push fijo se modifica el frame, y por lo tanto es necesario hacer 
+  algunas modificaciones en el código de tigerframe.

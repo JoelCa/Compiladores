@@ -154,6 +154,9 @@ struct
     in 
       if spilled = []
       then (print ("Fin del coloreo de una función\n");
+            initializeColoring(!newTemps);
+            accesses := Table.mkDict String.compare;
+            newTemps := Set.empty String.compare;    
             (body, color))
       else 
         let val _ = print "-------------------->Inicio Reescritura<---------------------\nEspileados:\n"

@@ -27,12 +27,13 @@
     |   lr       |  fp+8
     |   ip       |  fp+4
     |   fp ant   |  fp
-    |  fp level  |  fp-4   static link
-    |   local1   |  fp-8
-    |   local2   |  fp-12
-    |   local3   |  fp-16
-    |   local4   |  fp-20
-    |   local5   |  fp-24
+    |   r?       |  fp-4
+    |  fp level  |  fp-8   static link
+    |   local1   |  fp-12
+    |   local2   |  fp-16
+    |   local3   |  fp-20
+    |   local4   |  fp-24
+    |   local5   |  fp-28
     |    ...     |
     |   localn   |  fp-4*(n+1)
     |  callee S1 |  fp-4*(n+2)
@@ -59,12 +60,12 @@ val pc             = "pc"         (* program counter:                          r
 val wSz            = 4            (* word size in bytes                            *)
 val log2WSz        = 2            (* base two logarithm of word size in bytes      *)
 val fpPrev         = 0            (* offset (bytes)                                *)
-val fpPrevLev      = ~4           (* offset (bytes)                                *)
+val fpPrevLev      = ~8           (* offset (bytes)                                *)
 val argsInicial    = 1             
 val argsOffInicial = 2            (* words                                         *)
 val argsGap        = wSz          (* bytes                                         *)
 val localsInicial  = 0            (* words                                         *)
-val localsGap      = ~8           (* bytes que indican el espacio entre el fp y el 1º local *)
+val localsGap      = ~12          (* bytes que indican el espacio entre el fp y el 1º local *)
 val argregs        = ["r0","r1","r2","r3"]
 val calldefs       = argregs
 val specialregs    = [rv, fp, ip, sp, lr, pc]
@@ -165,10 +166,12 @@ fun seq [] = EXP (CONST 0)
   | seq (x::xs) = SEQ (x, seq xs)
 
 fun procEntryExit1 (fr: frame, body) = 
-  let val (entry,exit) = List.foldr
+  let val x = (List.filter (fn c => not(c = "r4")) calleesaves)
+      val _ = (List.app (fn w => print(w ^ " - ")) x ; print "\n")
+      val (entry,exit) = List.foldr
                           (fn (r,(ent,exi)) => let val nt = tigertemp.newtemp()
                                                in (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP r, TEMP nt)::exi)
-                                               end ) ([],[]) calleesaves
+                                               end ) ([],[]) x
       val acomodaArgs = recorreArgs (rev (!(#ftAccesos fr))) argregs
       val a = [MOVE (TEMP fp, TEMP sp)]
       val acomoda =  acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
@@ -182,8 +185,8 @@ fun procEntryExit3(fr: frame, body) =
     (* space es el espacio que ocupan todos los locales, más el static link. *)
     val space = wSz * (List.foldr (fn (b, r) => if b then r+1 else r) 1 (!(#locals fr)))
   in
-    { prolog = "push {fp,ip,lr}\nmov fp, sp\nsub sp, sp, #"^Int.toString space^"\n"
+    { prolog = "push {r4,fp,ip,lr}\nadd fp, sp, #4\nsub sp, sp, #"^Int.toString space^"\n"
     , body = body
-    , epilog = "mov sp, fp\npop {fp,ip,pc}\n"}
+    , epilog = "mov sp, fp\nsub sp, sp, #4\npop {r4,fp,ip,pc}\n"}
   end
 end
