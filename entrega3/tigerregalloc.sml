@@ -147,7 +147,8 @@ struct
 
 
   fun alloc(body, frame) =
-    let 
+    let
+      val _ = print ("PROCESANDO LA FUNCIÓN: " ^ (name frame) ^ "\n")
       val _ = buildHeuristic(body)
       val (color, spilled) = coloring({ code = body, initial = tempMap, spillCost = spillHeuristic, registers = allRegs })
       val _ = spillHeuristic := Table.mkDict String.compare

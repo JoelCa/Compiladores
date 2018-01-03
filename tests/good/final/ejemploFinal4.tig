@@ -1,7 +1,7 @@
 /* valid for and let */
 
 let
-	var a := 0
+  var a := 0
   function f(n : int) : int =
     if n = 0 then -9999 else n+90
 in 

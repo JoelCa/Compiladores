@@ -330,6 +330,9 @@ Se nos ocurrio que podriamos hacer un coloreo en dos etapas, en una coloreamos e
 de los callee saves, y en la otra coloreamos el resultado de la etapa anterior con el prologo y epilogo de los
 callee saves, ¿funcionara?.
 
+- En el ejemplo de las 8 reinas hay una parte comentada de la función try en donde se usa el flush(),
+  notamos que si descomentamos esa línea, el programa falla por intenta acceder a un índice fuera de
+  rango. No sabemos como es que flush() afecta a una de las variables (c) del programa.
 
 
 

@@ -176,7 +176,7 @@ struct
                         end
                       else
                         ()
-              (*val _ = print "\n------------"
+              val _ = print "\n------------"
               val _ = (print ("\ndefSet "); printNode i; print "\n")
               val _ = Set.app (fn x => print (x ^ " - ")) defSet
               val _ = (print ("\nlive outs "); printNode i; print "\n")
@@ -184,7 +184,7 @@ struct
               val _ = live := Set.union (!live, defSet)
               val _ = (print ("\nlive outs unidos con defs "); printNode i; print "\n")
               val _ = Set.app (fn y => print (y ^ " - ")) (!live)
-              val _ = print "\n"*)
+              val _ = print "\n"
           in
             Set.app (fn a =>
                       Set.app (fn b => (addEdge (a,b); print ("Se creó la arista: " ^ a ^ " <---> " ^ b ^ "\n"))) (!live)
@@ -559,9 +559,9 @@ struct
               val _ = Table.app (fn (t,s) => (print ("temporario: "^t^"\nconj. de adjacencia: "); Set.app (fn x => print (x ^ " - ")) s; print "\n")) (!adjList)
               val _ = print "\n\n-------------> Fin adjList <------------- \n\n\n"
           in () end
-        val _ = print "Inicia lista adjacencia 1\n"
+        (*val _ = print "Inicia lista adjacencia 1\n"
         val _ = printAdjList("")
-        val _ = print "Fin lista adjacencia 1\n"
+        val _ = print "Fin lista adjacencia 1\n"*)
         val _ = build(flowGraph)
         (*val _ = printInterferenceGraph()*)
         val _ = makeWorkList()

@@ -4,6 +4,7 @@ struct
   open tigerflow
   open tigerassem
 
+  val externFunctions = ["print", "flush", "getstr", "ord", "chr", "size", "substring", "concat", "not", "exit"]
   val instrNodes : instr table ref = ref (T.mkDict compareNodes)
   val labelProcesados : (string, node) T.dict ref = ref (T.mkDict String.compare)
   val jumpProcesados : (string, node list) T.dict ref = ref (T.mkDict String.compare)
@@ -25,10 +26,10 @@ struct
           (* (que no es label) y es el posible destino de un jump cuyo label este en "labels". *)
           (* Para cada label en "labels", agregamos el nodo a labelProcesados, recorremos los jumpProcesados en busca de alguno *)
           (* que lo tenga como destino y para los que coinciden, creamos la arista correspondiente. *)
-          (*val _ = case optNode of
+          val _ = case optNode of
                     SOME n => (printNode n; print "\n")
                   | NONE   => ()
-          val _ = printInstr x*)
+          val _ = printInstr x
           val _ =
             case x of (* REVISAR *)
               (LABEL {lab = l, ...}) => 
@@ -48,13 +49,23 @@ struct
                 (case x of
                    OPER {src = s, dst = d, jump = NONE, ...} =>
                    ((*print "Procesando nodo en 1: "; printNode n; print "\n"; *){control = #control flowG, def = T.insert (#def flowG, n, listToSet d), use = T.insert (#use flowG, n, listToSet s), ismove = T.insert (#ismove flowG, n, false)})
-                 | OPER {src = s, dst = d, jump = SOME [j], ...} =>
-                   let val _ = case T.peek (!labelProcesados, j) of
-                                   SOME n' => mk_edge (n, n')
-                                 | NONE    => case T.peek (!jumpProcesados, j) of
-                                             SOME w => jumpProcesados := T.insert (!jumpProcesados, j, n::w)
-                                           | NONE   => jumpProcesados := T.insert (!jumpProcesados, j, [n])
-                       val _ = if null s then is_jump := true else ()
+                 | OPER {src = s, dst = d, jump = SOME [j], assem = x} =>
+                   let fun processJump(jumpLabel,currentNode) =
+                         let val _ = case T.peek (!labelProcesados, jumpLabel) of
+                                         SOME n' => mk_edge (currentNode, n')
+                                       | NONE    => case T.peek (!jumpProcesados, jumpLabel) of
+                                                   SOME w => jumpProcesados := T.insert (!jumpProcesados, jumpLabel, currentNode::w)
+                                                 | NONE   => jumpProcesados := T.insert (!jumpProcesados, jumpLabel, [currentNode])
+                         in if null s then is_jump := true else () end
+                       fun isExtern(#"b"::(#"l"::(#" "::xs))) = 
+                             let val name = implode (rev (tl (rev (xs))))
+                             in List.exists (fn fName => fName = name) externFunctions end
+                         | isExtern(_) = false
+                       val w = isExtern(explode x)
+                       val _ = print ("Comparación en Flujo: " ^ x ^ " " ^ Bool.toString w ^ "\n")
+                       val _ = if w
+                               then (is_jump := false)
+                               else processJump(j,n)
                    in ((*print "Procesando nodo en 2: "; printNode n; print "\n";*) {control = #control flowG, def = T.insert (#def flowG, n, listToSet d), use = T.insert (#use flowG, n, listToSet s), ismove = T.insert (#ismove flowG, n, false)})
                    end
                  | MOVE {src = s, dst = d, ...} =>

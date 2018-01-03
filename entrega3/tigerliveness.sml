@@ -36,12 +36,16 @@ struct
                                   ; insertTable (outTemps, x, (empty String.compare)))) ns
           else ()
         fun body (n:node) = 
-          let (* val _ = T.app (fn (k,x) => ((printNode k); (print "\n"))) (!inTemps) *)
+          let  (*val _ = T.app (fn (k,x) => ((printNode k); (print "\n"))) (!inTemps) *)
               val _ = insertTable (inResults, n, T.find (!inTemps, n))
               val _ = insertTable (outResults, n, T.find (!outTemps, n))
               (*val _ = T.app (fn (k,x) => ((printNode k); (print "\n"))) (u)*)
               (*val _ = T.app (fn (k,x) => ((printNode k); (print "\n"))) (d)*)
               (*val _ = printNode n*)
+              val _ = if nodename n = "N936"
+                      then (T.app (fn (k,x) => ((printNode k); (print "\n"))) (u);
+                        T.app (fn (k,x) => ((printNode k); (print "\n"))) (d) )
+                      else ()
               val _ = insertTable (inTemps, n, union (T.find (u, n), difference (T.find (!outTemps, n), T.find (d, n))))
               val _ = insertTable (outTemps, n, List.foldl (fn (s,r) => union (T.find (!inTemps, s), r)) (empty String.compare) (succ(n)))
           in 
