@@ -3,6 +3,8 @@ signature tigertrans = sig
 exception breakexc
 exception divCero
 
+type ('a, 'b) either
+
 type level
 type access
 type frag = tigerframe.frag
@@ -14,7 +16,6 @@ val formals : level -> access list
 val getActualLev : unit -> int
 val allocArg : level -> bool -> access
 val allocLocal : level -> bool -> access
-
 type exp 
 val procEntryExit : {level: level, body: exp} -> unit
 val getResult : unit -> frag list
@@ -54,8 +55,14 @@ val unNx : exp -> tigertree.stm
 
 val procBody : tigerframe.frag -> (tigertree.stm * tigerframe.frame) option
 
-val procStringList : (tigertree.stm list * tigerframe.frame option) list -> string list
+val procStringList : (tigertree.stm -> tigertree.stm list) -> tigerframe.frag list -> (tigertemp.label * string, tigertree.stm list * tigerframe.frame) either list
+
+val procStringList2 : (tigertemp.label * string, tigertree.stm list * tigerframe.frame) either list-> string list
 
 val getStms : tigerframe.frag list -> (tigertree.stm * tigerframe.frame option) list
-                                                                     
+                                                 
+val printProcString : (tigertemp.label * string, tigertree.stm list * tigerframe.frame) either -> unit
+
+val splitEither : ('a,'b) either list -> 'a list * 'b list
+
 end

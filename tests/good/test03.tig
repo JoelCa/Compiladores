@@ -1,8 +1,18 @@
 /* a record type and a record variable */
 let
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
+   end
+
   type  rectype = {name : string, age : int}
   var rec1 : rectype := rectype {name="Nobody", age=1000}
 in
   rec1.name := "Somebody";
-  rec1; 0
+  rec1; printint(rec1.age); exit(0)
 end

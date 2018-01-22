@@ -3,5 +3,5 @@ let
    var a : a := 2
    function a (a : a) : a = a
 in
-   a (a + a); 0
+   a (a + a); exit(0)
 end

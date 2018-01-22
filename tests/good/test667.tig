@@ -4,5 +4,5 @@ in
   let /*type B = {k:A}*/
     type B=A
   in ()
-  end; 0
+  end; exit(0)
 end

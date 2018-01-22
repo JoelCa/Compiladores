@@ -1,5 +1,15 @@
 /* correct declarations */
 let
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
+   end
+
   type arrtype1 = array of int
   type rectype1 = {name : string, address : string, id : int, age : int}
   type arrtype2 = array of rectype1
@@ -23,5 +33,7 @@ in
 
   rec1.name := "sdf";
   rec2.dates[0] := 2323;
-  rec2.dates[2] := 2323; 0
+  rec2.dates[2] := 2323;
+  printint(rec2.dates[2]);
+  exit(0)
 end

@@ -3,9 +3,19 @@
    are not in the same  batch of mutually recursive functions. 
    See also test39 */
 let
-	function g (a : int) : int = a
+	function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
+   end
+
+  function g (a : int) : int = a
 	type t = int
 	function g (a : int) : int = a
 in
-	0
+	printint(g(3)); exit(0)
 end

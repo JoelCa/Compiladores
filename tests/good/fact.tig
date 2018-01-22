@@ -1,5 +1,15 @@
 /* define a recursive function */
 let
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
+   end
+
   /* calculate n! */
   function fact (n : int) : int =
     if  n = 0
@@ -7,5 +17,6 @@ let
       else n * fact (n - 1)
   var i := fact(2)
 in
-  i
+  printint(i);
+  exit(0)
 end

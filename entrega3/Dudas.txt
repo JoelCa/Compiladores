@@ -330,20 +330,18 @@ Se nos ocurrio que podriamos hacer un coloreo en dos etapas, en una coloreamos e
 de los callee saves, y en la otra coloreamos el resultado de la etapa anterior con el prologo y epilogo de los
 callee saves, ¿funcionara?.
 
-- En el ejemplo de las 8 reinas hay una parte comentada de la función try en donde se usa el flush(),
-  notamos que si descomentamos esa línea, el programa falla por intenta acceder a un índice fuera de
-  rango. No sabemos como es que flush() afecta a una de las variables (c) del programa.
 
+Dudas 2018:
+
+- ¿Debemos chequear si el usuario ingresó una constante mas gránde que entero máximo o mas chico que el mínimo?
+
+- En el ejemplo test06Modif.tig se genera una función recursiva infinita que dá un segmentation fault.
+  Hicimos en C una función que se llama a si misma para que nunca termine y falla de la misma manera.
+  ¿Es correcto este comportamiento?.
 
 
 HACER:
-- Llegamos a testear hasta el "ejemploFinal23.tig"
-- Chequear que calldefs este bien definido (solo deben ser los argregs?).
-- Arreglar el entero máximo y mínimo. Ver línea 347 de tigertrans.sml.
-- Arreglar flag "canon" e "inter", en tigermain.
-- Chequear "ejemploFinal1.tig"
-- Arreglar "test01.tig"
-
+- Chequéo de todos los ejemplos. Nos quedamos en /good/test06.tig
 
 LO HECHO:
 - Funciona el intérprete agregandole el prefijo a los labels de funciones.
@@ -377,6 +375,9 @@ LO HECHO:
 - Chequear el ejemploFinal6.tig, problemas en la función factorial.
 - Debugeando el coloreo, chequear la construcción del grafo de flujo e interferencia.
 - Hacer una función heuristica para el spileo.
+- Chequear que calldefs este bien definido.
+- Arreglar el entero máximo y mínimo. Ver línea 347 de tigertrans.sml
+- Arreglar flag "canon" e "inter", en tigermain.
 
 
 OBSERVACIÓN

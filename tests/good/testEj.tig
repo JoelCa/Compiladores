@@ -1,6 +1,16 @@
 let
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
+   end
+
   function f (n : int) : int =
     (if n > 11 then n+78 else n-78)
 in
-  f(10+500) + 1546856
+  printint(f(10+500) + 1546856)
 end

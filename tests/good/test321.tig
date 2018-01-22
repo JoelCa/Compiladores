@@ -1,4 +1,14 @@
 let
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
+   end
+
   type a = array of int
   var x := 0
   type b = {i:int,prox:a} /*¿ a quien debería hacer referencia este "a" ?*/
@@ -6,5 +16,6 @@ let
   var y:a := a [2] of nil
 in
   y[1] := b{i=1,prox=y};
-  0
+  printint(y[1].i);
+  exit(0)
 end

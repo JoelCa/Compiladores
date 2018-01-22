@@ -5,5 +5,5 @@ let
   type i = {n:int}
   var y:a := a{n=100}
 in
-  0
+  exit(0)
 end

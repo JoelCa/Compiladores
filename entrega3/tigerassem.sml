@@ -49,14 +49,12 @@ struct
     | replaceTemps (src:string list) (dst:string list) (#"'"::(#"s"::(n::xs))) = 
         let
           val index = charToInt n
-          (*val _ = print ((Int.toString (length src))^"  --------    "^(Int.toString index)^"\n")*)
           val temp = explode(List.nth(src, index))
         in temp @ replaceTemps src dst xs
         end
     | replaceTemps src dst (#"'"::(#"d"::(n::xs))) = 
         let
           val index = charToInt n
-          (*val _ = print ((Int.toString (length dst))^" "^(Int.toString index)^"\n")*)
           val temp = explode(List.nth(dst, index))
         in temp @ replaceTemps src dst xs
         end
@@ -65,7 +63,7 @@ struct
   fun format (coloreo : temp -> string) (OPER {assem = s, dst = dst, src = src, ...}) = 
         implode (replaceTemps (map coloreo src) (map coloreo dst) (explode s))
     | format _ (LABEL {assem = s, ...}) = s
-    | format coloreo (MOVE {assem = s, dst = dst, src = src}) = (*implode (replaceTemps (map coloreo src) (map coloreo dst) (explode s))*)
+    | format coloreo (MOVE {assem = s, dst = dst, src = src}) =
       let val regSource = map coloreo src
           val regDestination = map coloreo dst
       in

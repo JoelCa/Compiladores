@@ -1,5 +1,6 @@
 let
   var a:int := 7
+  var b := 157 + 99 - 89
 in 
-  157 + 99 - 89
+  ()
 end

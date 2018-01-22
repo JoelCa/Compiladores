@@ -76,7 +76,7 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
 	in
 		fun loadLabel lab = case tabBusca(lab, !tabLabels) of
 					SOME a => a
-				      | NONE => raise Fail("Label no encontrado: "^lab^"\n")
+				| NONE => raise Fail("Label no encontrado: "^lab^"\n")
 		fun storeLabel lab addr = tabLabels := tabInserta(lab, addr, !tabLabels)
 	end
 
@@ -125,8 +125,8 @@ fun inter showdebug (funfracs: (stm list*tigerframe.frame) list) (stringfracs: (
       | front [x] = []
       | front (x::xs) = x :: front xs
 
-      (*ripFront quita el .string '' del inicio de un string del fuente*)
-      fun ripFront xs = List.drop(xs, 9)
+      (*ripFront quita el .asciz " del inicio de un string del fuente*)
+      fun ripFront xs = List.drop(xs, 8)
 
       val finalStr = if delFuente 
                      then (front o ripFront o format1) str2

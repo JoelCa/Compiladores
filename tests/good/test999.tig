@@ -1,7 +1,6 @@
 let
   type a = { a1: b}
   type b = a
-
 in
-  0
+  exit(0)
 end

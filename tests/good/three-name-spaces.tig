@@ -1,6 +1,19 @@
-let type a = {a : int}
-    var  a := 0
-    function a (a : a) : a = a{a = a.a}
+let
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
+   end
+
+  type a = {a : int}
+  var  a := 0
+  function a (a : a) : a =
+    (printint(a.a);
+    a{a = a.a})
 in
-    a (a{a = -5}); 0
+  a (a{a = -5}); exit(0)
 end

@@ -1,18 +1,20 @@
 let
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
+   end
+
   function f (a:int) : int =
     a+1
   function g (a:int) : int =
     a+2
   var x := f(g(3))
 in
-  x * 4
+  printint(x * 4);
+  exit(0)
 end
-
-/*let
-  function f (a:int) : int =
-    a+1
-  var x := f(3)
-in
-  x * 4
-end*/
-

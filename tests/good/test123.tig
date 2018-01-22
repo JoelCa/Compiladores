@@ -1,8 +1,18 @@
 let
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
+   end
+
   type a = array of int
   var x := 0
   type a = {i:int,prox:a}
   var y:a := a{i=1,prox = a{i=2,prox=nil}}
 in
-  0
+  printint(y.prox.i); exit(0)
 end

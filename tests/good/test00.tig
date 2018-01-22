@@ -5,5 +5,5 @@ let
   var x:b := b [2] of nil
   var y:c := c {name = x}
 in
-  0
+  exit(0)
 end

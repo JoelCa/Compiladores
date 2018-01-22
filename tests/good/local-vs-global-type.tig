@@ -6,5 +6,6 @@ in
 		type a = string
 	in
 		0
-	end
+	end;
+  exit(0)
 end

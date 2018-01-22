@@ -1,22 +1,4 @@
 (*
-  Frames para el 80386 (sin displays ni registers).
-
-    |    argn    |  fp+4*(n+1)
-    |    ...     |
-    |    arg2    |  fp+16
-    |    arg1    |  fp+12
-    |  fp level  |  fp+8   static link
-    |  retorno   |  fp+4
-    --------------
-    |   fp ant   |  fp
-    |   local1   |  fp-4
-    |   local2   |  fp-8
-    |    ...     |
-    |   localn   |  fp-4*n
-
-*)
-
-(*
   Frame de ARM V7
 
     |    argn    |  fp+4*(n-1)
@@ -73,8 +55,7 @@ val callersaves    = []
 val calleesaves    = ["r4","r5","r6","r7","r8","r9","r10"]
 val allRegs        = argregs @ calleesaves @ [fp, ip, sp, lr, pc]
 
-(* allRegs    = ["r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10",ip,lr,fp,sp,pc] *)
-(* asignables = ["r4","r5","r6","r7","r8","r9","r10"] *)
+val maxInt32       = 2147483647
 
 (*
   pc: En todo momento se está modificando
@@ -165,17 +146,17 @@ fun seq [] = EXP (CONST 0)
   | seq [s] = s
   | seq (x::xs) = SEQ (x, seq xs)
 
+(* Se hace la diferencia con el registro r4 para tenerlo disponible en el coloreo *)
 fun procEntryExit1 (fr: frame, body) = 
   let val x = (List.filter (fn c => not(c = "r4")) calleesaves)
-      val _ = (List.app (fn w => print(w ^ " - ")) x ; print "\n")
       val (entry,exit) = List.foldr
                           (fn (r,(ent,exi)) => let val nt = tigertemp.newtemp()
                                                in (MOVE (TEMP nt, TEMP r)::ent, MOVE (TEMP r, TEMP nt)::exi)
                                                end ) ([],[]) x
       val acomodaArgs = recorreArgs (rev (!(#ftAccesos fr))) argregs
       val a = [MOVE (TEMP fp, TEMP sp)]
-      val acomoda =  acomodaArgs (*(MOVE (TEMP sp, (BINOP(MINUS,TEMP sp, MEM(NAME (#name fr^"_fs"))))))::acomodaArgs*)
-  in seq(entry@acomoda@[body]@exit) end  (*seq(acomoda@[body]) end*) 
+      val acomoda =  acomodaArgs
+  in seq(entry@acomoda@[body]@exit) end
 
 fun procEntryExit2(frame,body) = 
      body@[tigerassem.OPER {assem = "", src = [rv,sp]@calleesaves, dst = [], jump = NONE}]

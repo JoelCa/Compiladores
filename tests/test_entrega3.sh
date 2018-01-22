@@ -24,22 +24,23 @@ then
     files="$(ls *.tig)"
     while read -r f
     do
-        tiger_output="$(exec "$PATH_TIGER" "$f")"
-        res="$(echo "$tiger_output" | awk '//{line=$0} END{print line}')"
+        tiger_output="$(exec "$PATH_TIGER" "$f" 2>&1)"
+        #error= "$(echo $tiger_output 2> jojo)"
+        res="$(echo "$tiger_output" | awk 'NR==1{print $1}')"
         if [ $TYPE = true ]
         then
-            if [ "$res" != "yes!!" ]
+            if [[ ("$res" == "Fail:")  || ("$res" == "Uncaught") || ("$res" == "Error") ]];
             then
                 printf "Resultado inválido en $f\nDa error de tipo, cuando debería estar ok.\n"
             else
                 printf "$f válido.\n"
             fi
         else
-            if [ "$res" == "yes!!" ]
+            if [[ ("$res" == "Fail:")  || ("$res" == "Uncaught") || ("$res" == "Error") ]];
             then
-                printf "resultado inválido en $f\nDa ok, cuando debería dar un error.\n"
-            else
                 printf "$f válido.\n"
+            else
+                printf "resultado inválido en $f\nDa ok, cuando debería dar un error.\n"
             fi
         fi
     done <<< "$files"

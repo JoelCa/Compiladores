@@ -4,14 +4,15 @@ let
    let function f (i : int) =
      if i > 0
      then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
-   in if i < 0 then (print ("-"); f (-i))
-      else if i>0 then f (i)
-           else print ("0")
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
    end
  
   type  arrtype = array of int
   var arr1 : arrtype := arrtype [10] of -456
 in
   /*arr1[4] := 3;*/
-  printint(arr1[4]); 0
+  printint(arr1[4])
 end

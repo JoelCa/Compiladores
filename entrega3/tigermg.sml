@@ -8,7 +8,6 @@ struct
   val instrNodes : instr table ref = ref (T.mkDict compareNodes)
   val labelProcesados : (string, node) T.dict ref = ref (T.mkDict String.compare)
   val jumpProcesados : (string, node list) T.dict ref = ref (T.mkDict String.compare)
-  (*val labels : string list ref = ref []*)
   val lastNode : node option ref = ref NONE
 
   fun listToSet l = Splayset.addList (Splayset.empty String.compare, l)
@@ -26,12 +25,8 @@ struct
           (* (que no es label) y es el posible destino de un jump cuyo label este en "labels". *)
           (* Para cada label en "labels", agregamos el nodo a labelProcesados, recorremos los jumpProcesados en busca de alguno *)
           (* que lo tenga como destino y para los que coinciden, creamos la arista correspondiente. *)
-          val _ = case optNode of
-                    SOME n => (printNode n; print "\n")
-                  | NONE   => ()
-          val _ = printInstr x
           val _ =
-            case x of (* REVISAR *)
+            case x of
               (LABEL {lab = l, ...}) => 
                 (case !lastNode of
                   SOME ln =>
@@ -48,7 +43,7 @@ struct
               SOME n =>
                 (case x of
                    OPER {src = s, dst = d, jump = NONE, ...} =>
-                   ((*print "Procesando nodo en 1: "; printNode n; print "\n"; *){control = #control flowG, def = T.insert (#def flowG, n, listToSet d), use = T.insert (#use flowG, n, listToSet s), ismove = T.insert (#ismove flowG, n, false)})
+                     {control = #control flowG, def = T.insert (#def flowG, n, listToSet d), use = T.insert (#use flowG, n, listToSet s), ismove = T.insert (#ismove flowG, n, false)}
                  | OPER {src = s, dst = d, jump = SOME [j], assem = x} =>
                    let fun processJump(jumpLabel,currentNode) =
                          let val _ = case T.peek (!labelProcesados, jumpLabel) of
@@ -62,11 +57,10 @@ struct
                              in List.exists (fn fName => fName = name) externFunctions end
                          | isExtern(_) = false
                        val w = isExtern(explode x)
-                       val _ = print ("Comparación en Flujo: " ^ x ^ " " ^ Bool.toString w ^ "\n")
                        val _ = if w
                                then (is_jump := false)
                                else processJump(j,n)
-                   in ((*print "Procesando nodo en 2: "; printNode n; print "\n";*) {control = #control flowG, def = T.insert (#def flowG, n, listToSet d), use = T.insert (#use flowG, n, listToSet s), ismove = T.insert (#ismove flowG, n, false)})
+                   in {control = #control flowG, def = T.insert (#def flowG, n, listToSet d), use = T.insert (#use flowG, n, listToSet s), ismove = T.insert (#ismove flowG, n, false)}
                    end
                  | MOVE {src = s, dst = d, ...} =>
                    {control = #control flowG, def = T.insert (#def flowG, n, listToSet d), use = T.insert (#use flowG, n, listToSet s), ismove = T.insert (#ismove flowG, n, true)}
@@ -91,33 +85,3 @@ struct
         val _ = lastNode := NONE
     in () end
 end
-
-(*
-                        jump L2
-                        .
-                        .
-                        .
-                        jump L2
-                        .
-                        .
-                        .
-                        label L2
-                        mov r1, r2 <--- nodo n
-                        .
-                        .
-                        .
-                        jump L2
-                        .
-                        .
-                        .
-                        jump L3
-                        .
-                        .
-                        .
-                        jump L3
-                        .
-                        .
-                        .
-                        label L3
-                        str ..
-*)

@@ -13,6 +13,9 @@ type level = {parent: frame option , frame: frame, level: int} (*parent, es el f
 type access = tigerframe.access
 
 type frag = tigerframe.frag
+
+datatype ('a, 'b) either = Left of 'a | Right of 'b
+
 val fraglist = ref ([]: frag list)
 
 val actualLevel = ref ~1 (* _tigermain debe tener level = 0. *)
@@ -95,19 +98,30 @@ fun nombreFrame frame = print(".globl " ^ tigerframe.name frame ^ "\n")
 fun coloreo table = fn x => findAll (table, x)
 
 fun instrCode (table : allocation) {prolog = p, body = b : tigerassem.instr list, epilog = e} = 
-  let (*val _ = printAll table*)
-  		val str = p ^ (foldr (fn (s, r) => (tigerassem.format (coloreo table) s) ^ r) "" b) ^ e
-  	  val _ = print "Termina Format\n"
-  in str end
+  p ^ (foldr (fn (s, r) => (tigerassem.format (coloreo table) s) ^ r) "" b) ^ e
+  
+fun procStringList (g : tigertree.stm -> tigertree.stm list) ((PROC {body = b, frame = f})::zs) = (Right (g b,f)) :: procStringList g zs
+  | procStringList g ((STRING (l,s))::zs) = (Left (l,s)) :: procStringList g zs
+  | procStringList _ [] = []
 
-fun procStringList ((ss, SOME f)::zs) =
-	let
-		val (all, colTable) = tigerregalloc.alloc (tigercodegen.maximalMunch f ss, f)
-		val _ = print "Termino alloc\n"
-	in (instrCode colTable (tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, all)))) :: procStringList zs
-	end
-	| procStringList (([LABEL s], NONE)::zs) = s :: procStringList zs 
-	| procStringList [] = [] 
+fun procStringList2 [] = []
+	| procStringList2 ((Left ("",s))::xs) = s :: procStringList2 xs
+	| procStringList2 ((Left (l,s))::xs) = (l ^ ":\n" ^ s) :: procStringList2 xs
+	| procStringList2 ((Right (ss, f))::xs) =
+		let val (all, colTable) = tigerregalloc.alloc (tigercodegen.maximalMunch f ss, f)
+		in (instrCode colTable (tigerframe.procEntryExit3 (f, tigerframe.procEntryExit2 (f, all)))) :: procStringList2 xs
+		end
+
+fun printProcString (Left (l,_)) = (print o tigerit.tree) (LABEL l)
+  | printProcString (Right (xs,_)) = List.app (fn x => (print o tigerit.tree) x) xs
+
+fun splitEither [] = ([],[])
+	| splitEither (x::xs) =
+			let val (ls,rs) = splitEither xs
+			in case x of
+			     Left l  => (l::ls,rs) 
+			   | Right p => (ls,p::rs) 
+			end
 
 fun procBody (PROC {body = b, frame = f}) = SOME (b,f)
 	| procBody _  = NONE
@@ -131,9 +145,9 @@ val procsGlobs = ref ([]: frag list)
 val stringsGlobs = ref ([]: frag list)
 
 fun procEntryExit{level: level, body} =
-		let val label = STRING(name(#frame level), name(#frame level)^":\n")
+		let val label = STRING(name(#frame level), "")
 				val body' = PROC{frame= #frame level, body=unNx body}
-				val final = STRING("/*--------------*/", "/*--------------*/\n")
+				val final = STRING("", "/*--------------*/\n")
 		in  procsGlobs:=(!procsGlobs@[label, body', final])
 		end
 
@@ -152,9 +166,10 @@ fun stringLen s =
 (*     .string "hola" *)
 fun stringExp(s: string) =
 	let val l = newlabel()
-		  val len = l ^":\n.long "^makestring(stringLen s)^"\n"
-		  val str = ".asciz \""^s^"\"\n" ^ ".align\n"
-		  val _ = stringsGlobs:=(!stringsGlobs @ [STRING(l, len), STRING("",str)])
+		  val len = ".long "^makestring(stringLen s)^"\n"
+		  val str = ".asciz \""^s^"\"\n"
+		  val al =  ".align\n"
+		  val _ = stringsGlobs:=(!stringsGlobs @ [STRING(l, len), STRING("", str), STRING("", al)])
 	in  Ex(NAME l) end
 
 fun preFunctionDec() =
@@ -268,9 +283,8 @@ fun recordExp l =
 fun arrayExp{size, init} =
 (* NOSOTROS *)
 (*Originalmente usaba: "allocArray"*)
-	let
-		val s = unEx size
-		val i = unEx init
+	let val s = unEx size
+			val i = unEx init
 	in
 		Ex (externalCall("_initArray", [s, i])) (*retornaría el inicio del arreglo: i. En la posición i-1
 																							se encuentra el tamaño que fue reservado*)
@@ -354,7 +368,7 @@ fun forExp {lo, hi, var, body} =
 	in Nx (seq (
 		case hi of (*hacemos esta diferenciación para tener una pequeña optimización *)
 			Ex(CONST n) =>
-			if valOf Int.maxInt = n
+			if tigerframe.maxInt32 = n
 			then
 				[ MOVE (evar, elo),
 					CJUMP(LE, evar, CONST n, l1, l3),
@@ -507,8 +521,8 @@ fun binOpStrExp {left,oper,right} =
 		end
 
 
-fun getStms []                           = []
+fun getStms []                                 = []
 	| getStms ((PROC {body = b, frame = f})::zs) = (b, SOME f) :: (getStms zs)
-  | getStms ((STRING (_,l))::zs)         = (LABEL l, NONE) :: (getStms zs)
+  | getStms ((STRING (_,l))::zs)               = (LABEL l, NONE) :: (getStms zs)
 
 end                                      

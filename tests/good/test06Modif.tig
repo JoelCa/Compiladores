@@ -1,12 +1,8 @@
 /* define valid mutually recursive procedures */
 let
 
-function do_nothing1 (a : int, b : string) : int =
-		do_nothing2 (a+1)
-
-function do_nothing2 (d : int) : int =
-    if d = 10 then d else do_nothing1 (d, "str")
-
+function do_nothing1 () =
+		do_nothing1 ()
 in
-	do_nothing1 (0, "str2")
+	do_nothing1 ()
 end
