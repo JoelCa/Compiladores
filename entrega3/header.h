@@ -1,0 +1,1 @@
+int _tigermain(int arg);
