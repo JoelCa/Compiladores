@@ -8,6 +8,7 @@ in
   arr2[0].name := "kati";
   print (arr2[0].name);
   print (arr2[1].name);
-  7777
+  7777;
+  exit(0)
 end
 

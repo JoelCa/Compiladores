@@ -9,6 +9,5 @@ fun popPila pila =
 	let	val ret = hd(!pila)
 	in pila:=tl(!pila) end
 fun topPila pila = hd(!pila)
-                     (* AGREGADA *)
 fun isEmpty pila = null (!pila)
 end

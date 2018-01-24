@@ -7,8 +7,6 @@ structure T = tigertree
 open tigerframe
 open tigerconstants
 
-(* T.MOVE (a, b)  <-----> a := b *)
-
 fun codegen (frame) (stm) =
   let val ilist = ref (nil : A.instr list)
       fun emit x = ilist := x :: !ilist
@@ -22,12 +20,7 @@ fun codegen (frame) (stm) =
         | munchStm (T.MOVE (T.MEM (T.BINOP (T.PLUS, T.CONST i, e1)), e2)) = emit (A.OPER { assem = "str 's0, ['s1,'s2]\n",
                                                                                            src = [munchExp e2, munchExp e1, munchExp (T.CONST i)],
                                                                                            dst = [],
-                                                                                           jump = NONE } )
-        (* Este caso esta MAL. NO guarda en la posición de memoria e1 la etiqueta l.
-        | munchStm (T.MOVE (T.MEM e1, T.NAME l)) = emit (A.OPER { assem = "ldr 's0, =" ^ l ^ "\n",
-                                                                  src = [munchExp e1],
-                                                                  dst = [],
-                                                                  jump = NONE })  *)        
+                                                                                           jump = NONE } )        
         | munchStm (T.MOVE (T.MEM e1, e2)) = emit (A.OPER { assem = "str 's0, ['s1]\n",
                                                             src = [munchExp e2, munchExp e1],
                                                             dst = [],
@@ -164,8 +157,5 @@ fun codegen (frame) (stm) =
 
 
 fun maximalMunch f [] = []
-  (*| maximalMunch f ((h as T.CJUMP _)::_::t) = codegen f h @ maximalMunch f t *)
-  (* El caso comentado esta mal, pues NO podemos ignorar el segundo elemento de la lista, más alla de que éste sea siempre el label false del CJUMP *)
-  | maximalMunch f (h::t) = codegen f h @ maximalMunch f t
-      
+  | maximalMunch f (h::t) = codegen f h @ maximalMunch f t   
 end

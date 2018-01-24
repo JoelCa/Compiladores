@@ -15,7 +15,7 @@ let
            else print ("0")
    end
 
-  var r := f(10+500,16,17,18,19) + 1546856
+  var r := f(10+500,16,17,18,19) + 1546856 /* Resultado: 1547720 */
 in
   printint(r);
   print("\n")

@@ -1,11 +1,21 @@
 /* valid for and let */
 
 let
+  function printint (i : int) =
+   let function f (i : int) =
+     if i > 0
+     then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
+   end
+
   var a := 0
   function f(n : int) : int =
     if n = 0 then -9999 else n+90
 in 
 	for i :=0 to 100 do (a :=a+1; ());
-  f(a-101);
+  printint(f(a-101));
   exit(0)
 end

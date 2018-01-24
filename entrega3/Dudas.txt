@@ -37,7 +37,7 @@ de cada función? Si.
 Dudas 2016
 
 - En la entrega1 _tigermain tiene el resultado de tipo TInt, mientras que la entrega2 _tigermain tiene el de resultado de tipo TUnit, así esta bien?
-Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests están como para que funcionen con TInt?
+  Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests están como para que funcionen con TInt?
 
 - ¿Cual es la sugerencia de Guillermo para modificar el tigerframe?
 
@@ -50,7 +50,8 @@ Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests
 
 - Una vez terminado el maximal munch ¿Cuáles son los pasos a seguir?. Preguntado.
 
-- Te escribo por estoy avanzando con el compilador junto con Joel Catacora y nos surgió una duda respecto a la arquitectura destino. Estamos entre 2 opciones:
+- Te escribo por estoy avanzando con el compilador junto con Joel Catacora y nos surgió una duda respecto a la arquitectura destino. Estamos entre 2
+  opciones:
   - ARM
   - i386
   Queremos saber qué "problemas" puede presentarnos ARM, que no están, o son más simples, en i386? Preguntado.
@@ -61,12 +62,12 @@ Si está bien, ¿Cómo se probaría la segunda entrega si los tipos de los tests
 Dudas RESUELTAS 2017
 
 - En la variable "datosGlobs", cuando se agrega el PROC de una función f, asociamos como frame de f, 
-el frame que viene del level, el cual se crea con el nombre de f más un prefijo formado por una string obtenida de tigertemp.newLabel(). ¿Está bien?.
-El prefijo nos estorba para usar el intérprete, debido a que busca el frame por el nombre de las funciones sin tener en cuenta el prefijo ¿como lo solucionamos, si mantenemos este prefijo?.
+  el frame que viene del level, el cual se crea con el nombre de f más un prefijo formado por una string obtenida de tigertemp.newLabel(). ¿Está bien?.
+  El prefijo nos estorba para usar el intérprete, debido a que busca el frame por el nombre de las funciones sin tener en cuenta el prefijo ¿como lo solucionamos, si mantenemos este prefijo?.
 
 - En el código intermedio del CALL f, ¿deberíamos incluir MOVEs de los valores con los que se llama f, a los registros o
-direcciones de memoria, que genera allocArg(), en la declaración de f?. El interpete lo hace solo, si incluimos la función
-"formals" y hacemos MOVEs en el preambulo de la función, en procEntryExit1.
+  direcciones de memoria, que genera allocArg(), en la declaración de f?. El interpete lo hace solo, si incluimos la función
+  "formals" y hacemos MOVEs en el preambulo de la función, en procEntryExit1.
 
 - ¿Qué pasa cuando no esté el intérprete?. ¿El trabajo lo hace la instrucción CALL de ARM?. -----> NO
 
@@ -82,21 +83,21 @@ Dudas resueltas por Guillermo
 
 - ¿Es correcto utilizar push para poner los argumentos de la función llamada en memoria?
 
-- Cuando se hace la selección de instrucciones del CALL, el libro recomiendo hacer una función auxiliar munchArgs, que genere el código encargado de mover 
-los argumentos a donde correspondan (registro, o memoria). 
-Sabemos que del quinto argumento, en adelante, los argumentos van a memoria, ¿esto lo hacemos mediante PUSHs?.
-Luego de la instrucción BL (asociada al CALL), ¿deberían estar los POPs correspodientes?
+- Cuando se hace la selección de instrucciones del CALL, el libro recomienda hacer una función auxiliar munchArgs, que genere el código encargado de
+  mover los argumentos a donde correspondan (registro, o memoria). 
+  Sabemos que del quinto argumento, en adelante, los argumentos van a memoria, ¿esto lo hacemos mediante PUSHs?.
+  Luego de la instrucción BL (asociada al CALL), ¿deberían estar los POPs correspodientes?
 
-Codigo intermedio:
-CALL (f, a0,a1,a2,a3,a4,a5) 
+  Codigo intermedio:
+  CALL (f, a0,a1,a2,a3,a4,a5) 
 
-Código ARM:
-..
-(movimientos de los argumentos a los registros r0-r3)
-PUSH {a4, a5}
-BL f
-POP {a4, a5}
-..
+  Código ARM:
+  ..
+  (movimientos de los argumentos a los registros r0-r3)
+  PUSH {a4, a5}
+  BL f
+  POP {a4, a5}
+  ..
 
 - En procEntryExit1 agregamos como preludio y epilogo al cuerpo de la función, el código intermedio correspondiente a guardar y restaurar los registros callee saves.
 Esto lo hicimos con MOVEs a temporarios frescos.
@@ -146,7 +147,8 @@ function1 (Opción 2)
   POP {R5,LR}
   BX  LR
 
-- ¿Tenemos que hacer una arista "de vuelta", entre el último nodo del flujo del body de una función f y el nodo sucesor del nodo que represental al call f?.
+- ¿Tenemos que hacer una arista "de vuelta", entre el último nodo del flujo del body de una función f y el nodo sucesor del nodo que representa
+  al call f?.
   Si es necesario, ¿como podemos hacerla?.
 
 - ¿Es necesario hacer un nodo para cada una de las instr de assembler o solo para las OPER?
@@ -154,30 +156,27 @@ function1 (Opción 2)
 - ¿Cómo podemos probar las cosas relacionadas con los grafos?
 
 - En la función munchStm, cuando procesa un CALL (NAME name, ...), el datatype que generamos es un OPER, donde fijamos "jump = SOME [name]", 
-pero en el libro esta como "jump = NONE" . ¿Cuál es la correcta?.
+  pero en el libro esta como "jump = NONE" . ¿Cuál es la correcta?.
 
 - A la hora de crear el grafo de flujo, sabemos que si llegamos a una instrucción X con un jump a Y, tenemos que crear una arista entre el
-nodo X y el nodo de la proxima instrucción a Y. Pero, ¿qué pasa si la instrucción se corresponde a un CJUMP?. Creemos que en este caso deberiamos
-hacer no solo la arista a la proxima instrucción del label, sino tambien una arista entre la proxima instrucción al CJUMP.
+  nodo X y el nodo de la proxima instrucción a Y. Pero, ¿qué pasa si la instrucción se corresponde a un CJUMP?. Creemos que en este caso deberiamos
+  hacer no solo la arista a la proxima instrucción del label, sino tambien una arista entre la proxima instrucción al CJUMP.
 
 - Nosotros generamos una instrucción utilizando el constructor MOVE solo cuando se transfiere datos de un temporario a otro.
-¿Así está bien?
+  ¿Así está bien?
 
 - ¿Podemos llenar el campo "dst" de una instrucción, tanto en la función muchExp como muchStm?
-Por ejemplo, queremos hacer:
-munchStm (T.MOVE (TEMP i) e2) = emit (MOVE {src = [muchExp e2], dst=[i], ..})
-¿Está bien?. 
-Nosotros creiamos que como un statement no devuelve un valor, no debia utilizarse el campo "dst" de la instrucción asociada.
-
-
---------------------------------------------------------------------------------
-Dudas NO resueltas 2017
+  Por ejemplo, queremos hacer:
+  munchStm (T.MOVE (TEMP i) e2) = emit (MOVE {src = [muchExp e2], dst=[i], ..})
+  ¿Está bien?. 
+  Nosotros creiamos que como un statement no devuelve un valor, no debia utilizarse el campo "dst" de la instrucción asociada.
 
 - En el chequeo de tipos, ¿deberiamos capturar la excepción Ciclo, y mostrar un error más detallado?.
 
 - ¿Esta bien mantener dos levels donde el nombre del frame sea "_tigermain", en la pila de levels (uno viene por defecto, al crear la pila)?.
 
-- ¿Podemos definir en tiger una función de nombre "_tigermain"?.
+- ¿Podemos definir en tiger una función de nombre "_tigermain"?. NO, no es posible que el nombre de una función comience con guión bajo,
+  da syntax error.
 
 - A nosotros no nos importa el orden con el cual se declaran los miembros de un record, está bien?. Según la pág. 518 del libro, SI importa.
 
@@ -196,26 +195,29 @@ Selección de instrucciones y Livennes
 - Está bien hacer que los campos "use" y "def" de un grafo de flujo, sean conjuntos (en el libro, son listas)?.
 
 - En el libro, páginas 225 y 226, plantea un caso particular en el que puede definirse una variable que luego no se utiliza. Menciona que
-  interfiere con aquellas variable cuyo rango de vida que se solape con el rango de vida de esta variable (rango nulo).
+  interfiere con aquellas variable cuyo rango de vida se solape con el rango de vida de esta variable (rango nulo).
   ¿Me podrías plantear un caso en el que se dé esta situación?
   ¿Como deberíamos tratarlo, si es necesario?
 
-- Nosotros calculamos los liveouts para cada instrucción (liveMap), pero en la función Build (del pseudo-código de coloreo) inicia calculando los liveouts de un bloque 
-de instrucciones, "liveOut (bloque)", y lo guarda en una variable llamada "live". ¿A qué se refiere "liveOut(bloque)" ?.
-Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya que en el libro no explica como se calcula, ¿podemos adaptar el pseudo-código para usar liveMap?.
+- Nosotros calculamos los liveouts para cada instrucción (liveMap), pero en la función Build (del pseudo-código de coloreo) inicia calculando 
+  los liveouts de un bloque  de instrucciones, "liveOut (bloque)", y lo guarda en una variable llamada "live". ¿A qué se refiere "liveOut(bloque)" ?.
+  Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya que en el libro no explica como se calcula, ¿podemos adaptar 
+  el pseudo-código para usar liveMap?.
 
-- Una de las sentencias de Build agrega a la variable "live" los def(Instr), esto provoca que luego se generen bucles en el grafo de interferencias sobre los nodos que se corresponden a los temporarios de def. ¿Esta bien que suceda ésto?.
+- Una de las sentencias de Build agrega a la variable "live" los def(Instr), esto provoca que luego se generen bucles en el grafo de interferencias
+  sobre los nodos que se corresponden a los temporarios de def. ¿Esta bien que suceda ésto?.
 
 
  Coloreo
  --------
 
 - En la función "simpleregalloc", la variable "precolored", ¿se refiere a los registros de la arquitectura?. 
- ¿A qué se refiere la variable "asignables"? ¿Son aquellos registros que se pueden utilizar para colorear?.
- ¿La cantidad de colores K sería la cantidad de registros asignables?.
+  ¿A qué se refiere la variable "asignables"? ¿Son aquellos registros que se pueden utilizar para colorear?.
+  ¿La cantidad de colores K sería la cantidad de registros asignables?.
 
-- La función "simpleregalloc" que está en el archivo tigersimpleregalloc.sml (en entrega3, lo adjunto), hace un coloreo y reescritura de la instrucciones "básico", ¿verdad?.
- Vale la pena que lo adaptemos a nuestra arquitectura para ir probando lo que hicimos, antes de terminar de implementar el coloreo recomendado en el libro?.
+- La función "simpleregalloc" que está en el archivo tigersimpleregalloc.sml (en entrega3, lo adjunto), hace un coloreo y reescritura de la
+  instrucciones "básico", ¿verdad?.
+  Vale la pena que lo adaptemos a nuestra arquitectura para ir probando lo que hicimos, antes de terminar de implementar el coloreo recomendado en el libro?.
 
 - ¿Los registros "asignables" son los registros de propósito general?. En nuestro caso tenemos:
   Total de registros = ["r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r10",lr,fp, sp, pc]
@@ -230,8 +232,8 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
 
 - ¿Mantenemos el nombre de "_tigermain" para la función principal?
 
-- ¿Es correcto que el usuario pueda definir una función F con el mismo nombre que una función de librería?. En este caso, F "pisa" a la función de la
-  librería.
+- ¿Es correcto que el usuario pueda definir una función F con el mismo nombre que una función de biblioteca?. En este caso, F "pisa" a la función de la
+  biblioteca.
   Ver ejemploFinal16.tig
 
 - Si creamos un array de records, lo inicializamos con un record determinado y luego modificamos algún elemento
@@ -258,6 +260,8 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
     ldr c2, [fp,offset]
     r4 <- c2
   ¿Es necesario crear c1 y c2? ¿No se puede reescribir usando solo un temporario nuevo o mejor aún, usando c?
+  No se puede usar un solo temporario ya que se perdería el beneficio de que se acorten los rangos de vida de
+  los temporarios utilizados
 
 - ¿Es necesario, luego de finalizar la etapa de reescritura, volver todas las estructuras que utiliza el coloreo
   a su estado original?
@@ -288,60 +292,74 @@ Creemos que serían los temporarios que quedan vivos al finalizar el bloque. Ya 
   Es decir que, se puede hacer practicamente todo C como componente destino de una instrucción Call, así el coloreo resolvería el problema.
 
 - Hola Guillermo, descubrimos que es lo que nos está trabando en el coloreo.
-El libro nos recomienda que para los registros callee saves, creemos MOVs a temporarios frescos en el código intermedio,
-así el coloreo se encargaría de mandarlos o no a memoria.
-Lo hacemos, y pasa lo siguiente:
-Supongamos que r4 y r5 son los registros callee saves. Y los registros disponibles para el coloreo son [r0 .. r5]
+  El libro nos recomienda que para los registros callee saves, creemos MOVs a temporarios frescos en el código intermedio,
+  así el coloreo se encargaría de mandarlos o no a memoria.
+  Lo hacemos, y pasa lo siguiente:
+  Supongamos que r4 y r5 son los registros callee saves. Y los registros disponibles para el coloreo son [r0 .. r5]
 
-Reescritura 0:
+  Reescritura 0:
 
-t10 <- r4
-t11 <- r5
-.
-.
-.
-r4 <- t10
-r5 <- t11
+  t10 <- r4
+  t11 <- r5
+  .
+  .
+  .
+  r4 <- t10
+  r5 <- t11
 
-Se espilea t10.
+  Se espilea t10.
 
-Reescritura 1:
+  Reescritura 1:
 
-t20 <- r4
-M[dir] <- t20
-t11 <- r5
-.
-.
-.
-t21 <- M[dir]
-t4 <- t21
-r5 <- t11
+  t20 <- r4
+  M[dir] <- t20
+  t11 <- r5
+  .
+  .
+  .
+  t21 <- M[dir]
+  t4 <- t21
+  r5 <- t11
 
-Se espilea t20.
+  Se espilea t20.
 
-Y en cada iteración se va espileando el temporario que se creo en la etapa anterior para la reescritura.
-El coloreo no avanza, se queda atascado en el principio.
-No sabemos como solucionarlo.
-Sabemos que estamos haciendo bien el cálculo de los live out. La elección de los registros a espilear tiene sentido.
-En la "Reescritura 0", t10 interfiere con todos los registros coloreables salvo r4, pero cuando se le quiere asignar un color,
-uno de sus vecinos en el grafo de interferencia ya está coloreado con r4, asi que se lo espilea.
-¿Qué estamos haciendo mal?. Nos parecio raro que t10 interfiera con r5, pero sabemos que está bien.
-Se nos ocurrio que podriamos hacer un coloreo en dos etapas, en una coloreamos el código sin el prologo y epilogo
-de los callee saves, y en la otra coloreamos el resultado de la etapa anterior con el prologo y epilogo de los
-callee saves, ¿funcionara?.
+  Y en cada iteración se va espileando el temporario que se creo en la etapa anterior para la reescritura.
+  El coloreo no avanza, se queda atascado en el principio.
+  No sabemos como solucionarlo.
+  Sabemos que estamos haciendo bien el cálculo de los live out. La elección de los registros a espilear tiene sentido.
+  En la "Reescritura 0", t10 interfiere con todos los registros coloreables salvo r4, pero cuando se le quiere asignar un color,
+  uno de sus vecinos en el grafo de interferencia ya está coloreado con r4, asi que se lo espilea.
+  ¿Qué estamos haciendo mal?. Nos parecio raro que t10 interfiera con r5, pero sabemos que está bien.
+  Se nos ocurrio que podriamos hacer un coloreo en dos etapas, en una coloreamos el código sin el prologo y epilogo
+  de los callee saves, y en la otra coloreamos el resultado de la etapa anterior con el prologo y epilogo de los
+  callee saves, ¿funcionara?.
 
 
 Dudas 2018:
 
 - ¿Debemos chequear si el usuario ingresó una constante mas gránde que entero máximo o mas chico que el mínimo?
+  Si usamos una constante más grande que el máximo (o mas chica que el mínimo) detectamos 2 casos:
+    - La constante excede la cota por poco, gcc no falla pero el funcionamiento no es correcto
+    - La constante excede por mucho, gcc falla
 
 - En el ejemplo test06Modif.tig se genera una función recursiva infinita que dá un segmentation fault.
+  Creemos que ésto se dá porque se generan frames hasta que se queda sin memoria para asignar y da error.
   Hicimos en C una función que se llama a si misma para que nunca termine y falla de la misma manera.
-  ¿Es correcto este comportamiento?.
+  ¿Es correcto este comportamiento?. ADDDDDDDDDJUNTAR ARCHIVO
+
+- Al hacer el compilador con ARM como arquitectura destino y desarrollarlo en x86_64,
+  no podemos implementar lo que sugiere el libro en el capítulo 12 en el título "Making it work", con un solo
+  solo script, ya que por un lado generamos el prog.s (en la computadora donde programamos) y por otro
+  generamos el ejecutable, linkeandolo con runtime.c, en una máquina virtual que tiene ARM como arquitectura
+  (la cual corre en el DCC).
+  Sin embargo, podríamos instalar mosml en la máquina virtual y lo anterior se puede hacer en un paso.
+  ¿Los docentes prefieren que hagamos esto último o podemos dejarlo como lo hacemos actualmente
+  (como se explicó en el párrafo anterior)?
 
 
 HACER:
-- Chequéo de todos los ejemplos. Nos quedamos en /good/test06.tig
+- Probar el compilador en otras computadoras (en particular en alguna del DCC).
+
 
 LO HECHO:
 - Funciona el intérprete agregandole el prefijo a los labels de funciones.
@@ -378,31 +396,43 @@ LO HECHO:
 - Chequear que calldefs este bien definido.
 - Arreglar el entero máximo y mínimo. Ver línea 347 de tigertrans.sml
 - Arreglar flag "canon" e "inter", en tigermain.
+- Chequéo de todos los ejemplos good.
+- Chequear el archivo de dudas en general para ver si hay algo que no hallamos resuelto.
+- Hacer que tiger_compiler.sh maneje los errores (si el código tiger tiene error, mostrarlo
+  por salida estandar).
+- Probar los ejemplos finales.
 
 
 OBSERVACIÓN
 - Tener en cuenta que la instrucción "bl" requiere agregar dos instrucciones al término del body de la función a la que se salta.
 
 - En el coloreo de Guido, NO puede suceder lo siguiente:
-r9 <- 4
-t0 <- 10 (donde t0 puede ser coloreado con r9)
-t1 <- r9 <------------- ¿Qué valor tiene r9? ¿r9 == 4 ó r9 == 10?
-Pues nosotros NO "usamos" a r9.
+  r9 <- 4
+  t0 <- 10 (donde t0 puede ser coloreado con r9)
+  t1 <- r9 <------------- ¿Qué valor tiene r9? ¿r9 == 4 ó r9 == 10?
+  Pues nosotros NO "usamos" a r9.
 
 - Por alguna razón el código:
 
-push {r0,r2}
-mov r0, r2
-bl printf
-pop {r0,r2}
+  push {r0,r2}
+  mov r0, r2
+  bl printf
+  pop {r0,r2}
 
-Modifica el registro r1, en el archivo "ejemploFinal8.s".
-Se arregla haciendo en su lugar:
+  Modifica el registro r1, en el archivo "ejemploFinal8.s".
+  Se arregla haciendo en su lugar:
 
-push {r0,r1,r2}
-mov r0, r2
-bl printf
-pop {r0,r1,r2}
+  push {r0,r1,r2}
+  mov r0, r2
+  bl printf
+  pop {r0,r1,r2}
+
+  Conclusión: Al existir la posibilidad de que printf use r1 y nosotros no hacer push r1
+              y luego pop r1, es probable que r1 se sobreescriba. Actualmente en vez de llamar
+              a prinft directamente, hacemos uso del print (del runtime) por medio del CALL.
+              Problemas como este se solucionan ya que incluimos los argregs en el campo dst del CALL, 
+              lo que hace que estos registros esten "vivos" al final de la instrucción,
+              y por lo tanto no se puedan usar para colorear.
 
 
 - Código del build:
@@ -411,7 +441,7 @@ pop {r0,r1,r2}
     y no al mismo tiempo que se arma el grafo de interferencia) hay ciertas partes que no son tenidas
     en cuenta.
   - Por otro lado, si en la instrucción actual i se define un temporario t que luego no es utilizado
-    aún así interfiere con sus temporarios liveOuts (ver último párrafo de la página 225
+    aún así interfiere con sus temporarios liveOuts (ver último párrafo de la página 225).
 
 - Consideramos que los regístros r0, r1, r2 y r3 NO son registros asignables para el coloreo, pues NO se guarda
   su valor como los callee saves al entrar en una función, dando lugar a que al salir de la misma cambien su valor.

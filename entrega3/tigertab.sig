@@ -21,8 +21,6 @@ val tabAList : ('a, 'b) Tabla -> ('a * 'b) list
 val tabFiltra : ('b -> bool) * (''a, 'b) Tabla -> (''a, 'b) Tabla
 val tabPrimer : ('b -> bool) * ('a, 'b) Tabla -> ('a * 'b)
 val tabClaves : ('a, 'b) Tabla -> 'a list
-
-(*Agregado*)
 val printTab : (string, 'b) Tabla -> unit
 
 end

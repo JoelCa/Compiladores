@@ -1,5 +1,8 @@
 #!/bin/bash
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PATH_TIGER="$DIR/tiger"
+
 filename=$(basename "$1")
 extension="${filename##*.}"
 filename="${filename%.*}"
@@ -11,15 +14,25 @@ else
 
   if [ "$extension" == "tig" ]
   then
-   ./tiger "$1" -code > "$filename".s
+    tiger_output="$(exec "$PATH_TIGER" "$1" -code 2>&1)"
+    #./tiger "$1" -code 2>&1 > "$filename".s
   
-    X=".syntax unified\\n.thumb\\n\\n.text\\n.global _tigermain\\n\\n"
+    res="$(echo "$tiger_output" | awk 'NR==1{print $1}')"
+   
+    if [[ ("$res" == "Fail:")  || ("$res" == "Uncaught") || ("$res" == "Error") ]];
+    then
+      echo "$tiger_output"
+    else
+      echo "$tiger_output" > "$filename".s
 
-    sed -i "1s;^;$X;" "$filename".s
+      X=".syntax unified\\n.thumb\\n\\n.text\\n.global _tigermain\\n\\n"
 
-    xclip -sel c < "$filename".s
+      sed -i "1s;^;$X;" "$filename".s
 
-    echo "Fin de compilación"
+      xclip -sel c < "$filename".s
+
+      echo "Fin de compilación"
+    fi
   else
     echo "El archivo que se intenta compilar debe tener extensión \"tig\""
   fi

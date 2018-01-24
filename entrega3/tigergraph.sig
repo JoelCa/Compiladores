@@ -22,7 +22,5 @@ sig
   structure T : Splaymap
   type 'a table = (node, 'a) T.dict
 
-  (*sharing type (node,'a) dict*)
-
   val nodename: node -> string (* for debugging *)
 end

@@ -11,6 +11,6 @@ let
       ((stop := stop + 1); 
        print("hola\n"))
 
-in  print("a");0
+in  print("a"); exit(0)
 
 end

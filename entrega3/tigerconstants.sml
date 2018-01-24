@@ -15,8 +15,3 @@ fun upper_lower(n:int) =
   end
 
 end
-
-(*
-movw r0, #right
-movt r0, #left
-*)

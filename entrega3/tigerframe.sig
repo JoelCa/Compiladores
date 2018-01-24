@@ -6,7 +6,6 @@ structure Table : Splaymap
 type frame
 type register = string
 val rv : tigertemp.temp
-(*val ov : tigertemp.temp*)
 val fp : tigertemp.temp
 datatype access = InFrame of int | InReg of tigertemp.label
 val fpPrev : int

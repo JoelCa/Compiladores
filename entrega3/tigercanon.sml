@@ -90,8 +90,8 @@ fun linearize(stm0: stm) : stm list =
 type block = stm list
 
   (* Take list of statements and make basic blocks satisfying conditions
-       3 and 4 above, in addition to the extra condition that 
-      every block ends with a JUMP or CJUMP *)
+     3 and 4 above, in addition to the extra condition that 
+     every block ends with a JUMP or CJUMP *)
 
 fun basicBlocks stms =
   let val done = tigertemp.newlabel()

@@ -9,15 +9,16 @@ let
    let function f (i : int) =
      if i > 0
      then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
-   in if i < 0 then (print ("-"); f (-i))
-      else if i>0 then f (i)
-           else print ("0")
-  end
+   in (if i < 0 then (print ("-"); f (-i))
+         else if i>0 then f (i)
+              else print ("0"));
+      print("\n")
+   end
 
   var hoja1 := tree {key = 3004, children = nil}
   var hoja2 := tree {key = 6996, children = nil}
   var t : tree := tree {key = -34, children = treelist {hd = hoja1, tl = treelist {hd = hoja2, tl = nil}}}
 
 in
- printint((t.children.hd.key/-33 + t.children.tl.hd.key*-5)/4)
+ printint((t.children.hd.key/-33 + t.children.tl.hd.key*-5)/4) /* Resultado: −8767 */
 end

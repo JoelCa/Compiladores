@@ -1,8 +1,3 @@
-(*
-structure tigerpp :> tigerpp = 
-struct
-*)
-
 open tigerabs
 open tigertips
 open PP
@@ -10,9 +5,7 @@ open PP
 (*Agregado de Martin*)
 fun showT TUnit = "Unit"
 	| showT TNil = "Nil"
-	(* | showT (TInt RW) = "Int RW" *)
-	(* | showT (TInt RO) = "Int RO" *)
-        | showT TInt = "Int"
+  | showT TInt = "Int"
 	| showT TString = "String"
 	| showT (TArray(t,u)) = "Array of "^(showT t)
 	| showT (TRecord(lr,u)) = "Record["^(showr lr)^"]"
