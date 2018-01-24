@@ -1,0 +1,13 @@
+/* Para probar el entero máximo */
+
+let
+  function printboard () =
+   (for i := 0 to 2147483647
+	   do (
+       if i = 2147483647 
+       then print (" - ")
+       else ()
+     )
+   )
+in  printboard()
+end

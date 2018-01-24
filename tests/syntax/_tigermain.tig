@@ -1,0 +1,9 @@
+/* error: No se pueden escribir nombres de funciones que comiencen con _ */
+
+let
+  function _tigermain() =
+    print("Hola mundo\n")
+in
+  _tigermain();
+  exit(0)
+end
