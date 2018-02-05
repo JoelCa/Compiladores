@@ -358,6 +358,7 @@ Dudas 2018:
 
 
 HACER:
+- Ver los Warnings cuando hacemos make.
 - Probar el compilador en otras computadoras (en particular en alguna del DCC).
 
 

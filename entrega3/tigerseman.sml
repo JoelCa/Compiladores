@@ -65,20 +65,18 @@ fun tiposIguales (TRecord _) TNil = true
   | tiposIguales (TRecord (_, u1)) (TRecord (_, u2 )) = (u1=u2)
   | tiposIguales (TArray (_, u1)) (TArray (_, u2)) = (u1=u2)
   | tiposIguales (TTipo (_, r)) b =
-    let
-  val a = case !r of
-        SOME t => t
-      | NONE => raise Fail "No debería pasar! (1)"
+    let val a = case !r of
+                  SOME t => t
+                | NONE => raise Fail "No debería pasar! (1)"
     in
-  tiposIguales a b
+      tiposIguales a b
     end
   | tiposIguales a (TTipo (_, r)) =
-    let
-  val b = case !r of
-        SOME t => t
-      | NONE => raise Fail "No debería pasar! (2)"
+    let val b = case !r of
+                  SOME t => t
+                | NONE => raise Fail "No debería pasar! (2)"
     in
-  tiposIguales a b
+      tiposIguales a b
     end
   | tiposIguales a b = (a=b)
 
@@ -90,28 +88,27 @@ fun transExp(venv, tenv) =
         | trexp(IntExp(i, _)) = {exp=intExp i, ty=TInt}
         | trexp(StringExp(s, _)) = {exp=stringExp(s), ty=TString}
         | trexp(CallExp({func = f, args = xs}, nl)) =
-          let
-            val {formals = argsType, result = resultType, label = name, level = level, extern = extern} =
-              case tabBusca(f,venv) of
-                SOME (Func e) => e
-                | _ => error(printRef f ^ " no está declarada", nl)
-            fun compararListaTipos [] [] argsCode = (true, argsCode)
-              | compararListaTipos _ [] _ = error(printRef f ^ " tiene muchos argumentos", nl)
-              | compararListaTipos [] _  _= error(printRef f ^ " tiene pocos argumentos", nl)
-              | compararListaTipos (x::xs) (y::ys) argsCode =
-                let val {ty = expType, exp = expCode} = trexp x
-                in 
-                  if tiposIguales expType y then
-                    let val (b,ac) = compararListaTipos xs ys argsCode
-                    in (b, expCode::ac)
-                    end
-                  else
-                    (false, [])
-                end
-            val isProc = case resultType of
-                           TNil => true
-                         | _ => false
-            val (valid, argsCode) = compararListaTipos xs argsType []
+          let val {formals = argsType, result = resultType, label = name, level = level, extern = extern} =
+                case tabBusca(f,venv) of
+                  SOME (Func e) => e
+                | _             => error(printRef f ^ " no está declarada", nl)
+              fun compararListaTipos [] [] argsCode = (true, argsCode)
+                | compararListaTipos _ [] _ = error(printRef f ^ " tiene muchos argumentos", nl)
+                | compararListaTipos [] _  _= error(printRef f ^ " tiene pocos argumentos", nl)
+                | compararListaTipos (x::xs) (y::ys) argsCode =
+                  let val {ty = expType, exp = expCode} = trexp x
+                  in 
+                    if tiposIguales expType y then
+                      let val (b,ac) = compararListaTipos xs ys argsCode
+                      in (b, expCode::ac)
+                      end
+                    else
+                      (false, [])
+                  end
+              val isProc = case resultType of
+                             TNil => true
+                           | _    => false
+              val (valid, argsCode) = compararListaTipos xs argsType []
           in
             if valid then
               {exp = callExp(name,extern,isProc,level,argsCode), ty = resultType}
@@ -360,7 +357,7 @@ fun transExp(venv, tenv) =
                                  | _        => raise Fail (printRef s ^ " tiene un tipo incorrecto"))
                 in (s, tTipo, !esc) end
 
-              fun putVars ([], _, env) = env  
+              fun putVars ([], _, env) = env
                 | putVars ((s,vtype,esc)::xs, level, env) =
                   let val (acc, numLevel) = (allocArg level esc, getLevel level)
                   in
@@ -372,7 +369,7 @@ fun transExp(venv, tenv) =
 
               (* esta funcion la utilizaremos para agregar cada una de las funciones de fs a venv *)
               fun genEnvEntry ({name = s, params = ps, result = NONE, body = exp}, pos) =
-                let val fmlPairs = map genTipo ps   
+                let val fmlPairs = map genTipo ps
                     val fmls = map (#2) fmlPairs
                     val newName = if s = "_tigermain" then s else tigertemp.newlabel()^"_"^s
                     val level = newLevel{parent=topLevel(), name = newName, formals = map (#3) fmlPairs}
@@ -488,8 +485,8 @@ fun transExp(venv, tenv) =
                       val ttopt = case List.find (fn {name,ty} => name = h) recs of
                                     SOME _ => NONE
                                   | NONE   => (case tabBusca(h, env) of
-                                                   SOME t => SOME t
-                                                 | _ => NONE)
+                                                 SOME t => SOME t
+                                               | _ => NONE)
                       val env' = case ttopt of
                                    SOME tt => List.foldr (fn ({name, ty=NameTy _}, env) => tabRInserta(name, tt, env)
                                                          | (_, env) => env) env ps

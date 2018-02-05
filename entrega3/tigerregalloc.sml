@@ -58,11 +58,13 @@ struct
       val t' = tigertemp.newtemp()
       val _ = case Table.peek (!accesses, t) of
                 SOME n => stackInstrs := movaMem(t', n) @ !stackInstrs
-              | NONE   => let val InFrame m = tigerframe.allocLocal f true
-                              val _ = accesses := Table.insert (!accesses, t, m)
-                          in
-                            stackInstrs := movaMem(t', m) @ !stackInstrs
-                          end
+              | NONE   => case tigerframe.allocLocal f true of
+                            InFrame m =>
+                              let val _ = accesses := Table.insert (!accesses, t, m)
+                              in
+                                stackInstrs := movaMem(t', m) @ !stackInstrs
+                              end
+                          | _ => raise Fail("No debería llegar, makeStore!")
     in
       t'
     end

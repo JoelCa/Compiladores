@@ -98,6 +98,7 @@ fun coloreo table = fn x => findAll (table, x)
 fun instrCode (table : allocation) {prolog = p, body = b : tigerassem.instr list, epilog = e} = 
   p ^ (foldr (fn (s, r) => (tigerassem.format (coloreo table) s) ^ r) "" b) ^ e
   
+(* La g que toma procStringList es la función que canoniza *)
 fun procStringList (g : tigertree.stm -> tigertree.stm list) ((PROC {body = b, frame = f})::zs) = (Right (g b,f)) :: procStringList g zs
   | procStringList g ((STRING (l,s))::zs) = (Left (l,s)) :: procStringList g zs
   | procStringList _ [] = []
@@ -206,7 +207,7 @@ fun assignExp{var, exp} =
 
 fun varDec(acc,initCode) = assignExp{var = simpleVar(acc,getActualLev()), exp = initCode}
 
-(* var es el código que "apunta" al inicio del arreglo, y field es un entero que indica
+(* var es el código que "apunta" al inicio del record, y field es un entero que indica
 la posición del miembro, dado por el TRecord correspondiente *)
 fun fieldVar(var, field) =
 	let val a = unEx var
@@ -235,7 +236,7 @@ fun subscriptVar(arr, ind) =
 						 MEM( BINOP(PLUS, TEMP ra,
 												case i of
 													CONST k => CONST (k*tigerframe.wSz)
-												| _ => BINOP(LSHIFT, i, CONST tigerframe.log2WSz)
+												| _       => BINOP(LSHIFT, i, CONST tigerframe.log2WSz)
 											 )
 								)
 						)
@@ -243,9 +244,9 @@ fun subscriptVar(arr, ind) =
 	end
 
 (* l: es una lista de tuplas (code, i), donde "code" es el cod. intermedio del
-miembro en la posición i, del record *)
+			miembro en la posición i, del record *)
 (* Obs: Se guarda en memoria el resultado que se le quiere asignar a cada miembro, con el
-orden dado por los indices del TRecord correspondiente *)
+				orden dado por los indices del TRecord correspondiente *)
 fun recordExp l =
 	let val ret = newtemp()
 			
@@ -423,7 +424,7 @@ fun ifThenElseExp {test,then',else'} =
 	in
 		Ex (ESEQ (seq [e1 (t, f),
 									 LABEL t,
-						 MOVE(TEMP r, e2),
+						 	     MOVE(TEMP r, e2),
 									 JUMP (NAME e,[e]),
 									 LABEL f,
 									 MOVE(TEMP r, e3),
@@ -465,13 +466,13 @@ fun binOpIntRelExp {left,oper,right} =
 			fun opint oper = fn (t,f) => CJUMP(oper, l, r, t, f)
 	in
 		case oper of
-				EqOp  => Cx (opint EQ)
-			| NeqOp => Cx (opint NE)
-			| LtOp  => Cx (opint LT)
-			| LeOp  => Cx (opint LE)
-			| GtOp  => Cx (opint GT)
-			| GeOp  => Cx (opint GE)
-			| _     => raise Fail ("Error: se esperaba operador de comparacion") 
+			EqOp  => Cx (opint EQ)
+		| NeqOp => Cx (opint NE)
+		| LtOp  => Cx (opint LT)
+		| LeOp  => Cx (opint LE)
+		| GtOp  => Cx (opint GT)
+		| GeOp  => Cx (opint GE)
+		| _     => raise Fail ("Error: se esperaba operador de comparacion") 
 	end
 
 fun binOpStrExp {left,oper,right} =

@@ -38,9 +38,10 @@ struct
 					Splayset.listItems(Splayset.difference(s, precoloredSet))
 				end
 
-			val accesses = map (fn T => let val frame.InFrame n = frame.allocLocal frm true
-			                                (*val _ =  print("Accesses: "^ T ^ " --- " ^ Int.toString(n) ^ "\n")*)
-			                            in (T, n) end) temps
+			val accesses = map (fn T => case frame.allocLocal frm true of
+																		frame.InFrame n => (T, n)
+																	| _               => raise Fail("No debería llegar, accesses!")
+													) temps
 			fun getFramePos T =
 				let fun gfp T [] = raise Fail("Temporario no encontrado: "^T)
 					    | gfp T ((a,b)::xs) = if a = T then b else gfp T xs
