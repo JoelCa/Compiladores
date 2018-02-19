@@ -29,7 +29,7 @@ else
 
       sed -i "1s;^;$X;" "$filename".s
 
-      xclip -sel c < "$filename".s
+      #xclip -sel c < "$filename".s
 
       echo "Fin de compilación"
     fi

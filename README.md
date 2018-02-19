@@ -1,10 +1,29 @@
 Compiladores
 ============
 
-Etapa de revisión 2016
+Compilador de Tiger para ARMv7.
 
-Notas de la entrega1:
+Basado en el libro "Modern Compiler Implementation in ML".
 
-Para que funcione el test999.tig: No generamos pares de dependencia para los miembros de records que hacen referencia a tipos que se definen en su propio batch.
+## Instalación
 
-Para que funcione el test777.tig, test123.tig y test321.tig: Para asignar un tipo a un miembros de un record primero miramos su propio batch y si no está, luego vemos el entorno de tipos. Como consecuencia, tuve que agregar la función "tipoReal" en FieldVar y SubscriptVar.
+Hacer make en el directorio "entrega3".
+
+## Modo de uso
+
+Generación del assembler en ARM de un archivo tiger.
+
+```
+$ ./tiger_compiler.sh <tiger file>
+```
+
+## Tests
+
+Los ejemplos se encuentran en el directorio "test".
+
+Ejemplo: si estamos ubicados en "entrega3" generamos
+el asembler de "merge.tig" así:
+
+```
+$ ./tiger_compiler.sh ../tests/good/merge.tig
+```
