@@ -345,7 +345,7 @@ Dudas 2018:
 - En el ejemplo test06Modif.tig se genera una función recursiva infinita que dá un segmentation fault.
   Creemos que ésto se dá porque se generan frames hasta que se queda sin memoria para asignar y da error.
   Hicimos en C una función que se llama a si misma para que nunca termine y falla de la misma manera.
-  ¿Es correcto este comportamiento?. ADDDDDDDDDJUNTAR ARCHIVO
+  ¿Es correcto este comportamiento?.
 
 - Al hacer el compilador con ARM como arquitectura destino y desarrollarlo en x86_64,
   no podemos implementar lo que sugiere el libro en el capítulo 12 en el título "Making it work", con un solo
@@ -355,11 +355,6 @@ Dudas 2018:
   Sin embargo, podríamos instalar mosml en la máquina virtual y lo anterior se puede hacer en un paso.
   ¿Los docentes prefieren que hagamos esto último o podemos dejarlo como lo hacemos actualmente
   (como se explicó en el párrafo anterior)?
-
-
-HACER:
-- Ver los Warnings cuando hacemos make.
-- Probar el compilador en otras computadoras (en particular en alguna del DCC).
 
 
 LO HECHO:
@@ -402,6 +397,8 @@ LO HECHO:
 - Hacer que tiger_compiler.sh maneje los errores (si el código tiger tiene error, mostrarlo
   por salida estandar).
 - Probar los ejemplos finales.
+- Ver los Warnings cuando hacemos make.
+- Probar el compilador en otras computadoras (en particular en alguna del DCC).
 
 
 OBSERVACIÓN
