@@ -1,17 +1,18 @@
-Compiladores
+Tiger Compiler
 ============
 
-Compilador de Tiger para ARMv7.
+Tiger Compiler for ARMv7.
 
-Basado en el libro "Modern Compiler Implementation in ML".
+It's based in the book "Modern Compiler Implementation in ML".
 
-## Instalación
+## Setup
 
-Hacer make en el directorio "entrega3".
+Download the code from the `entrega3` folder.
+Then, do the `make` command.
 
-## Modo de uso
+## Use
 
-Generación del assembler en ARM de un archivo tiger.
+You can generate the arm assembler from a tiger file:
 
 ```
 $ ./tiger_compiler.sh <tiger file>
@@ -19,10 +20,10 @@ $ ./tiger_compiler.sh <tiger file>
 
 ## Tests
 
-Los ejemplos se encuentran en el directorio "test".
+The test examples are in `test` folder.
 
-Ejemplo: si estamos ubicados en "entrega3" generamos
-el asembler de "merge.tig" así:
+If you are in the `entrega3` folder, you can get the assembler of
+`merge.tig` as follows:
 
 ```
 $ ./tiger_compiler.sh ../tests/good/merge.tig
