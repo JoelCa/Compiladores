@@ -10,6 +10,8 @@ It's based in the book "Modern Compiler Implementation in ML".
 Download the code from the `entrega3` folder.
 Then, do the `make` command.
 
+[tiger compiler](https://github.com/JoelCa/Compiladores16/tree/master/entrega3)
+
 ## Use
 
 You can generate the arm assembler from a tiger file:
@@ -18,13 +20,14 @@ You can generate the arm assembler from a tiger file:
 $ ./tiger_compiler.sh <tiger file>
 ```
 
-## Tests
+## Examples
 
 The test examples are in `test` folder.
 
-If you are in the `entrega3` folder, you can get the assembler of
-`merge.tig` as follows:
+[test](https://github.com/JoelCa/Compiladores16/tree/master/tests).
 
-```
-$ ./tiger_compiler.sh ../tests/good/merge.tig
-```
+Load the files mannually in the `tiger_compiler.sh` executable.
+
+## Dependencies
+
+[Moscow ML](http://mosml.org/)
